@@ -60,27 +60,28 @@ export const DocumentList = ({ category, refreshTrigger }: DocumentListProps) =>
   }, [category, refreshTrigger]);
 
   const handleDownload = async (filePath: string, fileName: string) => {
-    const { data, error } = await supabase.storage
-      .from("documents")
-      .download(filePath);
+    try {
+      const { data, error } = await supabase.storage
+        .from("documents")
+        .download(filePath);
 
-    if (error) {
+      if (error) throw error;
+
+      const url = URL.createObjectURL(data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error: any) {
       toast({
         title: "Erro",
-        description: "Não foi possível baixar o arquivo.",
+        description: error.message || "Não foi possível baixar o arquivo.",
         variant: "destructive",
       });
-      return;
     }
-
-    const url = URL.createObjectURL(data);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
   };
 
   const handleDelete = async (id: string, filePath: string) => {

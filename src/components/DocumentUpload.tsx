@@ -48,9 +48,44 @@ export const DocumentUpload = ({ category, onUploadComplete }: DocumentUploadPro
       return;
     }
 
+    // Client-side validation
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      toast({
+        title: "Erro",
+        description: "Arquivo muito grande. Tamanho máximo: 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (title.length > 200) {
+      toast({
+        title: "Erro",
+        description: "Título muito longo. Máximo: 200 caracteres",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (description && description.length > 1000) {
+      toast({
+        title: "Erro",
+        description: "Descrição muito longa. Máximo: 1000 caracteres",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setUploading(true);
 
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("Você precisa estar autenticado para fazer upload.");
+      }
+
       const fileExt = file.name.split(".").pop();
       const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${category}/${fileName}`;
@@ -62,13 +97,14 @@ export const DocumentUpload = ({ category, onUploadComplete }: DocumentUploadPro
       if (uploadError) throw uploadError;
 
       const { error: dbError } = await supabase.from("documents").insert({
-        title,
-        description,
+        title: title.trim(),
+        description: description?.trim() || null,
         category,
         file_name: file.name,
         file_path: filePath,
         file_size: file.size,
         file_type: file.type,
+        user_id: user.id,
       });
 
       if (dbError) throw dbError;

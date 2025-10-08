@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      document_audit_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          document_id: string | null
+          id: string
+          ip_address: unknown | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          document_id?: string | null
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          document_id?: string | null
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_audit_log_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           category: Database["public"]["Enums"]["document_category"]
@@ -26,6 +64,7 @@ export type Database = {
           id: string
           title: string
           uploaded_at: string | null
+          user_id: string | null
         }
         Insert: {
           category: Database["public"]["Enums"]["document_category"]
@@ -38,6 +77,7 @@ export type Database = {
           id?: string
           title: string
           uploaded_at?: string | null
+          user_id?: string | null
         }
         Update: {
           category?: Database["public"]["Enums"]["document_category"]
@@ -50,6 +90,28 @@ export type Database = {
           id?: string
           title?: string
           uploaded_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -58,9 +120,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "admin" | "inspector" | "viewer"
       document_category:
         | "procedimentos_oficiais"
         | "inspecoes"
@@ -197,6 +266,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "inspector", "viewer"],
       document_category: [
         "procedimentos_oficiais",
         "inspecoes",
