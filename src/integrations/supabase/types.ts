@@ -14,7 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      documents: {
+        Row: {
+          category: Database["public"]["Enums"]["document_category"]
+          created_at: string | null
+          description: string | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          title: string
+          uploaded_at: string | null
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["document_category"]
+          created_at?: string | null
+          description?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          title: string
+          uploaded_at?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["document_category"]
+          created_at?: string | null
+          description?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          title?: string
+          uploaded_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +61,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      document_category:
+        | "procedimentos_oficiais"
+        | "inspecoes"
+        | "procedimentos_tecnicos"
+        | "treinamento"
+        | "modelos_relatorios"
+        | "resolucao_problemas"
+        | "duvidas_frequentes"
+        | "historico"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +196,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      document_category: [
+        "procedimentos_oficiais",
+        "inspecoes",
+        "procedimentos_tecnicos",
+        "treinamento",
+        "modelos_relatorios",
+        "resolucao_problemas",
+        "duvidas_frequentes",
+        "historico",
+      ],
+    },
   },
 } as const

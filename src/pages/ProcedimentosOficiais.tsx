@@ -1,72 +1,58 @@
+import { useState } from "react";
 import Header from "@/components/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
+import { DocumentUpload } from "@/components/DocumentUpload";
+import { DocumentList } from "@/components/DocumentList";
 
 const ProcedimentosOficiais = () => {
-  const procedimentos = [
-    {
-      title: "ISO 4309 - Critérios de Descarte",
-      description: "Norma internacional para critérios de inspeção e descarte de cabos de aço.",
-      category: "Normas Internacionais"
-    },
-    {
-      title: "Procedimento de Segurança em Campo",
-      description: "Diretrizes de segurança para trabalhos em altura e manuseio de equipamentos.",
-      category: "Segurança"
-    },
-    {
-      title: "Manual de Qualidade BB",
-      description: "Manual completo de qualidade e boas práticas da Bridon-Bekaert.",
-      category: "Qualidade"
-    },
-    {
-      title: "NR-35 - Trabalho em Altura",
-      description: "Norma regulamentadora sobre trabalho em altura e uso de EPIs.",
-      category: "Normas Regulamentadoras"
-    }
-  ];
-
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container py-8">
-        <div className="mb-8 space-y-2">
-          <h1 className="text-3xl font-bold">Procedimentos Oficiais</h1>
+      <main className="container py-8 space-y-8">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <FileText className="h-8 w-8" />
+            Procedimentos Oficiais
+          </h1>
           <p className="text-muted-foreground">
             Acesse normas, procedimentos oficiais e documentação regulamentadora da empresa.
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {procedimentos.map((proc, index) => (
-            <Card key={index}>
-              <CardHeader>
-                <div className="mb-2 flex items-start justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                    <FileText className="h-5 w-5 text-primary" />
-                  </div>
-                  <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium">
-                    {proc.category}
-                  </span>
-                </div>
-                <CardTitle className="text-xl">{proc.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="mb-4 text-base">
-                  {proc.description}
-                </CardDescription>
-                <Button variant="outline" size="sm" className="w-full">
-                  <Download className="mr-2 h-4 w-4" />
-                  Baixar Documento
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Upload de Documentos</CardTitle>
+            <CardDescription>
+              Envie novos procedimentos, normas e documentos oficiais
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DocumentUpload 
+              category="procedimentos_oficiais" 
+              onUploadComplete={() => setRefreshTrigger(prev => prev + 1)}
+            />
+          </CardContent>
+        </Card>
 
-        <Card className="mt-8 border-accent bg-accent/5">
+        <Card>
+          <CardHeader>
+            <CardTitle>Documentos Disponíveis</CardTitle>
+            <CardDescription>
+              Baixe e gerencie os documentos da categoria
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DocumentList 
+              category="procedimentos_oficiais" 
+              refreshTrigger={refreshTrigger}
+            />
+          </CardContent>
+        </Card>
+
+        <Card className="border-accent bg-accent/5">
           <CardHeader>
             <CardTitle className="text-xl">Importante</CardTitle>
           </CardHeader>
