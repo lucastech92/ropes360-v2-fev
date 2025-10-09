@@ -2,58 +2,29 @@ import Header from "@/components/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Wrench } from "lucide-react";
-
 const ProcedimentosTecnicos = () => {
-  const procedimentos = [
-    {
-      title: "Instalação de Cabos de Aço",
-      description: "Procedimento passo a passo para instalação segura de cabos em diferentes aplicações.",
-      topicos: [
-        "Preparação do local e ferramentas",
-        "Desenrolamento correto do cabo",
-        "Técnicas de tensionamento",
-        "Verificação final e documentação"
-      ]
-    },
-    {
-      title: "Soquetagem de Cabos",
-      description: "Técnicas de soquetagem com resina ou metal fundido para fixação de terminais.",
-      topicos: [
-        "Preparação da alma do cabo",
-        "Limpeza e desengraxe dos arames",
-        "Aplicação de resina ou metal",
-        "Tempo de cura e testes de qualidade"
-      ]
-    },
-    {
-      title: "Remoção e Descarte",
-      description: "Procedimentos seguros para remoção de cabos condenados e descarte adequado.",
-      topicos: [
-        "Isolamento da área de trabalho",
-        "Alívio de tensão controlado",
-        "Corte e retirada segura",
-        "Destinação para reciclagem"
-      ]
-    },
-    {
-      title: "Cálculo de Área Metálica",
-      description: "Como calcular a área metálica do cabo para avaliação de integridade estrutural.",
-      topicos: [
-        "Medição precisa do diâmetro",
-        "Fórmula para cálculo de área",
-        "Interpretação dos resultados",
-        "Comparação com valores nominais"
-      ]
-    },
-    {
-      title: "Wire Lock",
-      description: "Procedimentos e cálculos para instalação de wire lock em cabos de aço.",
-      hasTable: true
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-background">
+  const procedimentos = [{
+    title: "Instalação de Cabos de Aço",
+    description: "Procedimento passo a passo para instalação segura de cabos em diferentes aplicações.",
+    topicos: ["Preparação do local e ferramentas", "Desenrolamento correto do cabo", "Técnicas de tensionamento", "Verificação final e documentação"]
+  }, {
+    title: "Soquetagem de Cabos",
+    description: "Técnicas de soquetagem com resina ou metal fundido para fixação de terminais.",
+    topicos: ["Preparação da alma do cabo", "Limpeza e desengraxe dos arames", "Aplicação de resina ou metal", "Tempo de cura e testes de qualidade"]
+  }, {
+    title: "Remoção e Descarte",
+    description: "Procedimentos seguros para remoção de cabos condenados e descarte adequado.",
+    topicos: ["Isolamento da área de trabalho", "Alívio de tensão controlado", "Corte e retirada segura", "Destinação para reciclagem"]
+  }, {
+    title: "Cálculo de Área Metálica",
+    description: "Como calcular a área metálica do cabo para avaliação de integridade estrutural.",
+    topicos: ["Medição precisa do diâmetro", "Fórmula para cálculo de área", "Interpretação dos resultados", "Comparação com valores nominais"]
+  }, {
+    title: "Wire Lock",
+    description: "Procedimentos e cálculos para instalação de wire lock em cabos de aço.",
+    hasTable: true
+  }];
+  return <div className="min-h-screen bg-background">
       <Header />
       
       <main className="container py-8">
@@ -65,8 +36,7 @@ const ProcedimentosTecnicos = () => {
         </div>
 
         <div className="grid gap-6">
-          {procedimentos.map((proc, index) => (
-            <Card key={index}>
+          {procedimentos.map((proc, index) => <Card key={index}>
               <CardHeader>
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
                   <Wrench className="h-6 w-6 text-primary" />
@@ -75,8 +45,7 @@ const ProcedimentosTecnicos = () => {
                 <CardDescription className="text-base">{proc.description}</CardDescription>
               </CardHeader>
               <CardContent>
-                {proc.hasTable ? (
-                  <div className="space-y-6">
+                {proc.hasTable ? <div className="space-y-6">
                     <div>
                       <h4 className="mb-3 font-semibold text-lg">Tabela para Cálculo de Soquetes Padrão</h4>
                       <div className="rounded-lg border">
@@ -84,120 +53,69 @@ const ProcedimentosTecnicos = () => {
                           <TableHeader>
                             <TableRow>
                               <TableHead>Diâmetro do Cabo (mm)</TableHead>
-                              <TableHead>Comprimento Mínimo (mm)</TableHead>
-                              <TableHead>Torque Recomendado (N·m)</TableHead>
+                              
+                              <TableHead>WireLock CC</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             <TableRow>
                               <TableCell>6 - 8</TableCell>
                               <TableCell>120</TableCell>
-                              <TableCell>15 - 20</TableCell>
+                              <TableCell>
+                        </TableCell>
                             </TableRow>
                             <TableRow>
                               <TableCell>10 - 12</TableCell>
                               <TableCell>180</TableCell>
-                              <TableCell>30 - 40</TableCell>
+                              <TableCell>
+                        </TableCell>
                             </TableRow>
                             <TableRow>
                               <TableCell>14 - 16</TableCell>
                               <TableCell>240</TableCell>
-                              <TableCell>50 - 65</TableCell>
+                              <TableCell>
+                        </TableCell>
                             </TableRow>
                             <TableRow>
                               <TableCell>18 - 20</TableCell>
                               <TableCell>300</TableCell>
-                              <TableCell>80 - 100</TableCell>
+                              <TableCell>
+                        </TableCell>
                             </TableRow>
                           </TableBody>
                         </Table>
                       </div>
                     </div>
 
-                    <div>
-                      <h4 className="mb-3 font-semibold text-lg">Tabela para Cálculo de Soquetes Swivel</h4>
-                      <div className="rounded-lg border">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Diâmetro do Cabo (mm)</TableHead>
-                              <TableHead>Comprimento Mínimo (mm)</TableHead>
-                              <TableHead>Ângulo Máximo (°)</TableHead>
-                              <TableHead>Carga de Trabalho (kN)</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            <TableRow>
-                              <TableCell>6 - 8</TableCell>
-                              <TableCell>140</TableCell>
-                              <TableCell>180</TableCell>
-                              <TableCell>12 - 16</TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell>10 - 12</TableCell>
-                              <TableCell>200</TableCell>
-                              <TableCell>180</TableCell>
-                              <TableCell>25 - 35</TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell>14 - 16</TableCell>
-                              <TableCell>260</TableCell>
-                              <TableCell>180</TableCell>
-                              <TableCell>45 - 60</TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell>18 - 20</TableCell>
-                              <TableCell>320</TableCell>
-                              <TableCell>180</TableCell>
-                              <TableCell>75 - 95</TableCell>
-                            </TableRow>
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </div>
+                    
 
                     <div>
                       <h4 className="mb-3 font-semibold text-lg">Recomendações</h4>
                       <ul className="space-y-2">
-                        <li className="flex items-start space-x-2">
-                          <span className="mt-1 flex h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
-                          <span className="text-muted-foreground">Sempre utilize wire locks compatíveis com o diâmetro específico do cabo</span>
-                        </li>
-                        <li className="flex items-start space-x-2">
-                          <span className="mt-1 flex h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
-                          <span className="text-muted-foreground">Verifique o torque com torquímetro calibrado durante a instalação</span>
-                        </li>
+                        
+                        
                         <li className="flex items-start space-x-2">
                           <span className="mt-1 flex h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
                           <span className="text-muted-foreground">Inspecione visualmente após instalação para garantir fixação adequada</span>
                         </li>
-                        <li className="flex items-start space-x-2">
-                          <span className="mt-1 flex h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
-                          <span className="text-muted-foreground">Para soquetes swivel, não exceda o ângulo máximo especificado</span>
-                        </li>
+                        
                         <li className="flex items-start space-x-2">
                           <span className="mt-1 flex h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
                           <span className="text-muted-foreground">Documente todos os valores utilizados no relatório de instalação</span>
                         </li>
                       </ul>
                     </div>
-                  </div>
-                ) : (
-                  <>
+                  </div> : <>
                     <h4 className="mb-3 font-semibold">Principais Tópicos:</h4>
                     <ul className="space-y-2">
-                      {proc.topicos?.map((topico, idx) => (
-                        <li key={idx} className="flex items-start space-x-2">
+                      {proc.topicos?.map((topico, idx) => <li key={idx} className="flex items-start space-x-2">
                           <span className="mt-1 flex h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
                           <span className="text-muted-foreground">{topico}</span>
-                        </li>
-                      ))}
+                        </li>)}
                     </ul>
-                  </>
-                )}
+                  </>}
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
 
         <Card className="mt-8 border-accent bg-accent/5">
@@ -212,8 +130,6 @@ const ProcedimentosTecnicos = () => {
           </CardContent>
         </Card>
       </main>
-    </div>
-  );
+    </div>;
 };
-
 export default ProcedimentosTecnicos;
