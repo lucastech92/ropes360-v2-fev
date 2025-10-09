@@ -56,7 +56,7 @@ const Index = () => {
       color: "primary"
     },
     {
-      title: "Dúvidas Frequentes",
+      title: "Documentação da Equipe",
       description: "Perguntas mais comuns dos inspetores e suas respostas, além de dicas práticas do dia a dia.",
       icon: HelpCircle,
       href: "/duvidas-frequentes",
