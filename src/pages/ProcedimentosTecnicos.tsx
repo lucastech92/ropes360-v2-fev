@@ -21,7 +21,7 @@ const ProcedimentosTecnicos = () => {
     topicos: ["Medição precisa do diâmetro", "Fórmula para cálculo de área", "Interpretação dos resultados", "Comparação com valores nominais"]
   }, {
     title: "Wire Lock",
-    description: "Procedimentos e cálculos para instalação de wire lock em cabos de aço.",
+    description: "Manual e cálculo do WireLock.",
     hasTable: true
   }];
   return <div className="min-h-screen bg-background">
