@@ -57,6 +57,7 @@ export type Database = {
           category: Database["public"]["Enums"]["document_category"]
           created_at: string | null
           description: string | null
+          employee_folder: string | null
           file_name: string
           file_path: string
           file_size: number | null
@@ -70,6 +71,7 @@ export type Database = {
           category: Database["public"]["Enums"]["document_category"]
           created_at?: string | null
           description?: string | null
+          employee_folder?: string | null
           file_name: string
           file_path: string
           file_size?: number | null
@@ -83,6 +85,7 @@ export type Database = {
           category?: Database["public"]["Enums"]["document_category"]
           created_at?: string | null
           description?: string | null
+          employee_folder?: string | null
           file_name?: string
           file_path?: string
           file_size?: number | null

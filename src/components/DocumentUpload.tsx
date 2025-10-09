@@ -19,10 +19,11 @@ type DocumentCategory =
 
 interface DocumentUploadProps {
   category: DocumentCategory;
+  employeeFolder?: string;
   onUploadComplete?: () => void;
 }
 
-export const DocumentUpload = ({ category, onUploadComplete }: DocumentUploadProps) => {
+export const DocumentUpload = ({ category, employeeFolder, onUploadComplete }: DocumentUploadProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -105,6 +106,7 @@ export const DocumentUpload = ({ category, onUploadComplete }: DocumentUploadPro
         file_size: file.size,
         file_type: file.type,
         user_id: user.id,
+        employee_folder: employeeFolder || null,
       });
 
       if (dbError) throw dbError;

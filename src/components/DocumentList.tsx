@@ -27,21 +27,27 @@ interface Document {
 
 interface DocumentListProps {
   category: DocumentCategory;
+  employeeFolder?: string;
   refreshTrigger?: number;
 }
 
-export const DocumentList = ({ category, refreshTrigger }: DocumentListProps) => {
+export const DocumentList = ({ category, employeeFolder, refreshTrigger }: DocumentListProps) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   const fetchDocuments = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    let query = supabase
       .from("documents")
       .select("*")
-      .eq("category", category)
-      .order("uploaded_at", { ascending: false });
+      .eq("category", category);
+    
+    if (employeeFolder) {
+      query = query.eq("employee_folder", employeeFolder);
+    }
+    
+    const { data, error } = await query.order("uploaded_at", { ascending: false });
 
     if (error) {
       toast({
@@ -57,7 +63,7 @@ export const DocumentList = ({ category, refreshTrigger }: DocumentListProps) =>
 
   useEffect(() => {
     fetchDocuments();
-  }, [category, refreshTrigger]);
+  }, [category, employeeFolder, refreshTrigger]);
 
   const handleDownload = async (filePath: string, fileName: string) => {
     try {
