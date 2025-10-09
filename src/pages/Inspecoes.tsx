@@ -14,7 +14,7 @@ const Inspecoes = () => {
   ];
 
   const checklistEletromag = [
-    "Calibrar equipamento INTROS em trecho real",
+    "Calibrar equipamento INTRON em trecho real",
     "Definir baseline de referência",
     "Realizar varredura completa do cabo",
     "Identificar anomalias LMA (perda de área metálica)",
@@ -87,7 +87,7 @@ const Inspecoes = () => {
               <CardHeader>
                 <CardTitle>Checklist de Inspeção Eletromagnética</CardTitle>
                 <CardDescription>
-                  Procedimento para inspeção com equipamento INTROS
+                  Procedimento para inspeção com equipamento INTRON
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -104,7 +104,7 @@ const Inspecoes = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Como Calibrar o INTROS</CardTitle>
+                <CardTitle>Como Calibrar o INTRON</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
