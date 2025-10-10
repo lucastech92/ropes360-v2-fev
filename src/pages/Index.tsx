@@ -28,7 +28,7 @@ const Index = () => {
       color: "primary"
     },
     {
-      title: "Procedimentos Técnicos",
+      title: "Manuais Bridon",
       description: "Instruções detalhadas para instalação, soquetagem, remoção e manutenção de cabos de aço.",
       icon: Wrench,
       href: "/procedimentos-tecnicos",
