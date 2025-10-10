@@ -97,6 +97,30 @@ export type Database = {
         }
         Relationships: []
       }
+      employee_folders: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          folder_id: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          folder_id: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          folder_id?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
