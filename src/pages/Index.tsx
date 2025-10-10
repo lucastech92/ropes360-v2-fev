@@ -42,8 +42,8 @@ const Index = () => {
       color: "primary"
     },
     {
-      title: "Modelos de Relatórios",
-      description: "Templates padronizados para relatórios de inspeção, instalação e manutenção.",
+      title: "Check-Lists",
+      description: "Upload e download de modelos de check-lists para inspeções e procedimentos.",
       icon: FileText,
       href: "/modelos-relatorios",
       color: "accent"
