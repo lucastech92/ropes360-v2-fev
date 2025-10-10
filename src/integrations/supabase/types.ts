@@ -50,6 +50,13 @@ export type Database = {
             referencedRelation: "documents"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "document_audit_log_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents_expiring_soon"
+            referencedColumns: ["id"]
+          },
         ]
       }
       documents: {
@@ -58,6 +65,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           employee_folder: string | null
+          expiry_date: string | null
           file_name: string
           file_path: string
           file_size: number | null
@@ -72,6 +80,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           employee_folder?: string | null
+          expiry_date?: string | null
           file_name: string
           file_path: string
           file_size?: number | null
@@ -86,6 +95,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           employee_folder?: string | null
+          expiry_date?: string | null
           file_name?: string
           file_path?: string
           file_size?: number | null
@@ -144,7 +154,26 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      documents_expiring_soon: {
+        Row: {
+          category: Database["public"]["Enums"]["document_category"] | null
+          created_at: string | null
+          days_until_expiry: number | null
+          description: string | null
+          employee_folder: string | null
+          employee_name: string | null
+          expiry_date: string | null
+          file_name: string | null
+          file_path: string | null
+          file_size: number | null
+          file_type: string | null
+          id: string | null
+          title: string | null
+          uploaded_at: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
