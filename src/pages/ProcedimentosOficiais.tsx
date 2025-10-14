@@ -2,11 +2,21 @@ import { useState } from "react";
 import Header from "@/components/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText } from "lucide-react";
-import { DocumentUpload } from "@/components/DocumentUpload";
-import { DocumentList } from "@/components/DocumentList";
+import { FolderManager } from "@/components/FolderManager";
+import { DocumentUploadWithTags } from "@/components/DocumentUploadWithTags";
+import { DocumentListWithTags } from "@/components/DocumentListWithTags";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ProcedimentosOficiais = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+  const [selectedFolderName, setSelectedFolderName] = useState<string | null>(null);
+
+  const handleFolderSelect = (folderId: string | null, folderName: string | null) => {
+    setSelectedFolderId(folderId);
+    setSelectedFolderName(folderName);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -24,33 +34,54 @@ const ProcedimentosOficiais = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Upload de Documentos</CardTitle>
+            <CardTitle>Gerenciar Pastas e Subpastas</CardTitle>
             <CardDescription>
-              Envie novos procedimentos, normas e documentos oficiais
+              Organize os documentos em pastas e subpastas
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <DocumentUpload 
+            <FolderManager 
               category="procedimentos_oficiais" 
-              onUploadComplete={() => setRefreshTrigger(prev => prev + 1)}
+              onFolderSelect={handleFolderSelect}
+              selectedFolderId={selectedFolderId}
             />
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Documentos Disponíveis</CardTitle>
-            <CardDescription>
-              Baixe e gerencie os documentos da categoria
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <DocumentList 
-              category="procedimentos_oficiais" 
-              refreshTrigger={refreshTrigger}
-            />
-          </CardContent>
-        </Card>
+        {selectedFolderId && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Pasta: {selectedFolderName}</CardTitle>
+              <CardDescription>
+                Gerencie documentos e subpastas
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="documents">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="documents">Documentos</TabsTrigger>
+                  <TabsTrigger value="upload">Upload</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="documents" className="mt-6">
+                  <DocumentListWithTags 
+                    folderId={selectedFolderId}
+                    category="procedimentos_oficiais"
+                    refreshTrigger={refreshTrigger}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="upload" className="mt-6">
+                  <DocumentUploadWithTags 
+                    folderId={selectedFolderId}
+                    category="procedimentos_oficiais"
+                    onUploadComplete={() => setRefreshTrigger(prev => prev + 1)}
+                  />
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="border-accent bg-accent/5">
           <CardHeader>
