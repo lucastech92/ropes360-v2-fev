@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      checklist_items: {
+        Row: {
+          checklist_id: string
+          created_at: string | null
+          id: string
+          is_checked: boolean | null
+          item_text: string
+          order_index: number
+        }
+        Insert: {
+          checklist_id: string
+          created_at?: string | null
+          id?: string
+          is_checked?: boolean | null
+          item_text: string
+          order_index: number
+        }
+        Update: {
+          checklist_id?: string
+          created_at?: string | null
+          id?: string
+          is_checked?: boolean | null
+          item_text?: string
+          order_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_items_checklist_id_fkey"
+            columns: ["checklist_id"]
+            isOneToOne: false
+            referencedRelation: "checklists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checklists: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          service_tag: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          service_tag?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          service_tag?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       document_audit_log: {
         Row: {
           action: string
@@ -59,6 +124,49 @@ export type Database = {
           },
         ]
       }
+      document_tags: {
+        Row: {
+          created_at: string | null
+          document_id: string
+          id: string
+          tag_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          document_id: string
+          id?: string
+          tag_id: string
+        }
+        Update: {
+          created_at?: string | null
+          document_id?: string
+          id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_tags_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_tags_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents_expiring_soon"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           category: Database["public"]["Enums"]["document_category"]
@@ -70,6 +178,7 @@ export type Database = {
           file_path: string
           file_size: number | null
           file_type: string | null
+          folder_id: string | null
           id: string
           title: string
           uploaded_at: string | null
@@ -85,6 +194,7 @@ export type Database = {
           file_path: string
           file_size?: number | null
           file_type?: string | null
+          folder_id?: string | null
           id?: string
           title: string
           uploaded_at?: string | null
@@ -100,12 +210,21 @@ export type Database = {
           file_path?: string
           file_size?: number | null
           file_type?: string | null
+          folder_id?: string | null
           id?: string
           title?: string
           uploaded_at?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "documents_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       employee_folders: {
         Row: {
@@ -126,6 +245,101 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           folder_id?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      folders: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          name: string
+          parent_folder_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name: string
+          parent_folder_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name?: string
+          parent_folder_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folders_parent_folder_id_fkey"
+            columns: ["parent_folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory: {
+        Row: {
+          category: string | null
+          id: string
+          item_name: string
+          last_updated: string | null
+          location: string | null
+          min_quantity: number | null
+          notes: string | null
+          quantity: number | null
+          unit: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          category?: string | null
+          id?: string
+          item_name: string
+          last_updated?: string | null
+          location?: string | null
+          min_quantity?: number | null
+          notes?: string | null
+          quantity?: number | null
+          unit?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          category?: string | null
+          id?: string
+          item_name?: string
+          last_updated?: string | null
+          location?: string | null
+          min_quantity?: number | null
+          notes?: string | null
+          quantity?: number | null
+          unit?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      tags: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
           id?: string
           name?: string
         }
