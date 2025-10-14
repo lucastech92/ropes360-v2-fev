@@ -381,12 +381,21 @@ export type Database = {
           file_path: string | null
           file_size: number | null
           file_type: string | null
+          folder_id: string | null
           id: string | null
           title: string | null
           uploaded_at: string | null
           user_id: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "documents_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
