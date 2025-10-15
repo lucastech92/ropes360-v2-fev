@@ -18,26 +18,32 @@ export type Database = {
         Row: {
           checklist_id: string
           created_at: string | null
+          current_quantity: number | null
           id: string
           is_checked: boolean | null
           item_text: string
           order_index: number
+          target_quantity: number | null
         }
         Insert: {
           checklist_id: string
           created_at?: string | null
+          current_quantity?: number | null
           id?: string
           is_checked?: boolean | null
           item_text: string
           order_index: number
+          target_quantity?: number | null
         }
         Update: {
           checklist_id?: string
           created_at?: string | null
+          current_quantity?: number | null
           id?: string
           is_checked?: boolean | null
           item_text?: string
           order_index?: number
+          target_quantity?: number | null
         }
         Relationships: [
           {
