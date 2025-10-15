@@ -5,8 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ClipboardList, Plus, Trash2, Save, Edit, MinusCircle, PlusCircle } from "lucide-react";
+import { ClipboardList, Plus, Trash2, Save, Edit, MinusCircle, PlusCircle, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -26,6 +27,13 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
+interface InventoryItem {
+  id: string;
+  item_name: string;
+  quantity: number;
+  unit: string | null;
+}
+
 interface ChecklistItem {
   id: string;
   item_text: string;
@@ -33,6 +41,7 @@ interface ChecklistItem {
   order_index: number;
   target_quantity: number;
   current_quantity: number;
+  inventory_item_id: string | null;
 }
 
 interface Checklist {
@@ -40,6 +49,7 @@ interface Checklist {
   name: string;
   description: string | null;
   service_tag: string | null;
+  checklist_type: 'entrada' | 'saida';
   items?: ChecklistItem[];
 }
 
@@ -47,17 +57,20 @@ const CheckList = () => {
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [selectedChecklist, setSelectedChecklist] = useState<string | null>(null);
   const [items, setItems] = useState<ChecklistItem[]>([]);
-  const [newItemText, setNewItemText] = useState("");
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
+  const [selectedInventoryItem, setSelectedInventoryItem] = useState<string>("");
   const [newItemQuantity, setNewItemQuantity] = useState(1);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [newChecklistName, setNewChecklistName] = useState("");
   const [newChecklistDescription, setNewChecklistDescription] = useState("");
   const [newChecklistServiceTag, setNewChecklistServiceTag] = useState("");
+  const [newChecklistType, setNewChecklistType] = useState<'entrada' | 'saida'>('saida');
   const { toast } = useToast();
 
   useEffect(() => {
     fetchChecklists();
+    fetchInventoryItems();
   }, []);
 
   useEffect(() => {
@@ -66,6 +79,17 @@ const CheckList = () => {
     }
   }, [selectedChecklist]);
 
+  const fetchInventoryItems = async () => {
+    const { data, error } = await supabase
+      .from("inventory")
+      .select("id, item_name, quantity, unit")
+      .order("item_name");
+
+    if (!error && data) {
+      setInventoryItems(data);
+    }
+  };
+
   const fetchChecklists = async () => {
     const { data, error } = await supabase
       .from("checklists")
@@ -73,7 +97,7 @@ const CheckList = () => {
       .order("created_at", { ascending: false });
 
     if (!error && data) {
-      setChecklists(data);
+      setChecklists(data as Checklist[]);
       if (data.length > 0 && !selectedChecklist) {
         setSelectedChecklist(data[0].id);
       }
@@ -123,7 +147,10 @@ const CheckList = () => {
   };
 
   const addItem = async () => {
-    if (!newItemText.trim() || !selectedChecklist) return;
+    if (!selectedInventoryItem || !selectedChecklist) return;
+
+    const inventoryItem = inventoryItems.find(i => i.id === selectedInventoryItem);
+    if (!inventoryItem) return;
 
     const maxOrder = Math.max(...items.map(i => i.order_index), 0);
 
@@ -131,10 +158,11 @@ const CheckList = () => {
       .from("checklist_items")
       .insert({
         checklist_id: selectedChecklist,
-        item_text: newItemText,
+        item_text: inventoryItem.item_name,
         order_index: maxOrder + 1,
         target_quantity: newItemQuantity,
         current_quantity: 0,
+        inventory_item_id: selectedInventoryItem,
       })
       .select()
       .single();
@@ -149,11 +177,12 @@ const CheckList = () => {
     }
 
     setItems([...items, data]);
-    setNewItemText("");
+    setSelectedInventoryItem("");
     setNewItemQuantity(1);
+    await fetchInventoryItems(); // Refresh inventory to show updated quantities
     toast({
       title: "Item adicionado",
-      description: "Novo item foi adicionado ao checklist",
+      description: `Item foi adicionado ao checklist${currentChecklist?.checklist_type === 'saida' ? ' e retirado do inventário' : ' e adicionado ao inventário'}`,
     });
   };
 
@@ -173,9 +202,10 @@ const CheckList = () => {
     }
 
     setItems(items.filter(item => item.id !== itemId));
+    await fetchInventoryItems(); // Refresh inventory to show updated quantities
     toast({
       title: "Item removido",
-      description: "Item foi removido do checklist",
+      description: `Item foi removido do checklist${currentChecklist?.checklist_type === 'saida' ? ' e devolvido ao inventário' : ' e removido do inventário'}`,
     });
   };
 
@@ -188,6 +218,7 @@ const CheckList = () => {
         name: newChecklistName,
         description: newChecklistDescription || null,
         service_tag: newChecklistServiceTag || null,
+        checklist_type: newChecklistType,
       })
       .select()
       .single();
@@ -201,11 +232,12 @@ const CheckList = () => {
       return;
     }
 
-    setChecklists([data, ...checklists]);
+    setChecklists([data as Checklist, ...checklists]);
     setSelectedChecklist(data.id);
     setNewChecklistName("");
     setNewChecklistDescription("");
     setNewChecklistServiceTag("");
+    setNewChecklistType('saida');
     setIsCreateDialogOpen(false);
     toast({
       title: "Checklist criado",
@@ -222,6 +254,7 @@ const CheckList = () => {
         name: newChecklistName,
         description: newChecklistDescription || null,
         service_tag: newChecklistServiceTag || null,
+        checklist_type: newChecklistType,
       })
       .eq("id", selectedChecklist);
 
@@ -247,6 +280,7 @@ const CheckList = () => {
       setNewChecklistName(currentChecklist.name);
       setNewChecklistDescription(currentChecklist.description || "");
       setNewChecklistServiceTag(currentChecklist.service_tag || "");
+      setNewChecklistType(currentChecklist.checklist_type);
       setIsEditDialogOpen(true);
     }
   };
@@ -304,6 +338,18 @@ const CheckList = () => {
                           onChange={(e) => setNewChecklistName(e.target.value)}
                           placeholder="Nome do checklist"
                         />
+                      </div>
+                      <div>
+                        <Label htmlFor="type">Tipo de Checklist*</Label>
+                        <Select value={newChecklistType} onValueChange={(value: 'entrada' | 'saida') => setNewChecklistType(value)}>
+                          <SelectTrigger id="type">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="entrada">Entrada (Adiciona ao Inventário)</SelectItem>
+                            <SelectItem value="saida">Saída (Retira do Inventário)</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div>
                         <Label htmlFor="description">Descrição</Label>
@@ -371,6 +417,18 @@ const CheckList = () => {
                         />
                       </div>
                       <div>
+                        <Label htmlFor="edit-type">Tipo de Checklist*</Label>
+                        <Select value={newChecklistType} onValueChange={(value: 'entrada' | 'saida') => setNewChecklistType(value)}>
+                          <SelectTrigger id="edit-type">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="entrada">Entrada (Adiciona ao Inventário)</SelectItem>
+                            <SelectItem value="saida">Saída (Retira do Inventário)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
                         <Label htmlFor="edit-description">Descrição</Label>
                         <Textarea
                           id="edit-description"
@@ -403,7 +461,12 @@ const CheckList = () => {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle>{currentChecklist.name}</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <CardTitle>{currentChecklist.name}</CardTitle>
+                      <Badge variant={currentChecklist.checklist_type === 'entrada' ? 'default' : 'secondary'}>
+                        {currentChecklist.checklist_type === 'entrada' ? 'Entrada' : 'Saída'}
+                      </Badge>
+                    </div>
                     {currentChecklist.description && (
                       <CardDescription className="mt-2">
                         {currentChecklist.description}
@@ -467,28 +530,41 @@ const CheckList = () => {
                 ))}
 
                 <div className="flex gap-2 pt-4 border-t">
-                  <Input
-                    placeholder="Adicionar novo item..."
-                    value={newItemText}
-                    onChange={(e) => setNewItemText(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && addItem()}
-                    className="flex-1"
-                  />
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="quantity" className="text-sm whitespace-nowrap">Qtd:</Label>
-                    <Input
-                      id="quantity"
-                      type="number"
-                      min="1"
-                      value={newItemQuantity}
-                      onChange={(e) => setNewItemQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-20"
-                    />
+                  <div className="flex-1">
+                    <Label htmlFor="inventory-select" className="text-sm mb-2 block">
+                      <Package className="h-4 w-4 inline mr-1" />
+                      Selecionar Item do Inventário
+                    </Label>
+                    <Select value={selectedInventoryItem} onValueChange={setSelectedInventoryItem}>
+                      <SelectTrigger id="inventory-select">
+                        <SelectValue placeholder="Escolha um item do estoque" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {inventoryItems.map((item) => (
+                          <SelectItem key={item.id} value={item.id}>
+                            {item.item_name} (Estoque: {item.quantity} {item.unit || 'un'})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <Button onClick={addItem}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Adicionar
-                  </Button>
+                  <div className="flex items-end gap-2">
+                    <div>
+                      <Label htmlFor="quantity" className="text-sm whitespace-nowrap">Quantidade:</Label>
+                      <Input
+                        id="quantity"
+                        type="number"
+                        min="1"
+                        value={newItemQuantity}
+                        onChange={(e) => setNewItemQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                        className="w-24"
+                      />
+                    </div>
+                    <Button onClick={addItem} disabled={!selectedInventoryItem}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Adicionar
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

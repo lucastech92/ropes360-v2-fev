@@ -20,6 +20,7 @@ export type Database = {
           created_at: string | null
           current_quantity: number | null
           id: string
+          inventory_item_id: string | null
           is_checked: boolean | null
           item_text: string
           order_index: number
@@ -30,6 +31,7 @@ export type Database = {
           created_at?: string | null
           current_quantity?: number | null
           id?: string
+          inventory_item_id?: string | null
           is_checked?: boolean | null
           item_text: string
           order_index: number
@@ -40,6 +42,7 @@ export type Database = {
           created_at?: string | null
           current_quantity?: number | null
           id?: string
+          inventory_item_id?: string | null
           is_checked?: boolean | null
           item_text?: string
           order_index?: number
@@ -53,10 +56,18 @@ export type Database = {
             referencedRelation: "checklists"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "checklist_items_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory"
+            referencedColumns: ["id"]
+          },
         ]
       }
       checklists: {
         Row: {
+          checklist_type: string
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -66,6 +77,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          checklist_type?: string
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -75,6 +87,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          checklist_type?: string
           created_at?: string | null
           created_by?: string | null
           description?: string | null
