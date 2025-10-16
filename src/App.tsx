@@ -15,6 +15,7 @@ import DuvidasFrequentes from "./pages/DuvidasFrequentes";
 import Historico from "./pages/Historico";
 import CheckList from "./pages/CheckList";
 import Inventario from "./pages/Inventario";
+import WireRopeInspection from "./pages/WireRopeInspection";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/procedimentos-tecnicos" element={<ProtectedRoute><ProcedimentosTecnicos /></ProtectedRoute>} />
           <Route path="/treinamento" element={<ProtectedRoute><Treinamento /></ProtectedRoute>} />
           <Route path="/modelos-relatorios" element={<ProtectedRoute><ModelosRelatorios /></ProtectedRoute>} />
+          <Route path="/wire-rope-inspection" element={<ProtectedRoute><WireRopeInspection /></ProtectedRoute>} />
           <Route path="/resolucao-problemas" element={<ProtectedRoute><ResolucaoProblemas /></ProtectedRoute>} />
           <Route path="/duvidas-frequentes" element={<ProtectedRoute><DuvidasFrequentes /></ProtectedRoute>} />
           <Route path="/historico" element={<ProtectedRoute><Historico /></ProtectedRoute>} />
