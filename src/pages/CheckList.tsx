@@ -5,9 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ClipboardList, Plus, Trash2, Save, Edit, MinusCircle, PlusCircle, Package } from "lucide-react";
+import { ClipboardList, Plus, Trash2, Edit, MinusCircle, PlusCircle, PackagePlus, PackageMinus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -144,10 +143,19 @@ const CheckList = () => {
         ? { ...i, current_quantity: newQuantity, is_checked: newQuantity === item.target_quantity } 
         : i
     ));
+    
+    await fetchInventoryItems();
   };
 
   const addItem = async () => {
-    if (!selectedInventoryItem || !selectedChecklist) return;
+    if (!selectedInventoryItem || !selectedChecklist) {
+      toast({
+        title: "Erro",
+        description: "Selecione um item do inventário",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const inventoryItem = inventoryItems.find(i => i.id === selectedInventoryItem);
     if (!inventoryItem) return;
@@ -179,10 +187,10 @@ const CheckList = () => {
     setItems([...items, data]);
     setSelectedInventoryItem("");
     setNewItemQuantity(1);
-    await fetchInventoryItems(); // Refresh inventory to show updated quantities
+    await fetchInventoryItems();
     toast({
       title: "Item adicionado",
-      description: `Item foi adicionado ao checklist${currentChecklist?.checklist_type === 'saida' ? ' e retirado do inventário' : ' e adicionado ao inventário'}`,
+      description: "Item adicionado e estoque atualizado automaticamente",
     });
   };
 
@@ -202,10 +210,10 @@ const CheckList = () => {
     }
 
     setItems(items.filter(item => item.id !== itemId));
-    await fetchInventoryItems(); // Refresh inventory to show updated quantities
+    await fetchInventoryItems();
     toast({
       title: "Item removido",
-      description: `Item foi removido do checklist${currentChecklist?.checklist_type === 'saida' ? ' e devolvido ao inventário' : ' e removido do inventário'}`,
+      description: "Item removido e estoque atualizado automaticamente",
     });
   };
 
@@ -241,7 +249,7 @@ const CheckList = () => {
     setIsCreateDialogOpen(false);
     toast({
       title: "Checklist criado",
-      description: "Novo modelo de checklist foi criado com sucesso",
+      description: "Novo modelo de checklist criado com sucesso",
     });
   };
 
@@ -271,7 +279,7 @@ const CheckList = () => {
     setIsEditDialogOpen(false);
     toast({
       title: "Checklist atualizado",
-      description: "Modelo de checklist foi atualizado com sucesso",
+      description: "Modelo de checklist atualizado com sucesso",
     });
   };
 
@@ -301,7 +309,7 @@ const CheckList = () => {
             Check List
           </h1>
           <p className="text-muted-foreground">
-            Checklists para montagem de containers e verificação de ferramentas
+            Checklists com controle automático de inventário - itens de entrada/saída sincronizados com o estoque
           </p>
         </div>
 
@@ -340,14 +348,24 @@ const CheckList = () => {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="type">Tipo de Checklist*</Label>
+                        <Label htmlFor="type">Tipo*</Label>
                         <Select value={newChecklistType} onValueChange={(value: 'entrada' | 'saida') => setNewChecklistType(value)}>
-                          <SelectTrigger id="type">
+                          <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="entrada">Entrada (Adiciona ao Inventário)</SelectItem>
-                            <SelectItem value="saida">Saída (Retira do Inventário)</SelectItem>
+                            <SelectItem value="entrada">
+                              <div className="flex items-center gap-2">
+                                <PackagePlus className="h-4 w-4" />
+                                Checklist de Entrada (adiciona ao estoque)
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="saida">
+                              <div className="flex items-center gap-2">
+                                <PackageMinus className="h-4 w-4" />
+                                Checklist de Saída (retira do estoque)
+                              </div>
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -385,7 +403,7 @@ const CheckList = () => {
                 <SelectContent>
                   {checklists.map((checklist) => (
                     <SelectItem key={checklist.id} value={checklist.id}>
-                      {checklist.name} {checklist.service_tag && `(${checklist.service_tag})`}
+                      {checklist.name} {checklist.service_tag && `(${checklist.service_tag})`} - {checklist.checklist_type === 'entrada' ? 'Entrada' : 'Saída'}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -417,14 +435,24 @@ const CheckList = () => {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="edit-type">Tipo de Checklist*</Label>
+                        <Label htmlFor="edit-type">Tipo*</Label>
                         <Select value={newChecklistType} onValueChange={(value: 'entrada' | 'saida') => setNewChecklistType(value)}>
-                          <SelectTrigger id="edit-type">
+                          <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="entrada">Entrada (Adiciona ao Inventário)</SelectItem>
-                            <SelectItem value="saida">Saída (Retira do Inventário)</SelectItem>
+                            <SelectItem value="entrada">
+                              <div className="flex items-center gap-2">
+                                <PackagePlus className="h-4 w-4" />
+                                Checklist de Entrada (adiciona ao estoque)
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="saida">
+                              <div className="flex items-center gap-2">
+                                <PackageMinus className="h-4 w-4" />
+                                Checklist de Saída (retira do estoque)
+                              </div>
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -461,11 +489,25 @@ const CheckList = () => {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 mb-2">
                       <CardTitle>{currentChecklist.name}</CardTitle>
-                      <Badge variant={currentChecklist.checklist_type === 'entrada' ? 'default' : 'secondary'}>
-                        {currentChecklist.checklist_type === 'entrada' ? 'Entrada' : 'Saída'}
-                      </Badge>
+                      <span className={`text-sm font-semibold px-2 py-1 rounded flex items-center gap-1 ${
+                        currentChecklist.checklist_type === 'entrada' 
+                          ? 'bg-green-500/10 text-green-600' 
+                          : 'bg-blue-500/10 text-blue-600'
+                      }`}>
+                        {currentChecklist.checklist_type === 'entrada' ? (
+                          <>
+                            <PackagePlus className="h-3 w-3" />
+                            Entrada
+                          </>
+                        ) : (
+                          <>
+                            <PackageMinus className="h-3 w-3" />
+                            Saída
+                          </>
+                        )}
+                      </span>
                     </div>
                     {currentChecklist.description && (
                       <CardDescription className="mt-2">
@@ -530,41 +572,33 @@ const CheckList = () => {
                 ))}
 
                 <div className="flex gap-2 pt-4 border-t">
-                  <div className="flex-1">
-                    <Label htmlFor="inventory-select" className="text-sm mb-2 block">
-                      <Package className="h-4 w-4 inline mr-1" />
-                      Selecionar Item do Inventário
-                    </Label>
-                    <Select value={selectedInventoryItem} onValueChange={setSelectedInventoryItem}>
-                      <SelectTrigger id="inventory-select">
-                        <SelectValue placeholder="Escolha um item do estoque" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {inventoryItems.map((item) => (
-                          <SelectItem key={item.id} value={item.id}>
-                            {item.item_name} (Estoque: {item.quantity} {item.unit || 'un'})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <Select value={selectedInventoryItem} onValueChange={setSelectedInventoryItem}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Selecionar item do inventário" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {inventoryItems.map((item) => (
+                        <SelectItem key={item.id} value={item.id}>
+                          {item.item_name} - Disponível: {item.quantity} {item.unit || 'un'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="quantity" className="text-sm whitespace-nowrap">Qtd:</Label>
+                    <Input
+                      id="quantity"
+                      type="number"
+                      min="1"
+                      value={newItemQuantity}
+                      onChange={(e) => setNewItemQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="w-20"
+                    />
                   </div>
-                  <div className="flex items-end gap-2">
-                    <div>
-                      <Label htmlFor="quantity" className="text-sm whitespace-nowrap">Quantidade:</Label>
-                      <Input
-                        id="quantity"
-                        type="number"
-                        min="1"
-                        value={newItemQuantity}
-                        onChange={(e) => setNewItemQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-24"
-                      />
-                    </div>
-                    <Button onClick={addItem} disabled={!selectedInventoryItem}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Adicionar
-                    </Button>
-                  </div>
+                  <Button onClick={addItem}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Adicionar
+                  </Button>
                 </div>
               </CardContent>
             </Card>
