@@ -104,7 +104,7 @@ export type Database = {
           created_at: string | null
           document_id: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           user_agent: string | null
           user_id: string | null
         }
@@ -113,7 +113,7 @@ export type Database = {
           created_at?: string | null
           document_id?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id?: string | null
         }
@@ -122,7 +122,7 @@ export type Database = {
           created_at?: string | null
           document_id?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id?: string | null
         }
@@ -343,6 +343,69 @@ export type Database = {
           quantity?: number | null
           unit?: string | null
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      maintenance_records: {
+        Row: {
+          actions_taken: string | null
+          completion_date: string | null
+          cost: number | null
+          created_at: string | null
+          created_by: string | null
+          description: string
+          equipment_code: string
+          equipment_name: string
+          hours_spent: number | null
+          id: string
+          maintenance_type: string
+          next_maintenance: string | null
+          parts_used: string | null
+          priority: string
+          scheduled_date: string
+          status: string
+          technician: string
+          updated_at: string | null
+        }
+        Insert: {
+          actions_taken?: string | null
+          completion_date?: string | null
+          cost?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description: string
+          equipment_code: string
+          equipment_name: string
+          hours_spent?: number | null
+          id?: string
+          maintenance_type: string
+          next_maintenance?: string | null
+          parts_used?: string | null
+          priority: string
+          scheduled_date: string
+          status: string
+          technician: string
+          updated_at?: string | null
+        }
+        Update: {
+          actions_taken?: string | null
+          completion_date?: string | null
+          cost?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string
+          equipment_code?: string
+          equipment_name?: string
+          hours_spent?: number | null
+          id?: string
+          maintenance_type?: string
+          next_maintenance?: string | null
+          parts_used?: string | null
+          priority?: string
+          scheduled_date?: string
+          status?: string
+          technician?: string
+          updated_at?: string | null
         }
         Relationships: []
       }

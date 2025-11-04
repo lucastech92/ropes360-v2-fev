@@ -11,7 +11,8 @@ import {
   History,
   ClipboardList,
   Package,
-  FolderOpen
+  FolderOpen,
+  Settings
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FolderManager } from "@/components/FolderManager";
@@ -87,6 +88,13 @@ const Index = () => {
       icon: Package,
       href: "/inventario",
       color: "accent"
+    },
+    {
+      title: "Controle de Manutenção",
+      description: "Sistema completo de gestão de manutenções preventivas, corretivas e preditivas de equipamentos.",
+      icon: Settings,
+      href: "/manutencao",
+      color: "primary"
     }
   ];
 

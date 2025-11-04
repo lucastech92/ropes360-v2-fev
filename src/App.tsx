@@ -16,6 +16,7 @@ import Historico from "./pages/Historico";
 import CheckList from "./pages/CheckList";
 import Inventario from "./pages/Inventario";
 import WireRopeInspection from "./pages/WireRopeInspection";
+import Manutencao from "./pages/Manutencao";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/historico" element={<ProtectedRoute><Historico /></ProtectedRoute>} />
           <Route path="/checklist" element={<ProtectedRoute><CheckList /></ProtectedRoute>} />
           <Route path="/inventario" element={<ProtectedRoute><Inventario /></ProtectedRoute>} />
+          <Route path="/manutencao" element={<ProtectedRoute><Manutencao /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

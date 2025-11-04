@@ -27,26 +27,9 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import type { Database } from "@/integrations/supabase/types";
 
-interface MaintenanceRecord {
-  id: string;
-  equipment_name: string;
-  equipment_code: string;
-  maintenance_type: 'preventiva' | 'corretiva' | 'preditiva';
-  priority: 'baixa' | 'media' | 'alta' | 'urgente';
-  status: 'pendente' | 'em_andamento' | 'concluida' | 'cancelada';
-  scheduled_date: string;
-  completion_date?: string;
-  technician: string;
-  description: string;
-  actions_taken?: string;
-  parts_used?: string;
-  hours_spent?: number;
-  cost?: number;
-  next_maintenance?: string;
-  created_at: string;
-  created_by: string;
-}
+type MaintenanceRecord = Database['public']['Tables']['maintenance_records']['Row'];
 
 const Manutencao = () => {
   const [records, setRecords] = useState<MaintenanceRecord[]>([]);
@@ -59,12 +42,27 @@ const Manutencao = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    equipment_name: string;
+    equipment_code: string;
+    maintenance_type: 'preventiva' | 'corretiva' | 'preditiva';
+    priority: 'baixa' | 'media' | 'alta' | 'urgente';
+    status: 'pendente' | 'em_andamento' | 'concluida' | 'cancelada';
+    scheduled_date: string;
+    completion_date: string;
+    technician: string;
+    description: string;
+    actions_taken: string;
+    parts_used: string;
+    hours_spent: string;
+    cost: string;
+    next_maintenance: string;
+  }>({
     equipment_name: "",
     equipment_code: "",
-    maintenance_type: "preventiva" as const,
-    priority: "media" as const,
-    status: "pendente" as const,
+    maintenance_type: "preventiva",
+    priority: "media",
+    status: "pendente",
     scheduled_date: "",
     completion_date: "",
     technician: "",
@@ -191,9 +189,9 @@ const Manutencao = () => {
     setFormData({
       equipment_name: record.equipment_name,
       equipment_code: record.equipment_code,
-      maintenance_type: record.maintenance_type,
-      priority: record.priority,
-      status: record.status,
+      maintenance_type: record.maintenance_type as 'preventiva' | 'corretiva' | 'preditiva',
+      priority: record.priority as 'baixa' | 'media' | 'alta' | 'urgente',
+      status: record.status as 'pendente' | 'em_andamento' | 'concluida' | 'cancelada',
       scheduled_date: record.scheduled_date,
       completion_date: record.completion_date || "",
       technician: record.technician,
