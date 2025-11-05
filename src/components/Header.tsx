@@ -3,6 +3,7 @@ import { FileText, Home, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { NotificationBell } from "./NotificationBell";
 
 const Header = () => {
   const location = useLocation();
@@ -48,6 +49,7 @@ const Header = () => {
               </Link>
             </Button>
           )}
+          <NotificationBell />
           <Button variant="ghost" size="sm" onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
             Sair
