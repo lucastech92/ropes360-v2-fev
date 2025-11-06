@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { logActivity } from "@/utils/activityLogger";
 
 type DocumentCategory = 
   | "procedimentos_oficiais"
@@ -110,6 +111,20 @@ export const DocumentUpload = ({ category, employeeFolder, onUploadComplete }: D
       });
 
       if (dbError) throw dbError;
+
+      // Log activity
+      await logActivity({
+        action: "uploaded",
+        module: "documents",
+        entityType: "document",
+        description: `Upload do documento "${title.trim()}"`,
+        metadata: {
+          category,
+          file_name: file.name,
+          file_size: file.size,
+          employee_folder: employeeFolder || null,
+        },
+      });
 
       toast({
         title: "Sucesso!",

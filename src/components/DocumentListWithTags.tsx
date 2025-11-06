@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Download, Trash2, FileText, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { logActivity } from "@/utils/activityLogger";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -112,6 +113,15 @@ export const DocumentListWithTags = ({
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
+      // Log activity
+      await logActivity({
+        action: "downloaded",
+        module: "documents",
+        entityType: "document",
+        description: `Download do documento "${fileName}"`,
+        metadata: { file_name: fileName, file_path: filePath },
+      });
+
       toast({
         title: "Download iniciado",
         description: `Baixando ${fileName}`,
@@ -139,6 +149,16 @@ export const DocumentListWithTags = ({
         .eq("id", id);
 
       if (dbError) throw dbError;
+
+      // Log activity
+      await logActivity({
+        action: "deleted",
+        module: "documents",
+        entityType: "document",
+        entityId: id,
+        description: `Exclusão do documento "${title}"`,
+        metadata: { title, file_path: filePath },
+      });
 
       toast({
         title: "Documento deletado",

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { logActivity } from "@/utils/activityLogger";
 
 interface Tag {
   id: string;
@@ -173,6 +174,22 @@ export const DocumentUploadWithTags = ({
         .insert(tagLinks);
 
       if (tagError) throw tagError;
+
+      // Log activity
+      await logActivity({
+        action: "uploaded",
+        module: "documents",
+        entityType: "document",
+        entityId: documentData.id,
+        description: `Upload do documento "${title.trim()}" com ${selectedTags.length} tag(s)`,
+        metadata: {
+          file_name: file.name,
+          file_size: file.size,
+          tags: selectedTags,
+          folder_id: folderId,
+          expiry_date: expiryDate || null,
+        },
+      });
 
       toast({
         title: "Upload concluído",

@@ -3,6 +3,7 @@ import { FileText, Download, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { logActivity } from "@/utils/activityLogger";
 
 type DocumentCategory = 
   | "procedimentos_oficiais"
@@ -81,6 +82,15 @@ export const DocumentList = ({ category, employeeFolder, refreshTrigger }: Docum
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+
+      // Log activity
+      await logActivity({
+        action: "downloaded",
+        module: "documents",
+        entityType: "document",
+        description: `Download do documento "${fileName}"`,
+        metadata: { file_name: fileName, file_path: filePath, category },
+      });
     } catch (error: any) {
       toast({
         title: "Erro",
@@ -90,7 +100,7 @@ export const DocumentList = ({ category, employeeFolder, refreshTrigger }: Docum
     }
   };
 
-  const handleDelete = async (id: string, filePath: string) => {
+  const handleDelete = async (id: string, filePath: string, fileName: string) => {
     if (!confirm("Tem certeza que deseja excluir este documento?")) return;
 
     const { error: storageError } = await supabase.storage
@@ -118,6 +128,16 @@ export const DocumentList = ({ category, employeeFolder, refreshTrigger }: Docum
         variant: "destructive",
       });
     } else {
+      // Log activity
+      await logActivity({
+        action: "deleted",
+        module: "documents",
+        entityType: "document",
+        entityId: id,
+        description: `Exclusão do documento "${fileName}"`,
+        metadata: { file_name: fileName, file_path: filePath, category },
+      });
+
       toast({
         title: "Sucesso",
         description: "Documento excluído com sucesso.",
@@ -179,7 +199,7 @@ export const DocumentList = ({ category, employeeFolder, refreshTrigger }: Docum
             <Button
               variant="outline"
               size="icon"
-              onClick={() => handleDelete(doc.id, doc.file_path)}
+              onClick={() => handleDelete(doc.id, doc.file_path, doc.file_name)}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
