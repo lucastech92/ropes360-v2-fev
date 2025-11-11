@@ -13,7 +13,8 @@ import {
   ClipboardList,
   Package,
   FolderOpen,
-  Settings
+  Settings,
+  Shield
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FolderManager } from "@/components/FolderManager";
@@ -100,6 +101,13 @@ const Index = () => {
         description: "Sistema completo de gestão de manutenções preventivas, corretivas e preditivas de equipamentos.",
         icon: Settings,
         href: "/manutencao",
+        color: "primary"
+      },
+      {
+        title: "Gerenciar Usuários",
+        description: "Aprovar novos usuários e gerenciar níveis de acesso ao sistema (Admin).",
+        icon: Shield,
+        href: "/gerenciar-usuarios",
         color: "primary"
       },
     ],

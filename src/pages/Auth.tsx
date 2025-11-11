@@ -51,7 +51,7 @@ const Auth = () => {
 
       toast({
         title: "Conta criada com sucesso!",
-        description: "Você foi autenticado e pode começar a usar o sistema.",
+        description: "Aguarde a aprovação de um administrador para acessar o sistema.",
       });
     } catch (error: any) {
       toast({

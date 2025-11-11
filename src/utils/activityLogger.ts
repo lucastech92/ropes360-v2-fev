@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
-type ActionType = "created" | "updated" | "deleted" | "downloaded" | "uploaded" | "completed";
-type ModuleType = "documents" | "checklist" | "inventory" | "maintenance" | "folders" | "tags";
+type ActionType = "created" | "updated" | "deleted" | "downloaded" | "uploaded" | "completed" | "approve_user" | "reject_user" | "change_role";
+type ModuleType = "documents" | "checklist" | "inventory" | "maintenance" | "folders" | "tags" | "usuarios";
 
 interface LogActivityParams {
   action: ActionType;
