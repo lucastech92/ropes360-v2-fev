@@ -207,7 +207,10 @@ const GerenciarUsuarios = () => {
                       <TableCell>
                         <Select
                           value={user.role}
-                          onValueChange={(value) => handleRoleChange(user.id, user.role_id, value)}
+                          onValueChange={(value: string) => {
+                            const validRole = value as "admin" | "moderator" | "inspector";
+                            handleRoleChange(user.id, user.role_id, validRole);
+                          }}
                           disabled={!user.approved}
                         >
                           <SelectTrigger className="w-[150px]">
