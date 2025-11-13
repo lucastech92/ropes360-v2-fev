@@ -18,6 +18,8 @@ import Inventario from "./pages/Inventario";
 import WireRopeInspection from "./pages/WireRopeInspection";
 import Manutencao from "./pages/Manutencao";
 import GerenciarUsuarios from "./pages/GerenciarUsuarios";
+import Servicos from "./pages/Servicos";
+import NovoServico from "./pages/NovoServico";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -43,6 +45,8 @@ const App = () => (
           <Route path="/inventario" element={<ProtectedRoute><Inventario /></ProtectedRoute>} />
           <Route path="/manutencao" element={<ProtectedRoute><Manutencao /></ProtectedRoute>} />
           <Route path="/gerenciar-usuarios" element={<ProtectedRoute><GerenciarUsuarios /></ProtectedRoute>} />
+          <Route path="/servicos" element={<ProtectedRoute><Servicos /></ProtectedRoute>} />
+          <Route path="/novo-servico" element={<ProtectedRoute><NovoServico /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
