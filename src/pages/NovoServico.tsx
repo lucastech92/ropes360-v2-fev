@@ -6,9 +6,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
+
+const ESCOPO_OPTIONS = [
+  "MRT - Eletromagnético",
+  "Inspeção Visual",
+  "Soquetagem",
+  "Lubrificação",
+  "Spooler",
+  "Outros"
+];
 
 const NovoServico = () => {
   const navigate = useNavigate();
@@ -17,7 +27,9 @@ const NovoServico = () => {
   const [formData, setFormData] = useState({
     codigo_jbr: "",
     cliente: "",
-    escopo: "",
+    escopo: [] as string[],
+    outros_escopo: "",
+    aplicacao: "",
     equipamentos: "",
     data_inicio: "",
     data_termino: "",
@@ -37,7 +49,9 @@ const NovoServico = () => {
       const { error } = await supabase.from("services").insert({
         codigo_jbr: formData.codigo_jbr,
         cliente: formData.cliente,
-        escopo: formData.escopo || null,
+        escopo: formData.escopo.length > 0 ? formData.escopo : null,
+        outros_escopo: formData.outros_escopo || null,
+        aplicacao: formData.aplicacao || null,
         equipamentos: formData.equipamentos || null,
         data_inicio: formData.data_inicio || null,
         data_termino: formData.data_termino || null,
@@ -113,15 +127,56 @@ const NovoServico = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="escopo">Escopo</Label>
+                <Label>Escopo *</Label>
+                <div className="space-y-3">
+                  {ESCOPO_OPTIONS.map((option) => (
+                    <div key={option} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={option}
+                        checked={formData.escopo.includes(option)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setFormData({
+                              ...formData,
+                              escopo: [...formData.escopo, option],
+                            });
+                          } else {
+                            setFormData({
+                              ...formData,
+                              escopo: formData.escopo.filter((e) => e !== option),
+                            });
+                          }
+                        }}
+                      />
+                      <Label htmlFor={option} className="font-normal cursor-pointer">
+                        {option}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+                {formData.escopo.includes("Outros") && (
+                  <div className="mt-3">
+                    <Input
+                      placeholder="Especifique outros serviços"
+                      value={formData.outros_escopo}
+                      onChange={(e) =>
+                        setFormData({ ...formData, outros_escopo: e.target.value })
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="aplicacao">Aplicação</Label>
                 <Textarea
-                  id="escopo"
-                  value={formData.escopo}
+                  id="aplicacao"
+                  value={formData.aplicacao}
                   onChange={(e) =>
-                    setFormData({ ...formData, escopo: e.target.value })
+                    setFormData({ ...formData, aplicacao: e.target.value })
                   }
-                  placeholder="Descreva o escopo do serviço"
-                  rows={4}
+                  placeholder="Descreva a aplicação"
+                  rows={3}
                 />
               </div>
 

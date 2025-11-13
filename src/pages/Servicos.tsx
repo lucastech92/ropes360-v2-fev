@@ -12,7 +12,9 @@ interface Service {
   id: string;
   codigo_jbr: string;
   cliente: string;
-  escopo: string | null;
+  escopo: string[] | null;
+  outros_escopo: string | null;
+  aplicacao: string | null;
   equipamentos: string | null;
   data_inicio: string | null;
   data_termino: string | null;
@@ -89,6 +91,9 @@ const Servicos = () => {
                   <TableRow>
                     <TableHead>Código JBR</TableHead>
                     <TableHead>Cliente</TableHead>
+                    <TableHead>Escopo</TableHead>
+                    <TableHead>Aplicação</TableHead>
+                    <TableHead>Equipamentos</TableHead>
                     <TableHead>Data Início</TableHead>
                     <TableHead>Data Término</TableHead>
                   </TableRow>
@@ -98,6 +103,30 @@ const Servicos = () => {
                     <TableRow key={service.id}>
                       <TableCell className="font-medium">{service.codigo_jbr}</TableCell>
                       <TableCell>{service.cliente}</TableCell>
+                      <TableCell>
+                        {service.escopo && service.escopo.length > 0 ? (
+                          <div className="space-y-1">
+                            {service.escopo.map((esc, idx) => (
+                              <div key={idx} className="text-sm">
+                                {esc}
+                                {esc === "Outros" && service.outros_escopo && (
+                                  <span className="text-muted-foreground ml-1">
+                                    ({service.outros_escopo})
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
+                      <TableCell className="max-w-xs truncate">
+                        {service.aplicacao || "-"}
+                      </TableCell>
+                      <TableCell className="max-w-xs truncate">
+                        {service.equipamentos || "-"}
+                      </TableCell>
                       <TableCell>
                         {service.data_inicio
                           ? new Date(service.data_inicio).toLocaleDateString("pt-BR")
