@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FileText, Home, LogOut } from "lucide-react";
+import { FileText, Home, LogOut, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -44,8 +44,16 @@ const Header = () => {
           {location.pathname !== "/" && (
             <Button variant="ghost" size="sm" asChild>
               <Link to="/">
-                <Home className="mr-2 h-4 w-4" />
-                Início
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                Dashboard
+              </Link>
+            </Button>
+          )}
+          {location.pathname !== "/documentos" && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/documentos">
+                <FileText className="mr-2 h-4 w-4" />
+                Documentos
               </Link>
             </Button>
           )}
