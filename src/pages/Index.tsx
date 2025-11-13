@@ -67,6 +67,13 @@ const Index = () => {
     ],
     operations: [
       {
+        title: "JBR - Serviços",
+        description: "Gerencie todos os serviços registrados com código JBR, cliente, escopo e equipamentos.",
+        icon: ClipboardList,
+        href: "/servicos",
+        color: "accent"
+      },
+      {
         title: "Check List",
         description: "Checklists preenchíveis para montagem de containers e verificação de ferramentas (JBR).",
         icon: ClipboardList,
