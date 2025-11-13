@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -9,17 +10,22 @@ import {
   Settings, 
   TrendingUp,
   ClipboardList,
-  Users,
   Activity,
-  Calendar,
   CheckCircle2,
-  XCircle,
-  Clock
+  Clock,
+  ArrowRight
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { InventoryDetailsDialog } from "@/components/dashboard/InventoryDetailsDialog";
+import { ServicesDetailsDialog } from "@/components/dashboard/ServicesDetailsDialog";
+import { MaintenanceDetailsDialog } from "@/components/dashboard/MaintenanceDetailsDialog";
 
 const Dashboard = () => {
+  const [inventoryDialogOpen, setInventoryDialogOpen] = useState(false);
+  const [servicesDialogOpen, setServicesDialogOpen] = useState(false);
+  const [maintenanceDialogOpen, setMaintenanceDialogOpen] = useState(false);
   const { data: dashboardData, isLoading } = useQuery({
     queryKey: ["dashboard-complete"],
     queryFn: async () => {
@@ -38,10 +44,12 @@ const Dashboard = () => {
       // Serviços
       const { data: services } = await supabase
         .from("services")
-        .select("*");
+        .select("*")
+        .throwOnError();
 
       const servicesThisMonth = services?.filter(s => {
-        const start = new Date(s.data_inicio || "");
+        if (!s.data_inicio) return false;
+        const start = new Date(s.data_inicio);
         const now = new Date();
         return start.getMonth() === now.getMonth() && start.getFullYear() === now.getFullYear();
       }).length || 0;
@@ -69,13 +77,20 @@ const Dashboard = () => {
       // Inventário
       const { data: inventory } = await supabase
         .from("inventory")
-        .select("*");
+        .select("*")
+        .throwOnError();
 
       const lowStockItems = inventory?.filter(item => 
         item.min_quantity && item.quantity < item.min_quantity
       ).length || 0;
 
       const totalItems = inventory?.length || 0;
+
+      // Manutenção detalhada
+      const { data: allMaintenance } = await supabase
+        .from("maintenance_records")
+        .select("*")
+        .throwOnError();
 
       // Atividades
       const { count: weeklyActivity } = await supabase
@@ -102,16 +117,19 @@ const Dashboard = () => {
         services: {
           total: services?.length || 0,
           thisMonth: servicesThisMonth,
+          data: services || [],
         },
         maintenance: {
           total: totalMaintenance || 0,
           pending: pendingMaintenance || 0,
           inProgress: inProgressMaintenance || 0,
           completed: completedMaintenance || 0,
+          data: allMaintenance || [],
         },
         inventory: {
           total: totalItems,
           lowStock: lowStockItems,
+          data: inventory || [],
         },
         activity: {
           weekly: weeklyActivity || 0,
@@ -159,7 +177,7 @@ const Dashboard = () => {
 
         {/* Métricas Principais */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card className="hover:shadow-lg transition-all cursor-pointer border-primary/20" onClick={() => {}}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Total de Documentos
@@ -177,36 +195,53 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card 
+            className="hover:shadow-xl transition-all cursor-pointer border-accent/30 hover:border-accent group" 
+            onClick={() => setServicesDialogOpen(true)}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Serviços JBR
               </CardTitle>
-              <ClipboardList className="h-4 w-4 text-accent" />
+              <ClipboardList className="h-4 w-4 text-accent group-hover:scale-110 transition-transform" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{dashboardData.services.total}</div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {dashboardData.services.thisMonth} neste mês
-              </p>
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-xs text-muted-foreground">
+                  {dashboardData.services.thisMonth} neste mês
+                </p>
+                <ArrowRight className="h-3 w-3 text-accent opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow">
+          <Card 
+            className="hover:shadow-xl transition-all cursor-pointer border-primary/30 hover:border-primary group" 
+            onClick={() => setInventoryDialogOpen(true)}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Inventário
               </CardTitle>
-              <Package className="h-4 w-4 text-primary" />
+              <Package className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{dashboardData.inventory.total}</div>
-              {dashboardData.inventory.lowStock > 0 && (
-                <p className="text-xs text-yellow-600 flex items-center gap-1 mt-2">
-                  <AlertTriangle className="h-3 w-3" />
-                  {dashboardData.inventory.lowStock} itens abaixo do mínimo
-                </p>
-              )}
+              <div className="flex items-center justify-between mt-2">
+                {dashboardData.inventory.lowStock > 0 ? (
+                  <p className="text-xs text-yellow-600 flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3" />
+                    {dashboardData.inventory.lowStock} itens baixos
+                  </p>
+                ) : (
+                  <p className="text-xs text-green-600 flex items-center gap-1">
+                    <CheckCircle2 className="h-3 w-3" />
+                    Estoque OK
+                  </p>
+                )}
+                <ArrowRight className="h-3 w-3 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
             </CardContent>
           </Card>
 
@@ -228,15 +263,26 @@ const Dashboard = () => {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
           {/* Status de Manutenção */}
-          <Card className="lg:col-span-2">
+          <Card 
+            className="lg:col-span-2 hover:shadow-xl transition-all cursor-pointer border-muted hover:border-primary/50 group"
+            onClick={() => setMaintenanceDialogOpen(true)}
+          >
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Status de Manutenção
-              </CardTitle>
-              <CardDescription>
-                Visão geral das manutenções e seu progresso
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="h-5 w-5" />
+                    Status de Manutenção
+                  </CardTitle>
+                  <CardDescription>
+                    Visão geral das manutenções e seu progresso
+                  </CardDescription>
+                </div>
+                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  Ver Detalhes
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -338,6 +384,25 @@ const Dashboard = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Dialogs */}
+        <InventoryDetailsDialog
+          open={inventoryDialogOpen}
+          onOpenChange={setInventoryDialogOpen}
+          inventory={dashboardData.inventory.data}
+        />
+
+        <ServicesDetailsDialog
+          open={servicesDialogOpen}
+          onOpenChange={setServicesDialogOpen}
+          services={dashboardData.services.data}
+        />
+
+        <MaintenanceDetailsDialog
+          open={maintenanceDialogOpen}
+          onOpenChange={setMaintenanceDialogOpen}
+          maintenanceRecords={dashboardData.maintenance.data}
+        />
       </div>
     </div>
   );
