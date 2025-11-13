@@ -251,8 +251,12 @@ const GerenciarUsuarios = () => {
                       <TableCell>
                         <input
                           type="text"
-                          value={user.company || ""}
-                          onChange={(e) => handleProfileUpdate(user.id, "company", e.target.value)}
+                          defaultValue={user.company || ""}
+                          onBlur={(e) => {
+                            if (e.target.value !== (user.company || "")) {
+                              handleProfileUpdate(user.id, "company", e.target.value);
+                            }
+                          }}
                           disabled={!canEdit}
                           placeholder="Empresa"
                           className="w-full px-2 py-1 border rounded-md bg-background text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
@@ -261,8 +265,12 @@ const GerenciarUsuarios = () => {
                       <TableCell>
                         <input
                           type="text"
-                          value={user.position || ""}
-                          onChange={(e) => handleProfileUpdate(user.id, "position", e.target.value)}
+                          defaultValue={user.position || ""}
+                          onBlur={(e) => {
+                            if (e.target.value !== (user.position || "")) {
+                              handleProfileUpdate(user.id, "position", e.target.value);
+                            }
+                          }}
                           disabled={!canEdit}
                           placeholder="Cargo"
                           className="w-full px-2 py-1 border rounded-md bg-background text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
