@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +22,7 @@ const ESCOPO_OPTIONS = [
 
 const NovoServico = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -35,6 +36,44 @@ const NovoServico = () => {
     data_termino: "",
   });
 
+  useEffect(() => {
+    if (id) {
+      fetchService();
+    }
+  }, [id]);
+
+  const fetchService = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("services")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setFormData({
+          codigo_jbr: data.codigo_jbr || "",
+          cliente: data.cliente || "",
+          escopo: data.escopo || [],
+          outros_escopo: data.outros_escopo || "",
+          aplicacao: data.aplicacao || "",
+          equipamentos: data.equipamentos || "",
+          data_inicio: data.data_inicio || "",
+          data_termino: data.data_termino || "",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching service:", error);
+      toast({
+        title: "Erro ao carregar serviço",
+        description: "Não foi possível carregar os dados do serviço.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -46,7 +85,7 @@ const NovoServico = () => {
         throw new Error("Usuário não autenticado");
       }
 
-      const { error } = await supabase.from("services").insert({
+      const serviceData = {
         codigo_jbr: formData.codigo_jbr,
         cliente: formData.cliente,
         escopo: formData.escopo.length > 0 ? formData.escopo : null,
@@ -55,21 +94,39 @@ const NovoServico = () => {
         equipamentos: formData.equipamentos || null,
         data_inicio: formData.data_inicio || null,
         data_termino: formData.data_termino || null,
-        created_by: user.id,
-      });
+      };
 
-      if (error) throw error;
+      if (id) {
+        const { error } = await supabase
+          .from("services")
+          .update(serviceData)
+          .eq("id", id);
 
-      toast({
-        title: "Serviço criado com sucesso!",
-        description: `O serviço ${formData.codigo_jbr} foi registrado.`,
-      });
+        if (error) throw error;
+
+        toast({
+          title: "Serviço atualizado com sucesso!",
+          description: `O serviço ${formData.codigo_jbr} foi atualizado.`,
+        });
+      } else {
+        const { error } = await supabase.from("services").insert({
+          ...serviceData,
+          created_by: user.id,
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Serviço criado com sucesso!",
+          description: `O serviço ${formData.codigo_jbr} foi registrado.`,
+        });
+      }
 
       navigate("/servicos");
     } catch (error) {
-      console.error("Error creating service:", error);
+      console.error("Error saving service:", error);
       toast({
-        title: "Erro ao criar serviço",
+        title: id ? "Erro ao atualizar serviço" : "Erro ao criar serviço",
         description: "Não foi possível salvar o serviço. Tente novamente.",
         variant: "destructive",
       });
@@ -93,9 +150,9 @@ const NovoServico = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Novo Serviço</CardTitle>
+            <CardTitle>{id ? "Editar Serviço" : "Novo Serviço"}</CardTitle>
             <CardDescription>
-              Preencha os dados do serviço a ser cadastrado
+              {id ? "Atualize os dados do serviço" : "Preencha os dados do serviço a ser cadastrado"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -229,7 +286,7 @@ const NovoServico = () => {
                   Cancelar
                 </Button>
                 <Button type="submit" disabled={loading}>
-                  {loading ? "Salvando..." : "Salvar"}
+                  {loading ? "Salvando..." : id ? "Atualizar" : "Salvar"}
                 </Button>
               </div>
             </form>
