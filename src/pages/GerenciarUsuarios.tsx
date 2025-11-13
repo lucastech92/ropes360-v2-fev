@@ -17,12 +17,15 @@ interface UserWithRole {
   approved: boolean;
   created_at: string;
   role_id: string;
+  company: string | null;
+  position: string | null;
 }
 
 const GerenciarUsuarios = () => {
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isModerator, setIsModerator] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -34,21 +37,21 @@ const GerenciarUsuarios = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { data } = await supabase
+    const { data: roles } = await supabase
       .from("user_roles")
       .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "admin")
-      .maybeSingle();
+      .eq("user_id", user.id);
 
-    setIsAdmin(!!data);
+    const userRoles = roles?.map(r => r.role) || [];
+    setIsAdmin(userRoles.includes("admin"));
+    setIsModerator(userRoles.includes("moderator"));
   };
 
   const fetchUsers = async () => {
     try {
       const { data: profiles, error: profilesError } = await supabase
         .from("user_profiles")
-        .select("user_id, email, full_name, created_at");
+        .select("user_id, email, full_name, created_at, company, position");
 
       if (profilesError) throw profilesError;
 
@@ -67,7 +70,9 @@ const GerenciarUsuarios = () => {
           role: userRole?.role || "inspector",
           approved: userRole?.approved || false,
           created_at: profile.created_at,
-          role_id: userRole?.id || ""
+          role_id: userRole?.id || "",
+          company: profile.company,
+          position: profile.position
         };
       }) || [];
 
@@ -124,6 +129,9 @@ const GerenciarUsuarios = () => {
 
   const handleRoleChange = async (userId: string, roleId: string, newRole: "admin" | "moderator" | "inspector") => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
       const { error } = await supabase
         .from("user_roles")
         .update({ role: newRole })
@@ -136,12 +144,12 @@ const GerenciarUsuarios = () => {
         module: "usuarios",
         entityType: "user",
         entityId: userId,
-        description: `Nível de acesso alterado para ${newRole}`
+        description: `Role alterada para ${newRole}`
       });
 
       toast({
-        title: "Nível atualizado!",
-        description: "O nível de acesso foi alterado com sucesso.",
+        title: "Role atualizada!",
+        description: `O usuário agora tem a role ${newRole}.`,
       });
 
       fetchUsers();
@@ -154,7 +162,39 @@ const GerenciarUsuarios = () => {
     }
   };
 
-  if (!isAdmin) {
+  const handleProfileUpdate = async (userId: string, field: "company" | "position", value: string) => {
+    try {
+      const { error } = await supabase
+        .from("user_profiles")
+        .update({ [field]: value })
+        .eq("user_id", userId);
+
+      if (error) throw error;
+
+      await logActivity({
+        action: "update_profile",
+        module: "usuarios",
+        entityType: "user",
+        entityId: userId,
+        description: `${field === "company" ? "Empresa" : "Cargo"} atualizado`
+      });
+
+      toast({
+        title: "Atualizado!",
+        description: `${field === "company" ? "Empresa" : "Cargo"} atualizado com sucesso.`,
+      });
+
+      fetchUsers();
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (!isAdmin && !isModerator) {
     return (
       <div className="min-h-screen bg-background p-8">
         <Card>
@@ -168,6 +208,8 @@ const GerenciarUsuarios = () => {
       </div>
     );
   }
+
+  const canEdit = isAdmin || isModerator;
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -191,8 +233,10 @@ const GerenciarUsuarios = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Email</TableHead>
                     <TableHead>Nome</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Empresa</TableHead>
+                    <TableHead>Cargo</TableHead>
                     <TableHead>Nível</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Cadastrado em</TableHead>
@@ -202,8 +246,28 @@ const GerenciarUsuarios = () => {
                 <TableBody>
                   {users.map((user) => (
                     <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.email}</TableCell>
                       <TableCell>{user.full_name || "-"}</TableCell>
+                      <TableCell className="font-medium">{user.email}</TableCell>
+                      <TableCell>
+                        <input
+                          type="text"
+                          value={user.company || ""}
+                          onChange={(e) => handleProfileUpdate(user.id, "company", e.target.value)}
+                          disabled={!canEdit}
+                          placeholder="Empresa"
+                          className="w-full px-2 py-1 border rounded-md bg-background text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <input
+                          type="text"
+                          value={user.position || ""}
+                          onChange={(e) => handleProfileUpdate(user.id, "position", e.target.value)}
+                          disabled={!canEdit}
+                          placeholder="Cargo"
+                          className="w-full px-2 py-1 border rounded-md bg-background text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                        />
+                      </TableCell>
                       <TableCell>
                         <Select
                           value={user.role}
@@ -211,7 +275,7 @@ const GerenciarUsuarios = () => {
                             const validRole = value as "admin" | "moderator" | "inspector";
                             handleRoleChange(user.id, user.role_id, validRole);
                           }}
-                          disabled={!user.approved}
+                          disabled={!isAdmin}
                         >
                           <SelectTrigger className="w-[150px]">
                             <SelectValue />
