@@ -647,6 +647,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      search_document_content: {
+        Args: { match_count?: number; search_query: string }
+        Returns: {
+          content: string
+          document_id: string
+          id: string
+          metadata: Json
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "inspector" | "viewer" | "moderator"
