@@ -481,6 +481,51 @@ export type Database = {
         }
         Relationships: []
       }
+      services: {
+        Row: {
+          aplicacao: string | null
+          cliente: string
+          codigo_jbr: string
+          created_at: string | null
+          created_by: string | null
+          data_inicio: string | null
+          data_termino: string | null
+          equipamentos: string | null
+          escopo: string[] | null
+          id: string
+          outros_escopo: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          aplicacao?: string | null
+          cliente: string
+          codigo_jbr: string
+          created_at?: string | null
+          created_by?: string | null
+          data_inicio?: string | null
+          data_termino?: string | null
+          equipamentos?: string | null
+          escopo?: string[] | null
+          id?: string
+          outros_escopo?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          aplicacao?: string | null
+          cliente?: string
+          codigo_jbr?: string
+          created_at?: string | null
+          created_by?: string | null
+          data_inicio?: string | null
+          data_termino?: string | null
+          equipamentos?: string | null
+          escopo?: string[] | null
+          id?: string
+          outros_escopo?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       tags: {
         Row: {
           created_at: string | null
@@ -501,26 +546,32 @@ export type Database = {
       }
       user_profiles: {
         Row: {
+          company: string | null
           created_at: string | null
           email: string | null
           full_name: string | null
           id: string
+          position: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          company?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
+          position?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          company?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
+          position?: string | null
           updated_at?: string | null
           user_id?: string
         }
