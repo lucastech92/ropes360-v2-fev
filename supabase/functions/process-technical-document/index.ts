@@ -14,10 +14,19 @@ serve(async (req) => {
 
   try {
     const { documentId } = await req.json();
+    console.log('Processing document:', documentId);
+    
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('Missing environment variables');
+      throw new Error('Server configuration error');
+    }
     
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      SUPABASE_URL,
+      SUPABASE_SERVICE_ROLE_KEY
     );
 
     // Get document info
@@ -77,8 +86,10 @@ serve(async (req) => {
     // Update document status to ready
     await supabaseClient
       .from('technical_documents')
-      .update({ status: 'ready' })
+      .update({ status: 'ready', processed_at: new Date().toISOString() })
       .eq('id', documentId);
+
+    console.log('Document processed successfully:', { documentId, chunksProcessed: chunks.length });
 
     return new Response(
       JSON.stringify({ success: true, chunksProcessed: chunks.length }),
@@ -87,6 +98,26 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error processing document:', error);
+    
+    // Try to update document status to error
+    try {
+      const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+      const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+      if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+        const { documentId } = await req.json();
+        await supabaseClient
+          .from('technical_documents')
+          .update({ 
+            status: 'error', 
+            error_message: error instanceof Error ? error.message : 'Unknown error' 
+          })
+          .eq('id', documentId);
+      }
+    } catch (updateError) {
+      console.error('Failed to update document status:', updateError);
+    }
+    
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
