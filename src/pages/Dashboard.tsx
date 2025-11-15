@@ -177,6 +177,17 @@ const Dashboard = () => {
           </p>
         </div>
 
+        {/* Assistente Técnico */}
+        <div className="mb-8">
+          <ModuleCard
+            title="Assistente Técnico (Beta)"
+            description="Consulte a ISO 4309 e dados internos da plataforma"
+            icon={Bot}
+            href="/assistente-tecnico"
+            color="primary"
+          />
+        </div>
+
         {/* Métricas Principais */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
           <Card className="hover:shadow-lg transition-all cursor-pointer border-primary/20" onClick={() => {}}>
