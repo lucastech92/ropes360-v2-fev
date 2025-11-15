@@ -50,6 +50,65 @@ export type Database = {
         }
         Relationships: []
       }
+      assistant_conversations: {
+        Row: {
+          created_at: string | null
+          id: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      assistant_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string | null
+          id: string
+          role: string
+          sources: Json | null
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          role: string
+          sources?: Json | null
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          role?: string
+          sources?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assistant_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "assistant_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       checklist_items: {
         Row: {
           checklist_id: string
@@ -175,6 +234,41 @@ export type Database = {
             columns: ["document_id"]
             isOneToOne: false
             referencedRelation: "documents_expiring_soon"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_embeddings: {
+        Row: {
+          chunk_index: number
+          content: string
+          created_at: string | null
+          document_id: string | null
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          chunk_index: number
+          content: string
+          created_at?: string | null
+          document_id?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          chunk_index?: number
+          content?: string
+          created_at?: string | null
+          document_id?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_embeddings_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "technical_documents"
             referencedColumns: ["id"]
           },
         ]
@@ -541,6 +635,48 @@ export type Database = {
           created_at?: string | null
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      technical_documents: {
+        Row: {
+          document_type: string
+          error_message: string | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          processed_at: string | null
+          status: string
+          title: string
+          uploaded_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          document_type?: string
+          error_message?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          processed_at?: string | null
+          status?: string
+          title: string
+          uploaded_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          document_type?: string
+          error_message?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          processed_at?: string | null
+          status?: string
+          title?: string
+          uploaded_at?: string | null
+          uploaded_by?: string | null
         }
         Relationships: []
       }
