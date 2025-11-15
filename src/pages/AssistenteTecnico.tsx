@@ -147,14 +147,23 @@ const AssistenteTecnico = () => {
       if (docError) throw docError;
 
       // Process document in background
-      supabase.functions.invoke('process-technical-document', {
+      const { error: processError } = await supabase.functions.invoke('process-technical-document', {
         body: { documentId: document.id }
       });
 
-      toast({
-        title: "Documento enviado!",
-        description: "O processamento iniciará em breve.",
-      });
+      if (processError) {
+        console.error('Error invoking process function:', processError);
+        toast({
+          title: "Aviso",
+          description: "Documento enviado mas o processamento pode ter falhado. Verifique o status.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Documento enviado!",
+          description: "O processamento iniciará em breve.",
+        });
+      }
 
       setUploadDialogOpen(false);
       loadDocuments();
@@ -251,11 +260,18 @@ const AssistenteTecnico = () => {
       }
 
       // Save assistant message
-      await (supabase as any).from('assistant_messages').insert({
+      console.log('Saving assistant message:', { conversationId, contentLength: assistantContent.length });
+      const { error: saveError } = await (supabase as any).from('assistant_messages').insert({
         conversation_id: conversationId,
         role: 'assistant',
         content: assistantContent,
       });
+
+      if (saveError) {
+        console.error('Error saving assistant message:', saveError);
+      } else {
+        console.log('Assistant message saved successfully');
+      }
 
     } catch (error: any) {
       toast({
