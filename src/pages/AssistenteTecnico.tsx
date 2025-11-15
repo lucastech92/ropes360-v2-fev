@@ -205,17 +205,25 @@ const AssistenteTecnico = () => {
         content: inputMessage,
       });
 
-      const { data, error } = await supabase.functions.invoke('technical-assistant-chat', {
-        body: {
-          messages: [...messages, userMessage],
-          conversationId,
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/technical-assistant-chat`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({
+            messages: [...messages, userMessage],
+            conversationId,
+          }),
         }
-      });
+      );
 
-      if (error) throw error;
+      if (!response.ok || !response.body) throw new Error('Failed to start stream');
 
       let assistantContent = "";
-      const reader = data.getReader();
+      const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
 
