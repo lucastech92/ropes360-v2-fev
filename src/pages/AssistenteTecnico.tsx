@@ -366,18 +366,18 @@ const AssistenteTecnico = () => {
                 <Separator />
                 
                 <div className="p-4">
-                  <div className="flex gap-2">
+                  <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
                     <Input
                       value={inputMessage}
                       onChange={(e) => setInputMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
                       placeholder="Digite sua pergunta..."
                       disabled={isLoading}
+                      className="flex-1"
                     />
-                    <Button onClick={sendMessage} disabled={isLoading || !inputMessage.trim()}>
+                    <Button type="submit" disabled={isLoading || !inputMessage.trim()}>
                       <Send className="h-4 w-4" />
                     </Button>
-                  </div>
+                  </form>
                 </div>
               </CardContent>
             </Card>
