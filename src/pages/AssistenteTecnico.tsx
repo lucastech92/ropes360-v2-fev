@@ -78,15 +78,30 @@ const AssistenteTecnico = () => {
 
   const createConversation = async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) {
+      console.error('No user found');
+      return;
+    }
 
+    console.log('Creating conversation for user:', user.id);
     const { data, error } = await (supabase as any)
       .from('assistant_conversations')
       .insert({ user_id: user.id, title: 'Nova Conversa' })
       .select()
       .single();
 
-    if (!error && data) {
+    if (error) {
+      console.error('Error creating conversation:', error);
+      toast({
+        title: "Erro ao inicializar conversa",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (data) {
+      console.log('Conversation created:', data.id);
       setConversationId(data.id);
     }
   };
@@ -155,7 +170,11 @@ const AssistenteTecnico = () => {
   };
 
   const sendMessage = async () => {
-    if (!inputMessage.trim() || !conversationId) return;
+    console.log('sendMessage called', { inputMessage, conversationId });
+    if (!inputMessage.trim() || !conversationId) {
+      console.log('Validation failed', { hasInput: !!inputMessage.trim(), hasConversation: !!conversationId });
+      return;
+    }
 
     const userMessage: Message = { role: 'user', content: inputMessage };
     setMessages(prev => [...prev, userMessage]);
@@ -366,18 +385,25 @@ const AssistenteTecnico = () => {
                 <Separator />
                 
                 <div className="p-4">
-                  <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
-                    <Input
-                      value={inputMessage}
-                      onChange={(e) => setInputMessage(e.target.value)}
-                      placeholder="Digite sua pergunta..."
-                      disabled={isLoading}
-                      className="flex-1"
-                    />
-                    <Button type="submit" disabled={isLoading || !inputMessage.trim()}>
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </form>
+                  {!conversationId ? (
+                    <div className="text-center text-muted-foreground py-4">
+                      <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />
+                      <p className="text-sm">Inicializando conversa...</p>
+                    </div>
+                  ) : (
+                    <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
+                      <Input
+                        value={inputMessage}
+                        onChange={(e) => setInputMessage(e.target.value)}
+                        placeholder="Digite sua pergunta..."
+                        disabled={isLoading}
+                        className="flex-1"
+                      />
+                      <Button type="submit" disabled={isLoading || !inputMessage.trim()}>
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </form>
+                  )}
                 </div>
               </CardContent>
             </Card>
