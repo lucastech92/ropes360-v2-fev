@@ -16,17 +16,9 @@ serve(async (req) => {
     const { documentId } = await req.json();
     console.log('Processing document:', documentId);
     
-    const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    
-    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('Missing environment variables');
-      throw new Error('Server configuration error');
-    }
-    
     const supabaseClient = createClient(
-      SUPABASE_URL,
-      SUPABASE_SERVICE_ROLE_KEY
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
     // Get document info
@@ -101,19 +93,18 @@ serve(async (req) => {
     
     // Try to update document status to error
     try {
-      const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-      const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-      if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
-        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-        const { documentId } = await req.json();
-        await supabaseClient
-          .from('technical_documents')
-          .update({ 
-            status: 'error', 
-            error_message: error instanceof Error ? error.message : 'Unknown error' 
-          })
-          .eq('id', documentId);
-      }
+      const supabaseClient = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      );
+      const { documentId } = await req.json();
+      await supabaseClient
+        .from('technical_documents')
+        .update({ 
+          status: 'error', 
+          error_message: error instanceof Error ? error.message : 'Unknown error' 
+        })
+        .eq('id', documentId);
     } catch (updateError) {
       console.error('Failed to update document status:', updateError);
     }
