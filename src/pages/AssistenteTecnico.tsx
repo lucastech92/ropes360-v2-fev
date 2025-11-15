@@ -173,6 +173,13 @@ const AssistenteTecnico = () => {
     console.log('sendMessage called', { inputMessage, conversationId });
     if (!inputMessage.trim() || !conversationId) {
       console.log('Validation failed', { hasInput: !!inputMessage.trim(), hasConversation: !!conversationId });
+      if (!conversationId) {
+        toast({
+          title: "Erro",
+          description: "Aguarde a inicialização da conversa...",
+          variant: "destructive",
+        });
+      }
       return;
     }
 
@@ -182,6 +189,13 @@ const AssistenteTecnico = () => {
     setIsLoading(true);
 
     try {
+      // Salvar mensagem do usuário
+      await (supabase as any).from('assistant_messages').insert({
+        conversation_id: conversationId,
+        role: 'user',
+        content: inputMessage,
+      });
+
       const { data, error } = await supabase.functions.invoke('technical-assistant-chat', {
         body: {
           messages: [...messages, userMessage],
