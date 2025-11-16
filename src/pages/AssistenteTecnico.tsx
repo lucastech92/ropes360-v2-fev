@@ -146,24 +146,34 @@ const AssistenteTecnico = () => {
 
       if (docError) throw docError;
 
-      // Process document in background
-      const { error: processError } = await supabase.functions.invoke('process-technical-document', {
-        body: { documentId: document.id }
+      // Process document in background using fetch
+      fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-technical-document`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ documentId: document.id }),
+        }
+      ).then(response => {
+        if (!response.ok) {
+          console.error('Error processing document, status:', response.status);
+          toast({
+            title: "Aviso",
+            description: "Documento enviado mas o processamento pode ter falhado.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Documento enviado!",
+            description: "O processamento iniciará em breve.",
+          });
+        }
+      }).catch(err => {
+        console.error('Error calling process function:', err);
       });
-
-      if (processError) {
-        console.error('Error invoking process function:', processError);
-        toast({
-          title: "Aviso",
-          description: "Documento enviado mas o processamento pode ter falhado. Verifique o status.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Documento enviado!",
-          description: "O processamento iniciará em breve.",
-        });
-      }
 
       setUploadDialogOpen(false);
       loadDocuments();
