@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckCircle, XCircle, Clock, Shield, User, Trash2, ArrowLeft, Users } from "lucide-react";
 import { logActivity } from "@/utils/activityLogger";
+import { z } from "zod";
 
 interface UserWithRole {
   id: string;
@@ -245,11 +246,31 @@ const GerenciarUsuarios = () => {
     }
   };
 
+  // Validation schemas
+  const nameSchema = z.string()
+    .trim()
+    .min(1, "Nome não pode estar vazio")
+    .max(100, "Nome deve ter no máximo 100 caracteres")
+    .regex(/^[a-zA-ZÀ-ÿ\s'-]+$/, "Nome contém caracteres inválidos");
+
+  const companySchema = z.string().trim().max(100, "Empresa deve ter no máximo 100 caracteres");
+  const positionSchema = z.string().trim().max(100, "Cargo deve ter no máximo 100 caracteres");
+
   const handleProfileUpdate = async (userId: string, field: "company" | "position" | "full_name", value: string) => {
     try {
+      // Validate input based on field
+      let validatedValue = value;
+      if (field === "full_name") {
+        validatedValue = nameSchema.parse(value);
+      } else if (field === "company") {
+        validatedValue = companySchema.parse(value);
+      } else if (field === "position") {
+        validatedValue = positionSchema.parse(value);
+      }
+
       const { error } = await supabase
         .from("user_profiles")
-        .update({ [field]: value })
+        .update({ [field]: validatedValue })
         .eq("user_id", userId);
 
       if (error) throw error;
@@ -259,21 +280,34 @@ const GerenciarUsuarios = () => {
         module: "usuarios",
         entityType: "user",
         entityId: userId,
-        description: `${field === "company" ? "Empresa" : "Cargo"} atualizado`
+        description: `${field === "company" ? "Empresa" : field === "position" ? "Cargo" : "Nome"} atualizado`
       });
 
       toast({
         title: "Atualizado!",
-        description: `${field === "company" ? "Empresa" : "Cargo"} atualizado com sucesso.`,
+        description: `${field === "company" ? "Empresa" : field === "position" ? "Cargo" : "Nome"} atualizado com sucesso.`,
       });
 
-      fetchUsers();
+      // Update local state
+      setUsers(users.map(user => 
+        user.id === userId 
+          ? { ...user, [field]: validatedValue }
+          : user
+      ));
     } catch (error: any) {
-      toast({
-        title: "Erro",
-        description: error.message,
-        variant: "destructive",
-      });
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validação falhou",
+          description: error.issues[0].message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     }
   };
 
