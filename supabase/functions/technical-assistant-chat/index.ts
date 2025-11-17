@@ -7,6 +7,35 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Generate embedding for search query
+async function generateQueryEmbedding(text: string): Promise<number[]> {
+  const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+  
+  if (!LOVABLE_API_KEY) {
+    throw new Error('LOVABLE_API_KEY not configured');
+  }
+  
+  const response = await fetch('https://api.openai.com/v1/embeddings', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'text-embedding-3-small',
+      input: text,
+      dimensions: 768
+    }),
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Failed to generate query embedding: ${response.status}`);
+  }
+  
+  const data = await response.json();
+  return data.data[0].embedding;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -42,13 +71,18 @@ serve(async (req) => {
     let relevantChunks = [];
     let sources = [];
 
-    // Search ISO 4309 content
-    const { data: similarChunks, error: searchError } = await supabaseAdmin.rpc('search_document_content', {
-      search_query: lastMessage.content,
+    // Generate embedding for the query and search using vector similarity
+    console.log('🔍 Generating query embedding...');
+    const queryEmbedding = await generateQueryEmbedding(lastMessage.content);
+    
+    const { data: similarChunks, error: searchError } = await supabaseAdmin.rpc('search_document_content_semantic', {
+      query_embedding: queryEmbedding,
+      match_threshold: 0.5,
       match_count: 5,
     });
 
     if (!searchError && similarChunks && similarChunks.length > 0) {
+      console.log(`📚 Found ${similarChunks.length} relevant chunks`);
       relevantChunks = similarChunks.map((chunk: any) => chunk.content);
       sources.push({ type: 'iso_4309', sections: similarChunks.map((c: any) => c.metadata) });
     }
