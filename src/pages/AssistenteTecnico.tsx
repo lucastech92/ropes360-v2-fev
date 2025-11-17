@@ -122,8 +122,14 @@ const AssistenteTecnico = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      // Upload file to storage
-      const filePath = `${user.id}/${Date.now()}_${file.name}`;
+      // Upload file to storage (sanitize filename)
+      const sanitizedFileName = file.name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+        .replace(/[^\w\s.-]/g, '_') // Replace special chars with underscore
+        .replace(/\s+/g, '_'); // Replace spaces with underscore
+      
+      const filePath = `${user.id}/${Date.now()}_${sanitizedFileName}`;
       const { error: uploadError } = await supabase.storage
         .from('technical-documents')
         .upload(filePath, file);
