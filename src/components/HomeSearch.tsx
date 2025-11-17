@@ -9,7 +9,7 @@ interface SearchResult {
   id: string;
   title: string;
   subtitle?: string;
-  category: "documents" | "services" | "inventory" | "maintenance";
+  category: "documents" | "services" | "inventory" | "maintenance" | "employees";
   path: string;
 }
 
@@ -42,36 +42,35 @@ export function HomeSearch() {
 
     const searchAll = async () => {
       try {
-        console.log("🔍 Buscando por:", query);
         const searchTerm = `%${query}%`;
 
-        const [documentsRes, servicesRes, inventoryRes, maintenanceRes] = await Promise.all([
+        const [documentsRes, servicesRes, inventoryRes, maintenanceRes, employeesRes] = await Promise.all([
           supabase
             .from("documents")
-            .select("id, title, description")
-            .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
+            .select("id, title, description, file_name")
+            .or(`title.ilike.${searchTerm},description.ilike.${searchTerm},file_name.ilike.${searchTerm}`)
             .limit(5),
           supabase
             .from("services")
-            .select("id, codigo_jbr, cliente")
-            .or(`codigo_jbr.ilike.${searchTerm},cliente.ilike.${searchTerm}`)
+            .select("id, codigo_jbr, cliente, equipamentos, aplicacao")
+            .or(`codigo_jbr.ilike.${searchTerm},cliente.ilike.${searchTerm},equipamentos.ilike.${searchTerm},aplicacao.ilike.${searchTerm}`)
             .limit(5),
           supabase
             .from("inventory")
-            .select("id, item_name, category")
-            .or(`item_name.ilike.${searchTerm},category.ilike.${searchTerm}`)
+            .select("id, item_name, category, location")
+            .or(`item_name.ilike.${searchTerm},category.ilike.${searchTerm},location.ilike.${searchTerm}`)
             .limit(5),
           supabase
             .from("maintenance_records")
-            .select("id, equipment_name, equipment_code")
-            .or(`equipment_name.ilike.${searchTerm},equipment_code.ilike.${searchTerm}`)
+            .select("id, equipment_name, equipment_code, technician, description")
+            .or(`equipment_name.ilike.${searchTerm},equipment_code.ilike.${searchTerm},technician.ilike.${searchTerm},description.ilike.${searchTerm}`)
+            .limit(5),
+          supabase
+            .from("employee_folders")
+            .select("id, name, folder_id")
+            .ilike("name", searchTerm)
             .limit(5),
         ]);
-
-        console.log("📄 Documentos encontrados:", documentsRes.data?.length || 0, documentsRes.error);
-        console.log("💼 Serviços encontrados:", servicesRes.data?.length || 0, servicesRes.error);
-        console.log("📦 Inventário encontrado:", inventoryRes.data?.length || 0, inventoryRes.error);
-        console.log("🔧 Manutenção encontrada:", maintenanceRes.data?.length || 0, maintenanceRes.error);
 
         const allResults: SearchResult[] = [];
 
@@ -115,7 +114,15 @@ export function HomeSearch() {
           });
         });
 
-        console.log("✅ Total de resultados:", allResults.length);
+        employeesRes.data?.forEach((employee) => {
+          allResults.push({
+            id: employee.id,
+            title: employee.name,
+            subtitle: "Pasta de Funcionário",
+            category: "employees",
+            path: "/duvidas-frequentes",
+          });
+        });
         setResults(allResults);
         setShowResults(true);
       } catch (error) {
@@ -132,6 +139,7 @@ export function HomeSearch() {
     services: { icon: Briefcase, label: "Serviços", color: "text-accent" },
     inventory: { icon: Package, label: "Inventário", color: "text-success" },
     maintenance: { icon: Wrench, label: "Manutenção", color: "text-warning" },
+    employees: { icon: FileText, label: "Funcionários", color: "text-info" },
   };
 
   const handleSelect = (result: SearchResult) => {
