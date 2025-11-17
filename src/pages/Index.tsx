@@ -2,6 +2,7 @@ import { useState } from "react";
 import Header from "@/components/Header";
 import ModuleCard from "@/components/ModuleCard";
 import { DashboardMetrics } from "@/components/DashboardMetrics";
+import { HomeSearch } from "@/components/HomeSearch";
 import { 
   FileCheck, 
   Wrench, 
@@ -130,7 +131,7 @@ const Index = () => {
       <Header />
       
       <main className="container py-8 space-y-8">
-        <div className="mb-8 space-y-4 text-center">
+        <div className="mb-8 space-y-6 text-center">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
             Centro de Inteligência
           </h1>
@@ -138,6 +139,10 @@ const Index = () => {
             Portal completo de conhecimento técnico para inspetores de campo da Bridon-Bekaert.
             Acesse procedimentos, normas, treinamentos e ferramentas essenciais para suas atividades.
           </p>
+          
+          <div className="flex justify-center">
+            <HomeSearch />
+          </div>
         </div>
 
         <DashboardMetrics />

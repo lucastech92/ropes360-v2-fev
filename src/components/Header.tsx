@@ -1,10 +1,9 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FileText, Home, LogOut, LayoutDashboard, Search } from "lucide-react";
+import { FileText, Home, LogOut, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { NotificationBell } from "./NotificationBell";
-import { GlobalSearch } from "./GlobalSearch";
 
 const Header = () => {
   const location = useLocation();
@@ -29,61 +28,43 @@ const Header = () => {
   };
   
   return (
-    <>
-      <GlobalSearch />
-      <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-        <div className="container flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center space-x-3 transition-opacity hover:opacity-80">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-              <FileText className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-lg font-bold leading-tight">Hub de Inspetores</span>
-              <span className="text-xs text-muted-foreground">Centro de Inteligência</span>
-            </div>
-          </Link>
-          
-          <nav className="flex items-center space-x-2">
-            {location.pathname !== "/" && (
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/">
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Dashboard
-                </Link>
-              </Button>
-            )}
-            {location.pathname !== "/documentos" && (
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/documentos">
-                  <FileText className="mr-2 h-4 w-4" />
-                  Documentos
-                </Link>
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                const event = new KeyboardEvent("keydown", {
-                  key: "k",
-                  ctrlKey: true,
-                  bubbles: true,
-                });
-                document.dispatchEvent(event);
-              }}
-              title="Busca Global (Ctrl+K)"
-            >
-              <Search className="h-4 w-4" />
+    <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+      <div className="container flex h-16 items-center justify-between">
+        <Link to="/" className="flex items-center space-x-3 transition-opacity hover:opacity-80">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+            <FileText className="h-6 w-6 text-primary-foreground" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-lg font-bold leading-tight">Hub de Inspetores</span>
+            <span className="text-xs text-muted-foreground">Centro de Inteligência</span>
+          </div>
+        </Link>
+        
+        <nav className="flex items-center space-x-2">
+          {location.pathname !== "/" && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/">
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                Dashboard
+              </Link>
             </Button>
-            <NotificationBell />
-            <Button variant="ghost" size="sm" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Sair
+          )}
+          {location.pathname !== "/documentos" && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/documentos">
+                <FileText className="mr-2 h-4 w-4" />
+                Documentos
+              </Link>
             </Button>
-          </nav>
-        </div>
-      </header>
-    </>
+          )}
+          <NotificationBell />
+          <Button variant="ghost" size="sm" onClick={handleLogout}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Sair
+          </Button>
+        </nav>
+      </div>
+    </header>
   );
 };
 
