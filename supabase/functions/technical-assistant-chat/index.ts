@@ -7,34 +7,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Generate embedding for search query
-async function generateQueryEmbedding(text: string): Promise<number[]> {
-  const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-  
-  if (!LOVABLE_API_KEY) {
-    throw new Error('LOVABLE_API_KEY not configured');
-  }
-  
-  const response = await fetch('https://ai.gateway.lovable.dev/v1/embeddings', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'text-embedding-3-small',
-      input: text,
-      dimensions: 768
-    }),
-  });
-  
-  if (!response.ok) {
-    throw new Error(`Failed to generate query embedding: ${response.status}`);
-  }
-  
-  const data = await response.json();
-  return data.data[0].embedding;
-}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -71,13 +43,10 @@ serve(async (req) => {
     let relevantChunks = [];
     let sources = [];
 
-    // Generate embedding for the query and search using vector similarity
-    console.log('🔍 Generating query embedding...');
-    const queryEmbedding = await generateQueryEmbedding(lastMessage.content);
-    
-    const { data: similarChunks, error: searchError } = await supabaseAdmin.rpc('search_document_content_semantic', {
-      query_embedding: queryEmbedding,
-      match_threshold: 0.5,
+    // Use text-based search instead of vector similarity (since embeddings API is not available)
+    console.log('🔍 Searching for relevant content...');
+    const { data: similarChunks, error: searchError } = await supabaseAdmin.rpc('search_document_content', {
+      search_query: lastMessage.content,
       match_count: 5,
     });
 
