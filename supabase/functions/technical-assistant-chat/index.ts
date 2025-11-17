@@ -136,8 +136,19 @@ ${internalDataContext ? `\n### DADOS INTERNOS:\n${internalDataContext}` : ''}`;
 async function getInternalDataContext(question: string, supabase: any): Promise<string | null> {
   const lowerQuestion = question.toLowerCase();
   
-  // Inventory/Almoxarifado queries
-  if (lowerQuestion.includes('almoxarifado') || lowerQuestion.includes('estoque') || lowerQuestion.includes('inventário') || lowerQuestion.includes('item')) {
+  // Inventory/Almoxarifado queries - expandir termos de busca para capturar mais variações
+  if (lowerQuestion.includes('almoxarifado') || 
+      lowerQuestion.includes('estoque') || 
+      lowerQuestion.includes('inventário') || 
+      lowerQuestion.includes('item') ||
+      lowerQuestion.includes('disco') ||
+      lowerQuestion.includes('peça') ||
+      lowerQuestion.includes('material') ||
+      lowerQuestion.includes('ferramenta') ||
+      lowerQuestion.includes('equipamento') ||
+      lowerQuestion.includes('quantidade') ||
+      lowerQuestion.includes('tenho') ||
+      lowerQuestion.includes('temos')) {
     const { data: inventory, error } = await supabase.from('inventory').select('*');
     
     if (error) {
@@ -150,11 +161,27 @@ async function getInternalDataContext(question: string, supabase: any): Promise<
       const totalQuantity = inventory.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0);
       const lowStockItems = inventory.filter((item: any) => item.min_quantity && item.quantity < item.min_quantity);
       
+      // Se a pergunta menciona um item específico, listar os detalhes desse item
+      let specificItemInfo = '';
+      const possibleItemNames = inventory.map((item: any) => item.item_name.toLowerCase());
+      const matchedItems = inventory.filter((item: any) => 
+        lowerQuestion.includes(item.item_name.toLowerCase()) ||
+        item.item_name.toLowerCase().includes(lowerQuestion.split(' ').find((word: string) => word.length > 3) || '')
+      );
+      
+      if (matchedItems.length > 0) {
+        specificItemInfo = `\n\nITENS ENCONTRADOS:\n${matchedItems.map((item: any) => 
+          `  - ${item.item_name}: ${item.quantity || 0} ${item.unit || 'unidade(s)'} em estoque` +
+          (item.location ? ` (Localização: ${item.location})` : '') +
+          (item.min_quantity ? ` [Mínimo: ${item.min_quantity}]` : '')
+        ).join('\n')}`;
+      }
+      
       return `DADOS DO ALMOXARIFADO:
 - Total de itens cadastrados: ${totalItems}
 - Quantidade total em estoque: ${totalQuantity}
 - Itens com estoque baixo: ${lowStockItems.length}
-${lowStockItems.length > 0 ? `\nItens críticos:\n${lowStockItems.map((item: any) => `  - ${item.item_name}: ${item.quantity} (mínimo: ${item.min_quantity})`).join('\n')}` : ''}`;
+${lowStockItems.length > 0 ? `\nItens críticos:\n${lowStockItems.map((item: any) => `  - ${item.item_name}: ${item.quantity} (mínimo: ${item.min_quantity})`).join('\n')}` : ''}${specificItemInfo}`;
     }
   }
   
