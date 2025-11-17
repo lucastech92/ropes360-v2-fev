@@ -1,1 +1,7 @@
 project_id = "tnjqqaasmrkiaxnmkpcn"
+
+[functions.process-technical-document]
+verify_jwt = false
+
+[functions.technical-assistant-chat]
+verify_jwt = false
