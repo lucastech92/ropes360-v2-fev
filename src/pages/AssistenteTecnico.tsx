@@ -155,6 +155,11 @@ const AssistenteTecnico = () => {
       // Process document using Supabase functions invoke
       console.log('📤 Iniciando processamento do documento:', document.id);
       
+      toast({
+        title: "Processando documento",
+        description: "Extraindo texto e gerando embeddings... Isso pode levar alguns minutos.",
+      });
+
       try {
         const { data: processData, error: processError } = await supabase.functions.invoke(
           'process-technical-document',
@@ -166,15 +171,15 @@ const AssistenteTecnico = () => {
         if (processError) {
           console.error('❌ Erro ao processar documento:', processError);
           toast({
-            title: "Aviso",
-            description: "Documento enviado mas o processamento pode ter falhado.",
+            title: "Erro no processamento",
+            description: "O documento foi salvo mas o processamento falhou. Tente novamente.",
             variant: "destructive",
           });
         } else {
           console.log('✅ Documento processado com sucesso:', processData);
           toast({
-            title: "Documento enviado!",
-            description: "O documento foi processado com sucesso.",
+            title: "Documento processado!",
+            description: `${processData.chunksProcessed} chunks criados (${processData.totalCharacters} caracteres extraídos)`,
           });
         }
       } catch (err) {

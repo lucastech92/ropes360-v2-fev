@@ -244,6 +244,7 @@ export type Database = {
           content: string
           created_at: string | null
           document_id: string | null
+          embedding: string | null
           id: string
           metadata: Json | null
         }
@@ -252,6 +253,7 @@ export type Database = {
           content: string
           created_at?: string | null
           document_id?: string | null
+          embedding?: string | null
           id?: string
           metadata?: Json | null
         }
@@ -260,6 +262,7 @@ export type Database = {
           content?: string
           created_at?: string | null
           document_id?: string | null
+          embedding?: string | null
           id?: string
           metadata?: Json | null
         }
@@ -790,6 +793,20 @@ export type Database = {
           document_id: string
           id: string
           metadata: Json
+        }[]
+      }
+      search_document_content_semantic: {
+        Args: {
+          match_count?: number
+          match_threshold?: number
+          query_embedding: string
+        }
+        Returns: {
+          content: string
+          document_id: string
+          id: string
+          metadata: Json
+          similarity: number
         }[]
       }
     }
