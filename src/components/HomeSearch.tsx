@@ -42,6 +42,7 @@ export function HomeSearch() {
 
     const searchAll = async () => {
       try {
+        console.log("🔍 Buscando por:", query);
         const searchTerm = `%${query}%`;
 
         const [documentsRes, servicesRes, inventoryRes, maintenanceRes] = await Promise.all([
@@ -49,23 +50,28 @@ export function HomeSearch() {
             .from("documents")
             .select("id, title, description")
             .or(`title.ilike.${searchTerm},description.ilike.${searchTerm}`)
-            .limit(3),
+            .limit(5),
           supabase
             .from("services")
             .select("id, codigo_jbr, cliente")
             .or(`codigo_jbr.ilike.${searchTerm},cliente.ilike.${searchTerm}`)
-            .limit(3),
+            .limit(5),
           supabase
             .from("inventory")
             .select("id, item_name, category")
             .or(`item_name.ilike.${searchTerm},category.ilike.${searchTerm}`)
-            .limit(3),
+            .limit(5),
           supabase
             .from("maintenance_records")
             .select("id, equipment_name, equipment_code")
             .or(`equipment_name.ilike.${searchTerm},equipment_code.ilike.${searchTerm}`)
-            .limit(3),
+            .limit(5),
         ]);
+
+        console.log("📄 Documentos encontrados:", documentsRes.data?.length || 0, documentsRes.error);
+        console.log("💼 Serviços encontrados:", servicesRes.data?.length || 0, servicesRes.error);
+        console.log("📦 Inventário encontrado:", inventoryRes.data?.length || 0, inventoryRes.error);
+        console.log("🔧 Manutenção encontrada:", maintenanceRes.data?.length || 0, maintenanceRes.error);
 
         const allResults: SearchResult[] = [];
 
@@ -109,10 +115,11 @@ export function HomeSearch() {
           });
         });
 
+        console.log("✅ Total de resultados:", allResults.length);
         setResults(allResults);
         setShowResults(true);
       } catch (error) {
-        console.error("Search error:", error);
+        console.error("❌ Erro na busca:", error);
       }
     };
 
