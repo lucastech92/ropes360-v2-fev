@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, XCircle, Clock, Shield, User, Trash2 } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Shield, User, Trash2, ArrowLeft, Users } from "lucide-react";
 import { logActivity } from "@/utils/activityLogger";
 
 interface UserWithRole {
@@ -33,6 +34,7 @@ interface UserRole {
 }
 
 const GerenciarUsuarios = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [loading, setLoading] = useState(true);
@@ -293,23 +295,43 @@ const GerenciarUsuarios = () => {
   const canEdit = isAdmin || isModerator;
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-7xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-6 w-6" />
-              Gerenciar Usuários e Acessos
-            </CardTitle>
-            <CardDescription>
-              Aprove novos usuários e gerencie níveis de acesso no sistema
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="users" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="users">Usuários</TabsTrigger>
-                <TabsTrigger value="roles">Perfis de Acesso</TabsTrigger>
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header com botão de voltar */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => navigate("/")}
+              className="hover:bg-accent"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                <Users className="h-8 w-8 text-primary" />
+                Gerenciar Usuários
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Aprove novos usuários e gerencie níveis de acesso no sistema
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <Card className="border-border/50 shadow-lg">
+          <CardContent className="pt-6">
+            <Tabs defaultValue="users" className="w-full">" 
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="users" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Usuários
+                </TabsTrigger>
+                <TabsTrigger value="roles" className="flex items-center gap-2">
+                  <Shield className="h-4 w-4" />
+                  Perfis de Acesso
+                </TabsTrigger>
               </TabsList>
               
               <TabsContent value="users" className="space-y-4">
@@ -512,9 +534,9 @@ const GerenciarUsuarios = () => {
                 </Table>
               )}
             </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+            </Tabs>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
