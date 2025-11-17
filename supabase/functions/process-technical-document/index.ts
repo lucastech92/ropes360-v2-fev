@@ -32,6 +32,9 @@ function chunkText(text: string, maxChunkSize = 1000): string[] {
 async function extractPDFText(pdfBuffer: ArrayBuffer): Promise<string> {
   const pdfjsLib = await import('https://esm.sh/pdfjs-dist@4.0.379/build/pdf.min.mjs');
   
+  // Configure worker source for server-side environment
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://esm.sh/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs';
+  
   const loadingTask = pdfjsLib.getDocument({ data: pdfBuffer });
   const pdf = await loadingTask.promise;
   
