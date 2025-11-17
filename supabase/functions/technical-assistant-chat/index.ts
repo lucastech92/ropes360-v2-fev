@@ -47,36 +47,36 @@ serve(async (req) => {
     console.log('🔍 Searching for relevant content...');
     const { data: similarChunks, error: searchError } = await supabaseAdmin.rpc('search_document_content', {
       search_query: lastMessage.content,
-      match_count: 5,
+      match_count: 10, // Aumentar para pegar mais contexto
     });
 
     if (!searchError && similarChunks && similarChunks.length > 0) {
       console.log(`📚 Found ${similarChunks.length} relevant chunks`);
       relevantChunks = similarChunks.map((chunk: any) => chunk.content);
-      sources.push({ type: 'iso_4309', sections: similarChunks.map((c: any) => c.metadata) });
+      sources.push({ type: 'technical_documents', sections: similarChunks.map((c: any) => c.metadata) });
     }
 
     const isoContext = relevantChunks.length > 0 
-      ? `\n### CONTEXTO ISO 4309:\n${relevantChunks.join('\n\n')}`
+      ? `\n### CONTEXTO DOS DOCUMENTOS TÉCNICOS (WIRELOCK, ISO 4309, ETC):\n${relevantChunks.join('\n\n---\n\n')}\n### FIM DO CONTEXTO DOS DOCUMENTOS`
       : '';
 
     const systemPrompt = `Você é o Assistente Técnico do Hub Ropes360, especializado em cabos de aço e gestão operacional.
 
 SUAS CAPACIDADES:
-1. Consultar documentos técnicos (manuais, normas como ISO 4309)
-2. Acessar dados internos do inventário/almoxarifado
-3. Consultar informações de serviços e clientes  
+1. Consultar documentos técnicos (manuais Wirelock, normas como ISO 4309)
+2. Acessar dados internos do inventário/almoxarifado  
+3. Consultar informações de serviços e clientes
 4. Verificar registros de manutenção
 
-REGRAS CRÍTICAS:
-- NUNCA invente informações técnicas
-- Se a informação estiver no contexto de documentos abaixo, USE-A e cite a fonte
-- Se precisar de dados internos (inventário, serviços, manutenção), use as ferramentas disponíveis
-- Se NÃO tiver a informação nem nos documentos nem nos dados internos, diga claramente: "Essa informação não está disponível nos documentos técnicos nem nos dados da plataforma"
-- Seja preciso e cite fontes específicas
+REGRAS CRÍTICAS - SIGA RIGOROSAMENTE:
+1. **PRIORIDADE MÁXIMA**: Se a informação estiver no CONTEXTO DOS DOCUMENTOS TÉCNICOS abaixo, VOCÊ DEVE USAR EXATAMENTE ESSA INFORMAÇÃO
+2. **NUNCA INVENTE dados técnicos, especificações, quantidades ou valores**
+3. Se precisar de dados internos (inventário, serviços, manutenção), use as ferramentas disponíveis
+4. Se NÃO tiver a informação nem nos documentos nem nos dados internos, diga: "Essa informação não está disponível nos documentos técnicos nem nos dados da plataforma"
+5. Sempre cite a fonte específica (seção do documento, número da norma, etc)
 ${isoContext}
 
-${isoContext ? 'IMPORTANTE: Use as informações do contexto acima para responder. Essas são informações REAIS dos documentos técnicos.' : ''}`;
+${isoContext ? '\n⚠️ ATENÇÃO: As informações acima são REAIS extraídas dos documentos técnicos. Use-as com PRECISÃO. NÃO invente valores diferentes.' : ''}`;
 
     // Define function calling tools
     const tools = [
