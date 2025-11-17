@@ -136,10 +136,13 @@ ${internalDataContext ? `\n### DADOS INTERNOS:\n${internalDataContext}` : ''}`;
 async function getInternalDataContext(question: string, supabase: any): Promise<string | null> {
   const lowerQuestion = question.toLowerCase();
   
+  console.log('Checking internal data for question:', lowerQuestion);
+  
   // Inventory/Almoxarifado queries - expandir termos de busca para capturar mais variações
   if (lowerQuestion.includes('almoxarifado') || 
       lowerQuestion.includes('estoque') || 
       lowerQuestion.includes('inventário') || 
+      lowerQuestion.includes('inventario') || // sem acento também
       lowerQuestion.includes('item') ||
       lowerQuestion.includes('disco') ||
       lowerQuestion.includes('peça') ||
@@ -149,12 +152,16 @@ async function getInternalDataContext(question: string, supabase: any): Promise<
       lowerQuestion.includes('quantidade') ||
       lowerQuestion.includes('tenho') ||
       lowerQuestion.includes('temos')) {
+    
+    console.log('Fetching inventory data...');
     const { data: inventory, error } = await supabase.from('inventory').select('*');
     
     if (error) {
       console.error('Error fetching inventory:', error);
       return null;
     }
+    
+    console.log('Inventory fetched:', inventory?.length || 0, 'items');
     
     if (inventory) {
       const totalItems = inventory.length;
@@ -163,11 +170,12 @@ async function getInternalDataContext(question: string, supabase: any): Promise<
       
       // Se a pergunta menciona um item específico, listar os detalhes desse item
       let specificItemInfo = '';
-      const possibleItemNames = inventory.map((item: any) => item.item_name.toLowerCase());
       const matchedItems = inventory.filter((item: any) => 
         lowerQuestion.includes(item.item_name.toLowerCase()) ||
         item.item_name.toLowerCase().includes(lowerQuestion.split(' ').find((word: string) => word.length > 3) || '')
       );
+      
+      console.log('Matched items:', matchedItems.length);
       
       if (matchedItems.length > 0) {
         specificItemInfo = `\n\nITENS ENCONTRADOS:\n${matchedItems.map((item: any) => 
@@ -177,11 +185,14 @@ async function getInternalDataContext(question: string, supabase: any): Promise<
         ).join('\n')}`;
       }
       
-      return `DADOS DO ALMOXARIFADO:
+      const result = `DADOS DO ALMOXARIFADO:
 - Total de itens cadastrados: ${totalItems}
 - Quantidade total em estoque: ${totalQuantity}
 - Itens com estoque baixo: ${lowStockItems.length}
 ${lowStockItems.length > 0 ? `\nItens críticos:\n${lowStockItems.map((item: any) => `  - ${item.item_name}: ${item.quantity} (mínimo: ${item.min_quantity})`).join('\n')}` : ''}${specificItemInfo}`;
+      
+      console.log('Returning inventory context with', result.length, 'characters');
+      return result;
     }
   }
   
