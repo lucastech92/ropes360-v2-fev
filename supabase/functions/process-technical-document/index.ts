@@ -7,7 +7,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Split text into chunks of roughly equal size
 function chunkText(text: string, maxChunkSize = 1000): string[] {
   const chunks: string[] = [];
   const paragraphs = text.split(/\n\n+/);
@@ -30,60 +29,22 @@ function chunkText(text: string, maxChunkSize = 1000): string[] {
   return chunks.filter(chunk => chunk.length > 50);
 }
 
-// Extract text from PDF using external service
 async function extractPDFText(pdfBuffer: ArrayBuffer): Promise<string> {
-  // Use pdf.js via CDN for PDF parsing
-  const formData = new FormData();
-  formData.append('file', new Blob([pdfBuffer], { type: 'application/pdf' }));
+  const pdfjsLib = await import('https://esm.sh/pdfjs-dist@4.0.379/build/pdf.min.mjs');
   
-  // For now, use a simpler approach with pdf-extract API
-  // In production, you could use pdf.js or other libraries
-  const pdfjsLib = await import('https://esm.sh/pdfjs-dist@4.0.379/build/pdf.mjs');
+  const loadingTask = pdfjsLib.getDocument({ data: pdfBuffer });
+  const pdf = await loadingTask.promise;
   
-  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(pdfBuffer) }).promise;
   let fullText = '';
   
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    const pageText = content.items
-      .map((item: any) => item.str)
-      .join(' ');
+    const textContent = await page.getTextContent();
+    const pageText = textContent.items.map((item: any) => item.str).join(' ');
     fullText += pageText + '\n\n';
   }
   
   return fullText;
-}
-
-// Generate embedding using Lovable AI (OpenAI compatible)
-async function generateEmbedding(text: string): Promise<number[]> {
-  const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-  
-  if (!LOVABLE_API_KEY) {
-    throw new Error('LOVABLE_API_KEY not configured');
-  }
-  
-  const response = await fetch('https://api.openai.com/v1/embeddings', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'text-embedding-3-small',
-      input: text.substring(0, 8000),
-      dimensions: 768
-    }),
-  });
-  
-  if (!response.ok) {
-    const error = await response.text();
-    console.error('Embedding API error:', error);
-    throw new Error(`Failed to generate embedding: ${response.status}`);
-  }
-  
-  const data = await response.json();
-  return data.data[0].embedding;
 }
 
 serve(async (req) => {
@@ -95,12 +56,12 @@ serve(async (req) => {
     const { documentId } = await req.json();
     console.log('📄 Processing document:', documentId);
     
-    const supabaseClient = createClient(
+    const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const { data: document, error: docError } = await supabaseClient
+    const { data: document, error: docError } = await supabaseAdmin
       .from('technical_documents')
       .select('*')
       .eq('id', documentId)
@@ -110,13 +71,13 @@ serve(async (req) => {
       throw new Error('Document not found');
     }
 
-    await supabaseClient
+    await supabaseAdmin
       .from('technical_documents')
       .update({ status: 'processing' })
       .eq('id', documentId);
 
     console.log('📥 Downloading PDF...');
-    const { data: fileData, error: downloadError } = await supabaseClient
+    const { data: fileData, error: downloadError } = await supabaseAdmin
       .storage
       .from('technical-documents')
       .download(document.file_path);
@@ -131,55 +92,57 @@ serve(async (req) => {
     
     console.log(`✂️ Extracted ${fullText.length} characters`);
     
+    if (fullText.length < 100) {
+      throw new Error('PDF text extraction failed or document is empty');
+    }
+    
     const chunks = chunkText(fullText);
     console.log(`📦 Created ${chunks.length} chunks`);
 
-    // Delete old embeddings
-    await supabaseClient
+    await supabaseAdmin
       .from('document_embeddings')
       .delete()
       .eq('document_id', documentId);
 
-    // Process chunks with embeddings
+    console.log(`📝 Storing ${chunks.length} chunks...`);
+    
     for (let i = 0; i < chunks.length; i++) {
       const chunk = chunks[i];
-      console.log(`🔢 Chunk ${i + 1}/${chunks.length}`);
       
-      try {
-        const embedding = await generateEmbedding(chunk);
-        
-        await supabaseClient
-          .from('document_embeddings')
-          .insert({
-            document_id: documentId,
-            content: chunk,
-            chunk_index: i,
-            embedding: embedding,
-            metadata: { 
-              source: document.title,
-              page_estimate: Math.floor(i / 2) + 1
-            },
-          });
-      } catch (error) {
-        console.error(`Error on chunk ${i}:`, error);
+      const { error: embeddingError } = await supabaseAdmin
+        .from('document_embeddings')
+        .insert({
+          document_id: documentId,
+          content: chunk,
+          chunk_index: i,
+          metadata: {
+            document_title: document.title,
+            document_type: document.document_type,
+            total_chunks: chunks.length,
+            char_count: chunk.length
+          }
+        });
+
+      if (embeddingError) {
+        console.error(`Error storing chunk ${i}:`, embeddingError);
+        throw embeddingError;
       }
     }
 
-    await supabaseClient
+    await supabaseAdmin
       .from('technical_documents')
       .update({ 
-        status: 'ready', 
-        processed_at: new Date().toISOString() 
+        status: 'ready',
+        processed_at: new Date().toISOString()
       })
       .eq('id', documentId);
 
-    console.log('✅ Processing complete');
-
+    console.log('✅ Document processed successfully');
     return new Response(
       JSON.stringify({ 
         success: true, 
-        chunksProcessed: chunks.length,
-        totalCharacters: fullText.length 
+        chunks: chunks.length,
+        totalChars: fullText.length 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -188,20 +151,23 @@ serve(async (req) => {
     console.error('❌ Error:', error);
     
     try {
-      const supabaseClient = createClient(
-        Deno.env.get('SUPABASE_URL')!,
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-      );
       const { documentId } = await req.json();
-      await supabaseClient
-        .from('technical_documents')
-        .update({ 
-          status: 'error', 
-          error_message: error instanceof Error ? error.message : 'Unknown error' 
-        })
-        .eq('id', documentId);
+      if (documentId) {
+        const supabaseAdmin = createClient(
+          Deno.env.get('SUPABASE_URL')!,
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+        );
+        
+        await supabaseAdmin
+          .from('technical_documents')
+          .update({ 
+            status: 'error',
+            error_message: error instanceof Error ? error.message : 'Unknown error'
+          })
+          .eq('id', documentId);
+      }
     } catch (e) {
-      console.error('Status update failed:', e);
+      console.error('Error updating document status:', e);
     }
     
     return new Response(
