@@ -245,7 +245,7 @@ const GerenciarUsuarios = () => {
     }
   };
 
-  const handleProfileUpdate = async (userId: string, field: "company" | "position", value: string) => {
+  const handleProfileUpdate = async (userId: string, field: "company" | "position" | "full_name", value: string) => {
     try {
       const { error } = await supabase
         .from("user_profiles")
@@ -356,7 +356,20 @@ const GerenciarUsuarios = () => {
                 <TableBody>
                   {users.map((user) => (
                     <TableRow key={user.id}>
-                      <TableCell>{user.full_name || "-"}</TableCell>
+                      <TableCell>
+                        <input
+                          type="text"
+                          defaultValue={user.full_name || ""}
+                          onBlur={(e) => {
+                            if (e.target.value !== (user.full_name || "")) {
+                              handleProfileUpdate(user.id, "full_name", e.target.value);
+                            }
+                          }}
+                          disabled={!canEdit}
+                          placeholder="Nome completo"
+                          className="w-full px-2 py-1 border rounded-md bg-background text-foreground disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </TableCell>
                       <TableCell className="font-medium">{user.email}</TableCell>
                       <TableCell>
                         <input
