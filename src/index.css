@@ -8,79 +8,144 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
+    /* Cores de fundo e texto principal */
+    --background: 220 15% 97%;
+    --foreground: 222 47% 11%;
 
+    /* Cards e superfícies */
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 222 47% 11%;
 
+    /* Popovers e dropdowns */
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 210 100% 42%;
+    /* Cor primária - azul profissional inspirado em Bridon-Bekaert */
+    --primary: 215 90% 48%;
     --primary-foreground: 0 0% 100%;
+    --primary-light: 215 85% 60%;
+    --primary-dark: 215 95% 38%;
 
-    --secondary: 210 15% 92%;
-    --secondary-foreground: 215 25% 15%;
+    /* Cor secundária */
+    --secondary: 220 13% 91%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 210 15% 95%;
-    --muted-foreground: 215 15% 45%;
+    /* Elementos neutros */
+    --muted: 220 13% 94%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 25 95% 53%;
+    /* Cor de destaque - laranja Bekaert */
+    --accent: 25 95% 55%;
     --accent-foreground: 0 0% 100%;
+    --accent-light: 25 90% 65%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    /* Sucesso */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
 
-    --border: 210 20% 88%;
-    --input: 210 20% 88%;
-    --ring: 210 100% 42%;
+    /* Aviso */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
 
-    --radius: 0.75rem;
-
-    --gradient-primary: linear-gradient(135deg, hsl(210 100% 42%), hsl(210 100% 52%));
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 20% 98%));
-    
-    --shadow-card: 0 2px 8px -2px hsl(210 15% 15% / 0.08);
-    --shadow-card-hover: 0 8px 24px -4px hsl(210 100% 42% / 0.15);
-    
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .dark {
-    --background: 215 28% 12%;
-    --foreground: 210 20% 95%;
-
-    --card: 215 25% 16%;
-    --card-foreground: 210 20% 95%;
-
-    --popover: 215 25% 16%;
-    --popover-foreground: 210 20% 95%;
-
-    --primary: 210 100% 52%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 215 20% 22%;
-    --secondary-foreground: 210 20% 95%;
-
-    --muted: 215 20% 18%;
-    --muted-foreground: 210 15% 60%;
-
-    --accent: 25 95% 58%;
-    --accent-foreground: 0 0% 100%;
-
+    /* Destruição/erro */
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 20% 22%;
-    --input: 215 20% 22%;
-    --ring: 210 100% 52%;
+    /* Bordas e inputs */
+    --border: 220 13% 87%;
+    --input: 220 13% 91%;
+    --ring: 215 90% 48%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(210 100% 52%), hsl(210 100% 62%));
-    --gradient-card: linear-gradient(145deg, hsl(215 25% 16%), hsl(215 25% 18%));
+    /* Raio de borda padrão */
+    --radius: 0.5rem;
+
+    /* Gradientes modernos */
+    --gradient-primary: linear-gradient(135deg, hsl(215 90% 48%) 0%, hsl(215 85% 60%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(25 95% 55%) 0%, hsl(25 90% 65%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(220 15% 98%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsla(0 0% 100% / 0.9) 0%, hsla(220 15% 98% / 0.8) 100%);
     
-    --shadow-card: 0 2px 8px -2px hsl(0 0% 0% / 0.3);
-    --shadow-card-hover: 0 8px 24px -4px hsl(210 100% 52% / 0.25);
+    /* Sombras elegantes */
+    --shadow-xs: 0 1px 2px 0 hsl(220 13% 15% / 0.05);
+    --shadow-sm: 0 1px 3px 0 hsl(220 13% 15% / 0.1), 0 1px 2px -1px hsl(220 13% 15% / 0.1);
+    --shadow-md: 0 4px 6px -1px hsl(220 13% 15% / 0.1), 0 2px 4px -2px hsl(220 13% 15% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(220 13% 15% / 0.1), 0 4px 6px -4px hsl(220 13% 15% / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(220 13% 15% / 0.1), 0 8px 10px -6px hsl(220 13% 15% / 0.1);
+    --shadow-card: 0 2px 8px -2px hsl(215 90% 48% / 0.08);
+    --shadow-card-hover: 0 8px 24px -4px hsl(215 90% 48% / 0.18);
+    --shadow-glow: 0 0 30px hsl(215 90% 48% / 0.2);
+    
+    /* Transições suaves */
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    /* Cores de fundo e texto principal */
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    /* Cards e superfícies */
+    --card: 222 40% 14%;
+    --card-foreground: 210 40% 98%;
+
+    /* Popovers e dropdowns */
+    --popover: 222 40% 14%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Cor primária */
+    --primary: 215 90% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 215 85% 70%;
+    --primary-dark: 215 95% 50%;
+
+    /* Cor secundária */
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    /* Elementos neutros */
+    --muted: 217 33% 20%;
+    --muted-foreground: 215 20% 65%;
+
+    /* Cor de destaque */
+    --accent: 25 95% 60%;
+    --accent-foreground: 0 0% 100%;
+    --accent-light: 25 90% 70%;
+
+    /* Sucesso */
+    --success: 142 70% 45%;
+    --success-foreground: 0 0% 100%;
+
+    /* Aviso */
+    --warning: 38 90% 55%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Destruição/erro */
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Bordas e inputs */
+    --border: 217 33% 24%;
+    --input: 217 33% 20%;
+    --ring: 215 90% 60%;
+
+    /* Gradientes modernos */
+    --gradient-primary: linear-gradient(135deg, hsl(215 90% 60%) 0%, hsl(215 85% 70%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(25 95% 60%) 0%, hsl(25 90% 70%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(222 40% 14%) 0%, hsl(222 40% 16%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsla(222 40% 14% / 0.9) 0%, hsla(222 40% 16% / 0.8) 100%);
+    
+    /* Sombras elegantes */
+    --shadow-xs: 0 1px 2px 0 hsl(0 0% 0% / 0.15);
+    --shadow-sm: 0 1px 3px 0 hsl(0 0% 0% / 0.2), 0 1px 2px -1px hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.25), 0 2px 4px -2px hsl(0 0% 0% / 0.25);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.3), 0 4px 6px -4px hsl(0 0% 0% / 0.3);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.35), 0 8px 10px -6px hsl(0 0% 0% / 0.35);
+    --shadow-card: 0 2px 8px -2px hsl(215 90% 60% / 0.15);
+    --shadow-card-hover: 0 8px 24px -4px hsl(215 90% 60% / 0.25);
+    --shadow-glow: 0 0 30px hsl(215 90% 60% / 0.3);
   }
 }
 
@@ -90,11 +155,98 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1, "kern" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
+  /* Tipografia hierárquica */
+  h1 {
+    @apply text-4xl md:text-5xl font-bold tracking-tight;
+  }
+  
+  h2 {
+    @apply text-3xl md:text-4xl font-bold tracking-tight;
+  }
+  
+  h3 {
+    @apply text-2xl md:text-3xl font-semibold tracking-tight;
+  }
+  
+  h4 {
+    @apply text-xl md:text-2xl font-semibold tracking-tight;
+  }
+  
+  h5 {
+    @apply text-lg md:text-xl font-semibold;
+  }
+  
+  h6 {
+    @apply text-base md:text-lg font-semibold;
+  }
+}
+
+@layer components {
+  /* Utilitários para sombras */
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  
+  .shadow-card-hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+  
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  /* Gradientes prontos */
+  .bg-gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .bg-gradient-accent {
+    background: var(--gradient-accent);
+  }
+  
+  .bg-gradient-card {
+    background: var(--gradient-card);
+  }
+  
+  .bg-gradient-glass {
+    background: var(--gradient-glass);
+    backdrop-filter: blur(10px);
+  }
+  
+  /* Transições suaves */
+  .transition-fast {
+    transition: var(--transition-fast);
+  }
+  
+  .transition-base {
+    transition: var(--transition-base);
+  }
+  
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+  
+  .transition-slow {
+    transition: var(--transition-slow);
+  }
+  
+  /* Efeito de hover em cards */
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1;
+  }
+  
+  /* Texto com gradiente */
+  .text-gradient-primary {
+    @apply bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent;
+  }
+  
+  .text-gradient-accent {
+    @apply bg-gradient-to-r from-accent to-accent-light bg-clip-text text-transparent;
   }
 }
