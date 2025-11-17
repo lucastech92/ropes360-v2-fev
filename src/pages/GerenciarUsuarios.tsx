@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckCircle, XCircle, Clock, Shield, User } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CheckCircle, XCircle, Clock, Shield, User, Trash2 } from "lucide-react";
 import { logActivity } from "@/utils/activityLogger";
 
 interface UserWithRole {
@@ -21,8 +22,19 @@ interface UserWithRole {
   position: string | null;
 }
 
+interface UserRole {
+  id: string;
+  user_id: string;
+  role: string;
+  approved: boolean;
+  created_at: string;
+  user_email?: string;
+  user_name?: string;
+}
+
 const GerenciarUsuarios = () => {
   const [users, setUsers] = useState<UserWithRole[]>([]);
+  const [userRoles, setUserRoles] = useState<UserRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isModerator, setIsModerator] = useState(false);
@@ -31,6 +43,7 @@ const GerenciarUsuarios = () => {
   useEffect(() => {
     checkAdminStatus();
     fetchUsers();
+    fetchUserRoles();
   }, []);
 
   const checkAdminStatus = async () => {
@@ -85,6 +98,74 @@ const GerenciarUsuarios = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserRoles = async () => {
+    try {
+      const { data: roles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("id, user_id, role, approved, created_at");
+
+      if (rolesError) throw rolesError;
+
+      const { data: profiles, error: profilesError } = await supabase
+        .from("user_profiles")
+        .select("user_id, email, full_name");
+
+      if (profilesError) throw profilesError;
+
+      const rolesWithUserInfo = roles?.map(role => {
+        const profile = profiles?.find(p => p.user_id === role.user_id);
+        return {
+          ...role,
+          user_email: profile?.email || "Desconhecido",
+          user_name: profile?.full_name || "Sem nome"
+        };
+      }) || [];
+
+      setUserRoles(rolesWithUserInfo);
+    } catch (error: any) {
+      toast({
+        title: "Erro ao carregar perfis de acesso",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteRole = async (roleId: string) => {
+    if (!confirm("Tem certeza que deseja excluir este perfil de acesso?")) return;
+
+    try {
+      const { error } = await supabase
+        .from("user_roles")
+        .delete()
+        .eq("id", roleId);
+
+      if (error) throw error;
+
+      await logActivity({
+        action: "deleted",
+        module: "usuarios",
+        entityType: "user_role",
+        entityId: roleId,
+        description: "Perfil de acesso excluído"
+      });
+
+      toast({
+        title: "Perfil excluído!",
+        description: "O perfil de acesso foi removido com sucesso.",
+      });
+
+      fetchUserRoles();
+      fetchUsers();
+    } catch (error: any) {
+      toast({
+        title: "Erro ao excluir perfil",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -225,6 +306,13 @@ const GerenciarUsuarios = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <Tabs defaultValue="users" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="users">Usuários</TabsTrigger>
+                <TabsTrigger value="roles">Perfis de Acesso</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="users" className="space-y-4">
             {loading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
@@ -355,8 +443,78 @@ const GerenciarUsuarios = () => {
                 </TableBody>
               </Table>
             )}
-          </CardContent>
-        </Card>
+            </TabsContent>
+
+            <TabsContent value="roles" className="space-y-4">
+              {loading ? (
+                <p className="text-muted-foreground">Carregando perfis de acesso...</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Usuário</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Perfil</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Criado em</TableHead>
+                      <TableHead>Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {userRoles.map((role) => (
+                      <TableRow key={role.id}>
+                        <TableCell className="font-medium">
+                          {role.user_name}
+                        </TableCell>
+                        <TableCell>{role.user_email}</TableCell>
+                        <TableCell>
+                          <Badge variant={
+                            role.role === "admin" ? "default" : 
+                            role.role === "moderator" ? "secondary" : 
+                            "outline"
+                          }>
+                            {role.role === "admin" ? "Administrador" : 
+                             role.role === "moderator" ? "Moderador" : 
+                             "Inspetor"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {role.approved ? (
+                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Aprovado
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                              <Clock className="h-3 w-3 mr-1" />
+                              Pendente
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {new Date(role.created_at).toLocaleDateString('pt-BR')}
+                        </TableCell>
+                        <TableCell>
+                          {(isAdmin || isModerator) && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteRole(role.id)}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
       </div>
     </div>
   );
