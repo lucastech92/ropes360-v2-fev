@@ -55,7 +55,7 @@ serve(async (req) => {
     }
 
     // Check if question is about internal data
-    const internalDataContext = await getInternalDataContext(lastMessage.content, supabaseClient);
+    const internalDataContext = await getInternalDataContext(lastMessage.content, supabaseAdmin);
     
     if (internalDataContext) {
       sources.push({ type: 'internal_data', data: internalDataContext });
@@ -137,8 +137,13 @@ async function getInternalDataContext(question: string, supabase: any): Promise<
   const lowerQuestion = question.toLowerCase();
   
   // Inventory/Almoxarifado queries
-  if (lowerQuestion.includes('almoxarifado') || lowerQuestion.includes('estoque') || lowerQuestion.includes('inventário')) {
-    const { data: inventory } = await supabase.from('inventory').select('*');
+  if (lowerQuestion.includes('almoxarifado') || lowerQuestion.includes('estoque') || lowerQuestion.includes('inventário') || lowerQuestion.includes('item')) {
+    const { data: inventory, error } = await supabase.from('inventory').select('*');
+    
+    if (error) {
+      console.error('Error fetching inventory:', error);
+      return null;
+    }
     
     if (inventory) {
       const totalItems = inventory.length;
@@ -154,8 +159,13 @@ ${lowStockItems.length > 0 ? `\nItens críticos:\n${lowStockItems.map((item: any
   }
   
   // Services queries
-  if (lowerQuestion.includes('serviço') || lowerQuestion.includes('jbr') || lowerQuestion.includes('campo')) {
-    const { data: services } = await supabase.from('services').select('*');
+  if (lowerQuestion.includes('serviço') || lowerQuestion.includes('jbr') || lowerQuestion.includes('campo') || lowerQuestion.includes('cliente')) {
+    const { data: services, error } = await supabase.from('services').select('*');
+    
+    if (error) {
+      console.error('Error fetching services:', error);
+      return null;
+    }
     
     if (services) {
       const activeServices = services.filter((s: any) => !s.data_termino || new Date(s.data_termino) > new Date());
@@ -168,8 +178,13 @@ ${lowStockItems.length > 0 ? `\nItens críticos:\n${lowStockItems.map((item: any
   }
   
   // Maintenance queries
-  if (lowerQuestion.includes('manutenção') || lowerQuestion.includes('equipamento')) {
-    const { data: maintenance } = await supabase.from('maintenance_records').select('*');
+  if (lowerQuestion.includes('manutenção') || lowerQuestion.includes('equipamento') || lowerQuestion.includes('máquina')) {
+    const { data: maintenance, error } = await supabase.from('maintenance_records').select('*');
+    
+    if (error) {
+      console.error('Error fetching maintenance:', error);
+      return null;
+    }
     
     if (maintenance) {
       const pending = maintenance.filter((m: any) => m.status === 'pendente');
