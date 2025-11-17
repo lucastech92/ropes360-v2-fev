@@ -146,34 +146,39 @@ const AssistenteTecnico = () => {
 
       if (docError) throw docError;
 
-      // Process document in background using fetch
-      fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-technical-document`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ documentId: document.id }),
-        }
-      ).then(response => {
-        if (!response.ok) {
-          console.error('Error processing document, status:', response.status);
+      // Process document using Supabase functions invoke
+      console.log('📤 Iniciando processamento do documento:', document.id);
+      
+      try {
+        const { data: processData, error: processError } = await supabase.functions.invoke(
+          'process-technical-document',
+          {
+            body: { documentId: document.id }
+          }
+        );
+
+        if (processError) {
+          console.error('❌ Erro ao processar documento:', processError);
           toast({
             title: "Aviso",
             description: "Documento enviado mas o processamento pode ter falhado.",
             variant: "destructive",
           });
         } else {
+          console.log('✅ Documento processado com sucesso:', processData);
           toast({
             title: "Documento enviado!",
-            description: "O processamento iniciará em breve.",
+            description: "O documento foi processado com sucesso.",
           });
         }
-      }).catch(err => {
-        console.error('Error calling process function:', err);
-      });
+      } catch (err) {
+        console.error('❌ Erro na chamada da função:', err);
+        toast({
+          title: "Erro",
+          description: "Falha ao processar documento.",
+          variant: "destructive",
+        });
+      }
 
       setUploadDialogOpen(false);
       loadDocuments();
