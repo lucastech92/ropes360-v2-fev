@@ -26,10 +26,6 @@ const ProcedimentosTecnicos = () => {
     title: "Cálculo de Área Metálica",
     description: "Como calcular a área metálica do cabo para avaliação de integridade estrutural.",
     topicos: ["Medição precisa do diâmetro", "Fórmula para cálculo de área", "Interpretação dos resultados", "Comparação com valores nominais"]
-  }, {
-    title: "Wire Lock",
-    description: "Manual e cálculo do WireLock.",
-    hasTable: true
   }];
 
   return (
@@ -63,67 +59,15 @@ const ProcedimentosTecnicos = () => {
                     <CardDescription className="text-base">{proc.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {proc.hasTable ? (
-                      <div className="space-y-6">
-                        <div>
-                          <h4 className="mb-3 font-semibold text-lg">Tabela para Cálculo de Soquetes Padrão</h4>
-                          <div className="rounded-lg border">
-                            <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead>Diâmetro do Cabo (mm)</TableHead>
-                                  <TableHead>WireLock CC</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                <TableRow>
-                                  <TableCell>6 - 8</TableCell>
-                                  <TableCell>120</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>10 - 12</TableCell>
-                                  <TableCell>180</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>14 - 16</TableCell>
-                                  <TableCell>240</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>18 - 20</TableCell>
-                                  <TableCell>300</TableCell>
-                                </TableRow>
-                              </TableBody>
-                            </Table>
-                          </div>
-                        </div>
-
-                        <div>
-                          <h4 className="mb-3 font-semibold text-lg">Recomendações</h4>
-                          <ul className="space-y-2">
-                            <li className="flex items-start space-x-2">
-                              <span className="mt-1 flex h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
-                              <span className="text-muted-foreground">Inspecione visualmente após instalação para garantir fixação adequada</span>
-                            </li>
-                            <li className="flex items-start space-x-2">
-                              <span className="mt-1 flex h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
-                              <span className="text-muted-foreground">Documente todos os valores utilizados no relatório de instalação</span>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <h4 className="mb-3 font-semibold">Principais Tópicos:</h4>
-                        <ul className="space-y-2">
-                          {proc.topicos?.map((topico, idx) => (
-                            <li key={idx} className="flex items-start space-x-2">
-                              <span className="mt-1 flex h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
-                              <span className="text-muted-foreground">{topico}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </>
-                    )}
+                    <h4 className="mb-3 font-semibold">Principais Tópicos:</h4>
+                    <ul className="space-y-2">
+                      {proc.topicos?.map((topico, idx) => (
+                        <li key={idx} className="flex items-start space-x-2">
+                          <span className="mt-1 flex h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
+                          <span className="text-muted-foreground">{topico}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </CardContent>
                 </Card>
               ))}
