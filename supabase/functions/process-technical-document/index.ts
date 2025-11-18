@@ -102,60 +102,21 @@ serve(async (req) => {
       .delete()
       .eq('document_id', documentId);
 
-    // Generate embeddings for each chunk using Lovable AI
-    console.log('🔮 Generating embeddings for', chunks.length, 'chunks...');
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
-    }
-
-    const embeddings = [];
-    for (let index = 0; index < chunks.length; index++) {
-      const chunk = chunks[index];
-      
-      try {
-        // Generate embedding using Lovable AI
-        const embeddingResponse = await fetch('https://ai.gateway.lovable.dev/v1/embeddings', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'text-embedding-3-small',
-            input: chunk,
-          }),
-        });
-
-        if (!embeddingResponse.ok) {
-          const errorText = await embeddingResponse.text();
-          console.error(`Error generating embedding for chunk ${index}:`, errorText);
-          throw new Error(`Embedding API error: ${embeddingResponse.status}`);
-        }
-
-        const embeddingData = await embeddingResponse.json();
-        const embeddingVector = embeddingData.data[0].embedding;
-
-        embeddings.push({
-          document_id: documentId,
-          content: chunk,
-          chunk_index: index,
-          embedding: JSON.stringify(embeddingVector), // Store as JSON string for vector type
-          metadata: {
-            chunk_index: index,
-            total_chunks: chunks.length,
-            document_title: document.title,
-            document_type: document.document_type,
-            char_count: chunk.length,
-          },
-        });
-
-        console.log(`✅ Generated embedding ${index + 1}/${chunks.length}`);
-      } catch (error) {
-        console.error(`Failed to generate embedding for chunk ${index}:`, error);
-        throw error;
-      }
-    }
+    // Store chunks without embeddings (using text search instead)
+    console.log('💾 Preparing chunks for storage...');
+    const embeddings = chunks.map((chunk, index) => ({
+      document_id: documentId,
+      content: chunk,
+      chunk_index: index,
+      embedding: null, // No embeddings needed for text search
+      metadata: {
+        chunk_index: index,
+        total_chunks: chunks.length,
+        document_title: document.title,
+        document_type: document.document_type,
+        char_count: chunk.length,
+      },
+    }));
 
     // Insert all embeddings at once
     console.log('💾 Storing embeddings in database...');

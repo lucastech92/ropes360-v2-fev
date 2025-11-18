@@ -40,64 +40,29 @@ serve(async (req) => {
       throw new Error('Invalid message format');
     }
 
-    let relevantChunks = [];
-    let sources = [];
+    const userMessage = lastMessage.content;
 
-    // Generate embedding for user question and perform semantic search
-    console.log('🔍 Generating query embedding and searching...');
+    // Perform text-based search with more chunks
+    console.log('🔍 Searching for relevant document chunks...');
     
-    try {
-      // Generate embedding for the user's question
-      const embeddingResponse = await fetch('https://ai.gateway.lovable.dev/v1/embeddings', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'text-embedding-3-small',
-          input: lastMessage.content,
-        }),
-      });
-
-      if (!embeddingResponse.ok) {
-        throw new Error(`Embedding API error: ${embeddingResponse.status}`);
+    const { data: chunks, error: searchError } = await supabaseAdmin.rpc(
+      'search_document_content',
+      { 
+        search_query: userMessage,
+        match_count: 20 // Send 20 chunks to the model
       }
+    );
 
-      const embeddingData = await embeddingResponse.json();
-      const queryEmbedding = embeddingData.data[0].embedding;
-
-      // Perform semantic search using vector similarity
-      const { data: similarChunks, error: searchError } = await supabaseAdmin.rpc('search_document_content_semantic', {
-        query_embedding: JSON.stringify(queryEmbedding),
-        match_threshold: 0.5, // Lower threshold to get more results
-        match_count: 10,
-      });
-
-      if (!searchError && similarChunks && similarChunks.length > 0) {
-        console.log(`📚 Found ${similarChunks.length} semantically similar chunks`);
-        similarChunks.forEach((chunk: any, i: number) => {
-          console.log(`  ${i + 1}. Similarity: ${(chunk.similarity * 100).toFixed(1)}% - ${chunk.content.substring(0, 100)}...`);
-        });
-        relevantChunks = similarChunks.map((chunk: any) => chunk.content);
-        sources.push({ type: 'technical_documents', sections: similarChunks.map((c: any) => c.metadata) });
-      } else {
-        console.log('⚠️ No similar chunks found or search error:', searchError);
-      }
-    } catch (error) {
-      console.error('Error during semantic search:', error);
-      // Fallback to text search if embedding fails
-      const { data: similarChunks, error: searchError } = await supabaseAdmin.rpc('search_document_content', {
-        search_query: lastMessage.content,
-        match_count: 10,
-      });
-
-      if (!searchError && similarChunks && similarChunks.length > 0) {
-        console.log(`📚 Fallback: Found ${similarChunks.length} chunks via text search`);
-        relevantChunks = similarChunks.map((chunk: any) => chunk.content);
-        sources.push({ type: 'technical_documents', sections: similarChunks.map((c: any) => c.metadata) });
-      }
+    if (searchError) {
+      console.error('Search error:', searchError);
     }
+
+    const relevantChunks = chunks && chunks.length > 0 ? chunks : [];
+    const sources = relevantChunks.length > 0 
+      ? [{ type: 'technical_documents', sections: relevantChunks.map((c: any) => c.metadata) }]
+      : [];
+    
+    console.log('📚 Retrieved chunks:', relevantChunks.length);
 
     const isoContext = relevantChunks.length > 0 
       ? `\n### CONTEXTO DOS DOCUMENTOS TÉCNICOS (WIRELOCK, ISO 4309, ETC):\n${relevantChunks.join('\n\n---\n\n')}\n### FIM DO CONTEXTO DOS DOCUMENTOS`
@@ -226,7 +191,7 @@ ${isoContext ? '\n⚠️ ATENÇÃO: As informações acima são REAIS extraídas
           content: result
         });
 
-        sources.push({ type: 'internal_data', tool: toolCall.function.name });
+        sources.push({ type: 'internal_data', sections: [{ tool: toolCall.function.name }] });
       }
 
       // Second AI call with tool results
