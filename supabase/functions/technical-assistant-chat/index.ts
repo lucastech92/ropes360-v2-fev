@@ -43,17 +43,60 @@ serve(async (req) => {
     let relevantChunks = [];
     let sources = [];
 
-    // Use text-based search instead of vector similarity (since embeddings API is not available)
-    console.log('🔍 Searching for relevant content...');
-    const { data: similarChunks, error: searchError } = await supabaseAdmin.rpc('search_document_content', {
-      search_query: lastMessage.content,
-      match_count: 10, // Aumentar para pegar mais contexto
-    });
+    // Generate embedding for user question and perform semantic search
+    console.log('🔍 Generating query embedding and searching...');
+    
+    try {
+      // Generate embedding for the user's question
+      const embeddingResponse = await fetch('https://ai.gateway.lovable.dev/v1/embeddings', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'text-embedding-3-small',
+          input: lastMessage.content,
+        }),
+      });
 
-    if (!searchError && similarChunks && similarChunks.length > 0) {
-      console.log(`📚 Found ${similarChunks.length} relevant chunks`);
-      relevantChunks = similarChunks.map((chunk: any) => chunk.content);
-      sources.push({ type: 'technical_documents', sections: similarChunks.map((c: any) => c.metadata) });
+      if (!embeddingResponse.ok) {
+        throw new Error(`Embedding API error: ${embeddingResponse.status}`);
+      }
+
+      const embeddingData = await embeddingResponse.json();
+      const queryEmbedding = embeddingData.data[0].embedding;
+
+      // Perform semantic search using vector similarity
+      const { data: similarChunks, error: searchError } = await supabaseAdmin.rpc('search_document_content_semantic', {
+        query_embedding: JSON.stringify(queryEmbedding),
+        match_threshold: 0.5, // Lower threshold to get more results
+        match_count: 10,
+      });
+
+      if (!searchError && similarChunks && similarChunks.length > 0) {
+        console.log(`📚 Found ${similarChunks.length} semantically similar chunks`);
+        similarChunks.forEach((chunk: any, i: number) => {
+          console.log(`  ${i + 1}. Similarity: ${(chunk.similarity * 100).toFixed(1)}% - ${chunk.content.substring(0, 100)}...`);
+        });
+        relevantChunks = similarChunks.map((chunk: any) => chunk.content);
+        sources.push({ type: 'technical_documents', sections: similarChunks.map((c: any) => c.metadata) });
+      } else {
+        console.log('⚠️ No similar chunks found or search error:', searchError);
+      }
+    } catch (error) {
+      console.error('Error during semantic search:', error);
+      // Fallback to text search if embedding fails
+      const { data: similarChunks, error: searchError } = await supabaseAdmin.rpc('search_document_content', {
+        search_query: lastMessage.content,
+        match_count: 10,
+      });
+
+      if (!searchError && similarChunks && similarChunks.length > 0) {
+        console.log(`📚 Fallback: Found ${similarChunks.length} chunks via text search`);
+        relevantChunks = similarChunks.map((chunk: any) => chunk.content);
+        sources.push({ type: 'technical_documents', sections: similarChunks.map((c: any) => c.metadata) });
+      }
     }
 
     const isoContext = relevantChunks.length > 0 

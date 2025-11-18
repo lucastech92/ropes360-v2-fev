@@ -96,34 +96,76 @@ serve(async (req) => {
     const chunks = chunkText(fullText);
     console.log(`📦 Created ${chunks.length} chunks`);
 
+    // Delete existing embeddings for this document
     await supabaseAdmin
       .from('document_embeddings')
       .delete()
       .eq('document_id', documentId);
 
-    console.log(`📝 Storing ${chunks.length} chunks...`);
-    
-    for (let i = 0; i < chunks.length; i++) {
-      const chunk = chunks[i];
+    // Generate embeddings for each chunk using Lovable AI
+    console.log('🔮 Generating embeddings for', chunks.length, 'chunks...');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY not configured');
+    }
+
+    const embeddings = [];
+    for (let index = 0; index < chunks.length; index++) {
+      const chunk = chunks[index];
       
-      const { error: embeddingError } = await supabaseAdmin
-        .from('document_embeddings')
-        .insert({
-          document_id: documentId,
-          content: chunk,
-          chunk_index: i,
-          metadata: {
-            document_title: document.title,
-            document_type: document.document_type,
-            total_chunks: chunks.length,
-            char_count: chunk.length
-          }
+      try {
+        // Generate embedding using Lovable AI
+        const embeddingResponse = await fetch('https://ai.gateway.lovable.dev/v1/embeddings', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'text-embedding-3-small',
+            input: chunk,
+          }),
         });
 
-      if (embeddingError) {
-        console.error(`Error storing chunk ${i}:`, embeddingError);
-        throw embeddingError;
+        if (!embeddingResponse.ok) {
+          const errorText = await embeddingResponse.text();
+          console.error(`Error generating embedding for chunk ${index}:`, errorText);
+          throw new Error(`Embedding API error: ${embeddingResponse.status}`);
+        }
+
+        const embeddingData = await embeddingResponse.json();
+        const embeddingVector = embeddingData.data[0].embedding;
+
+        embeddings.push({
+          document_id: documentId,
+          content: chunk,
+          chunk_index: index,
+          embedding: JSON.stringify(embeddingVector), // Store as JSON string for vector type
+          metadata: {
+            chunk_index: index,
+            total_chunks: chunks.length,
+            document_title: document.title,
+            document_type: document.document_type,
+            char_count: chunk.length,
+          },
+        });
+
+        console.log(`✅ Generated embedding ${index + 1}/${chunks.length}`);
+      } catch (error) {
+        console.error(`Failed to generate embedding for chunk ${index}:`, error);
+        throw error;
       }
+    }
+
+    // Insert all embeddings at once
+    console.log('💾 Storing embeddings in database...');
+    const { error: insertError } = await supabaseAdmin
+      .from('document_embeddings')
+      .insert(embeddings);
+
+    if (insertError) {
+      console.error('Error inserting embeddings:', insertError);
+      throw insertError;
     }
 
     await supabaseAdmin
