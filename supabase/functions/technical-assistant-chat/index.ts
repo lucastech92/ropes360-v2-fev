@@ -98,6 +98,14 @@ serve(async (req) => {
       : [];
     
     console.log('📚 Retrieved chunks:', relevantChunks.length);
+    
+    // Log first 200 chars of each chunk for debugging
+    if (relevantChunks.length > 0) {
+      console.log('🔍 Chunk previews:');
+      relevantChunks.slice(0, 5).forEach((c: any, i: number) => {
+        console.log(`  Chunk ${i}: ${c.content.substring(0, 200)}...`);
+      });
+    }
 
     const isoContext = relevantChunks.length > 0
       ? `\n### CONTEXTO DOS DOCUMENTOS TÉCNICOS (WIRELOCK, ISO 4309, ETC):\n${relevantChunks.map((c: any) => c.content).join('\n\n---\n\n')}\n### FIM DO CONTEXTO DOS DOCUMENTOS`
@@ -107,19 +115,19 @@ serve(async (req) => {
 
 SUAS CAPACIDADES:
 1. Consultar documentos técnicos (manuais Wirelock, normas como ISO 4309)
-2. Acessar dados internos do inventário/almoxarifado  
+2. Acessar dados internos do inventário/almoxarife  
 3. Consultar informações de serviços e clientes
 4. Verificar registros de manutenção
 
-REGRAS CRÍTICAS - SIGA RIGOROSAMENTE:
-1. **PRIORIDADE MÁXIMA**: Se a informação estiver no CONTEXTO DOS DOCUMENTOS TÉCNICOS abaixo, VOCÊ DEVE USAR EXATAMENTE ESSA INFORMAÇÃO
-2. **NUNCA INVENTE dados técnicos, especificações, quantidades ou valores**
-3. Se precisar de dados internos (inventário, serviços, manutenção), use as ferramentas disponíveis
-4. Se NÃO tiver a informação nem nos documentos nem nos dados internos, diga: "Essa informação não está disponível nos documentos técnicos nem nos dados da plataforma"
-5. Sempre cite a fonte específica (seção do documento, número da norma, etc)
+REGRAS CRÍTICAS:
+1. **USE O CONTEXTO**: Se encontrou chunks relevantes abaixo, USE-OS para responder. Não diga "não tenho informação" se há contexto disponível.
+2. **NUNCA INVENTE**: Só cite valores/especificações que estejam LITERALMENTE no contexto fornecido.
+3. **CITE A FONTE**: Sempre mencione de onde veio a informação (ex: "Segundo o manual Wirelock...").
+4. **FERRAMENTAS**: Para dados internos (inventário, serviços, manutenção), use as ferramentas disponíveis.
+5. **SEM CONTEXTO**: Só diga "não disponível" se realmente NÃO houver contexto relevante abaixo.
 ${isoContext}
 
-${isoContext ? '\n⚠️ ATENÇÃO: As informações acima são REAIS extraídas dos documentos técnicos. Use-as com PRECISÃO. NÃO invente valores diferentes.' : ''}`;
+${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnicos acima. Analise-os cuidadosamente antes de responder. Se a resposta estiver lá, USE-A!' : ''}`;
 
     // Define function calling tools
     const tools = [
