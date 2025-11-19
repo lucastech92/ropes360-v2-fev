@@ -42,27 +42,50 @@ serve(async (req) => {
 
     const userMessage = lastMessage.content;
 
-    // Perform text-based search with more chunks
+    // Step 1: Translate query to English for better document matching
+    console.log('🌐 Translating query for multi-language search...');
+    
+    const translationResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { 
+            role: 'system', 
+            content: 'Extract key English search terms from user query. If already in English, return as-is. Return ONLY the search terms, nothing else.' 
+          },
+          { role: 'user', content: userMessage }
+        ],
+        max_tokens: 50
+      }),
+    });
+
+    let searchQuery = userMessage;
+    if (translationResponse.ok) {
+      const translationData = await translationResponse.json();
+      searchQuery = translationData.choices?.[0]?.message?.content?.trim() || userMessage;
+      console.log('🔤 Search terms:', searchQuery);
+    }
+
+    // Step 2: Search documents with English terms
     console.log('🔍 Searching for relevant document chunks...');
-    console.log('📝 User message:', userMessage);
     
     const { data: chunks, error: searchError } = await supabaseAdmin.rpc(
       'search_document_content',
       { 
-        search_query: userMessage,
-        match_count: 20 // Send 20 chunks to the model
+        search_query: searchQuery,
+        match_count: 20
       }
     );
 
     console.log('🔎 RPC Response:', { 
       chunksCount: chunks?.length || 0, 
       hasError: !!searchError,
-      error: searchError,
-      firstChunkPreview: chunks?.[0] ? {
-        hasContent: !!chunks[0].content,
-        contentLength: chunks[0].content?.length,
-        contentPreview: chunks[0].content?.substring(0, 100)
-      } : null
+      error: searchError
     });
 
     if (searchError) {
@@ -75,11 +98,8 @@ serve(async (req) => {
       : [];
     
     console.log('📚 Retrieved chunks:', relevantChunks.length);
-    if (relevantChunks.length > 0) {
-      console.log('✅ Sample chunk content length:', relevantChunks[0]?.content?.length);
-    }
 
-    const isoContext = relevantChunks.length > 0 
+    const isoContext = relevantChunks.length > 0
       ? `\n### CONTEXTO DOS DOCUMENTOS TÉCNICOS (WIRELOCK, ISO 4309, ETC):\n${relevantChunks.map((c: any) => c.content).join('\n\n---\n\n')}\n### FIM DO CONTEXTO DOS DOCUMENTOS`
       : '';
 
