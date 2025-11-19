@@ -65,7 +65,7 @@ serve(async (req) => {
     console.log('📚 Retrieved chunks:', relevantChunks.length);
 
     const isoContext = relevantChunks.length > 0 
-      ? `\n### CONTEXTO DOS DOCUMENTOS TÉCNICOS (WIRELOCK, ISO 4309, ETC):\n${relevantChunks.join('\n\n---\n\n')}\n### FIM DO CONTEXTO DOS DOCUMENTOS`
+      ? `\n### CONTEXTO DOS DOCUMENTOS TÉCNICOS (WIRELOCK, ISO 4309, ETC):\n${relevantChunks.map((c: any) => c.content).join('\n\n---\n\n')}\n### FIM DO CONTEXTO DOS DOCUMENTOS`
       : '';
 
     const systemPrompt = `Você é o Assistente Técnico do Hub Ropes360, especializado em cabos de aço e gestão operacional.
