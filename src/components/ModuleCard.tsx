@@ -14,20 +14,21 @@ interface ModuleCardProps {
 const ModuleCard = ({ title, description, icon: Icon, href, color = "primary" }: ModuleCardProps) => {
   return (
     <Link to={href} className="group">
-      <Card className="h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-        <CardHeader>
+      <Card className="h-full overflow-hidden relative transition-all duration-300 hover:shadow-card-hover hover:-translate-y-2 hover:scale-[1.02] border-border/50">
+        <div className="absolute inset-0 bg-gradient-mesh opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <CardHeader className="relative">
           <div className={cn(
-            "mb-4 flex h-12 w-12 items-center justify-center rounded-lg",
-            color === "primary" && "bg-primary/10 text-primary",
-            color === "accent" && "bg-accent/10 text-accent"
+            "mb-4 flex h-14 w-14 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-3",
+            color === "primary" && "bg-gradient-to-br from-primary/20 to-primary/5 text-primary shadow-inner group-hover:shadow-glow",
+            color === "accent" && "bg-gradient-to-br from-accent/20 to-accent/5 text-accent shadow-inner group-hover:shadow-glow"
           )}>
-            <Icon className="h-6 w-6" />
+            <Icon className="h-7 w-7 transition-transform duration-300 group-hover:scale-110" />
           </div>
-          <CardTitle className="text-xl group-hover:text-primary transition-colors">
+          <CardTitle className="text-xl transition-all duration-300 group-hover:text-gradient-primary">
             {title}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative">
           <CardDescription className="text-base leading-relaxed">
             {description}
           </CardDescription>
