@@ -6,9 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/EmptyState";
-import { Plus, Pencil, ClipboardList } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Plus, Pencil, ClipboardList, Download, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { exportToExcel } from "@/utils/exportUtils";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 interface Service {
   id: string;
@@ -26,6 +29,8 @@ const Servicos = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [services, setServices] = useState<Service[]>([]);
+  const [filteredServices, setFilteredServices] = useState<Service[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
 
   const fetchServices = async () => {
@@ -53,24 +58,76 @@ const Servicos = () => {
     fetchServices();
   }, []);
 
+  useEffect(() => {
+    const filtered = services.filter(service =>
+      service.codigo_jbr.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      service.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      service.aplicacao?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredServices(filtered);
+  }, [services, searchTerm]);
+
+  const handleExport = () => {
+    const exportData = filteredServices.map(s => ({
+      'Código JBR': s.codigo_jbr,
+      'Cliente': s.cliente,
+      'Escopo': s.escopo?.join(', ') || '',
+      'Outros Escopo': s.outros_escopo || '',
+      'Aplicação': s.aplicacao || '',
+      'Equipamentos': s.equipamentos || '',
+      'Data Início': s.data_inicio || '',
+      'Data Término': s.data_termino || '',
+    }));
+    exportToExcel(exportData, `servicos_${new Date().toISOString().split('T')[0]}`, 'Serviços');
+    toast({ title: "Exportado com sucesso", description: `${exportData.length} serviços exportados` });
+  };
+
+  useKeyboardShortcuts([
+    { key: 'n', ctrl: true, callback: () => navigate("/novo-servico"), description: 'Novo serviço' },
+    { key: 'e', ctrl: true, callback: handleExport, description: 'Exportar serviços' },
+  ]);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <div className="container mx-auto py-8 px-4">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">JBR - Serviços</h1>
-            <p className="text-muted-foreground mt-2">
-              Gerencie todos os serviços registrados
-            </p>
+        <div className="space-y-6 mb-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">JBR - Serviços</h1>
+              <p className="text-muted-foreground mt-2">
+                Gerencie todos os serviços registrados
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={handleExport}
+                className="flex items-center gap-2"
+                disabled={filteredServices.length === 0}
+              >
+                <Download className="h-4 w-4" />
+                Exportar Excel
+              </Button>
+              <Button
+                onClick={() => navigate("/novo-servico")}
+                className="flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
+              >
+                <Plus className="h-4 w-4" />
+                Novo Serviço
+              </Button>
+            </div>
           </div>
-          <Button
-            onClick={() => navigate("/novo-servico")}
-            className="flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
-          >
-            <Plus className="h-4 w-4" />
-            Novo Serviço
-          </Button>
+
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por código JBR, cliente ou aplicação..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
         </div>
 
         <Card>
@@ -93,11 +150,11 @@ const Servicos = () => {
                   </div>
                 ))}
               </div>
-            ) : services.length === 0 ? (
+            ) : filteredServices.length === 0 ? (
               <EmptyState
-                icon={ClipboardList}
-                title="Nenhum serviço cadastrado"
-                description="Comece criando seu primeiro serviço JBR. Clique no botão 'Novo Serviço' para começar."
+                icon={searchTerm ? Search : ClipboardList}
+                title={searchTerm ? "Nenhum resultado encontrado" : "Nenhum serviço cadastrado"}
+                description={searchTerm ? "Tente ajustar os termos de busca" : "Comece criando seu primeiro serviço JBR. Clique no botão 'Novo Serviço' para começar."}
                 actionLabel="Criar Primeiro Serviço"
                 onAction={() => navigate("/novo-servico")}
               />
@@ -116,7 +173,7 @@ const Servicos = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {services.map((service, index) => (
+                  {filteredServices.map((service, index) => (
                     <TableRow 
                       key={service.id}
                       className="animate-fade-in transition-all hover:bg-muted/50"

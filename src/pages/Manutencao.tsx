@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { exportToExcel } from "@/utils/exportUtils";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -23,7 +25,8 @@ import {
   Edit,
   Trash2,
   Filter,
-  Search
+  Search,
+  Download
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -81,6 +84,27 @@ const Manutencao = () => {
   useEffect(() => {
     applyFilters();
   }, [records, searchTerm, filterType, filterStatus]);
+
+  const handleExport = () => {
+    const exportData = filteredRecords.map(r => ({
+      'Equipamento': r.equipment_name,
+      'Código': r.equipment_code,
+      'Tipo': r.maintenance_type,
+      'Prioridade': r.priority,
+      'Status': r.status,
+      'Data Agendada': r.scheduled_date,
+      'Data Conclusão': r.completion_date || '',
+      'Técnico': r.technician,
+      'Custo': r.cost || '',
+      'Horas': r.hours_spent || '',
+    }));
+    exportToExcel(exportData, `manutencao_${new Date().toISOString().split('T')[0]}`, 'Manutenção');
+  };
+
+  useKeyboardShortcuts([
+    { key: 'n', ctrl: true, callback: () => setIsDialogOpen(true), description: 'Nova manutenção' },
+    { key: 'e', ctrl: true, callback: handleExport, description: 'Exportar manutenções' },
+  ]);
 
   const fetchRecords = async () => {
     try {

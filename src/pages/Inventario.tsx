@@ -4,7 +4,9 @@ import Header from "@/components/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Package, Plus, Trash2, Save, AlertTriangle } from "lucide-react";
+import { Package, Plus, Trash2, Save, AlertTriangle, Download, Search } from "lucide-react";
+import { exportToExcel } from "@/utils/exportUtils";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useToast } from "@/hooks/use-toast";
 import {
   Table,
@@ -38,6 +40,8 @@ interface InventoryItem {
 
 const Inventario = () => {
   const [items, setItems] = useState<InventoryItem[]>([]);
+  const [filteredItems, setFilteredItems] = useState<InventoryItem[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [newItem, setNewItem] = useState<Partial<InventoryItem>>({
     item_name: "",
@@ -54,6 +58,32 @@ const Inventario = () => {
   useEffect(() => {
     fetchItems();
   }, []);
+
+  useEffect(() => {
+    const filtered = items.filter(item =>
+      item.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.location?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredItems(filtered);
+  }, [items, searchTerm]);
+
+  const handleExport = () => {
+    const exportData = filteredItems.map(i => ({
+      'Item': i.item_name,
+      'Categoria': i.category || '',
+      'Quantidade': i.quantity,
+      'Unidade': i.unit || '',
+      'Localização': i.location || '',
+      'Qtd. Mínima': i.min_quantity || '',
+      'Observações': i.notes || '',
+    }));
+    exportToExcel(exportData, `inventario_${new Date().toISOString().split('T')[0]}`, 'Inventário');
+  };
+
+  useKeyboardShortcuts([
+    { key: 'e', ctrl: true, callback: handleExport, description: 'Exportar inventário' },
+  ]);
 
   const fetchItems = async () => {
     const { data, error } = await supabase
@@ -184,20 +214,29 @@ const Inventario = () => {
 
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <CardTitle>Itens do Inventário</CardTitle>
                 <CardDescription>
                   Gerencie todos os itens e consumíveis da base
                 </CardDescription>
               </div>
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Adicionar Item
-                  </Button>
-                </DialogTrigger>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handleExport}
+                  disabled={filteredItems.length === 0}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Exportar
+                </Button>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Adicionar Item
+                    </Button>
+                  </DialogTrigger>
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
                     <DialogTitle>Adicionar Novo Item</DialogTitle>
