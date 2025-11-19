@@ -4,7 +4,9 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/EmptyState";
+import { Plus, Pencil, ClipboardList } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -64,7 +66,7 @@ const Servicos = () => {
           </div>
           <Button
             onClick={() => navigate("/novo-servico")}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
           >
             <Plus className="h-4 w-4" />
             Novo Serviço
@@ -80,11 +82,25 @@ const Servicos = () => {
           </CardHeader>
           <CardContent>
             {loading ? (
-              <p className="text-muted-foreground text-center py-8">Carregando...</p>
+              <div className="space-y-2">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex gap-4 items-center">
+                    <Skeleton className="h-12 w-24" />
+                    <Skeleton className="h-12 flex-1" />
+                    <Skeleton className="h-12 w-32" />
+                    <Skeleton className="h-12 w-32" />
+                    <Skeleton className="h-12 w-24" />
+                  </div>
+                ))}
+              </div>
             ) : services.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">
-                Nenhum serviço cadastrado ainda.
-              </p>
+              <EmptyState
+                icon={ClipboardList}
+                title="Nenhum serviço cadastrado"
+                description="Comece criando seu primeiro serviço JBR. Clique no botão 'Novo Serviço' para começar."
+                actionLabel="Criar Primeiro Serviço"
+                onAction={() => navigate("/novo-servico")}
+              />
             ) : (
               <Table>
                 <TableHeader>
@@ -100,8 +116,12 @@ const Servicos = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {services.map((service) => (
-                    <TableRow key={service.id}>
+                  {services.map((service, index) => (
+                    <TableRow 
+                      key={service.id}
+                      className="animate-fade-in transition-all hover:bg-muted/50"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
                       <TableCell className="font-medium">{service.codigo_jbr}</TableCell>
                       <TableCell>{service.cliente}</TableCell>
                       <TableCell>
@@ -143,6 +163,7 @@ const Servicos = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => navigate(`/editar-servico/${service.id}`)}
+                          className="transition-all hover:scale-110 active:scale-95"
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
