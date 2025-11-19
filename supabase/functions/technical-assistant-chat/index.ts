@@ -71,42 +71,18 @@ serve(async (req) => {
       console.log('🔤 Search terms:', searchQuery);
     }
 
-    // Step 2: Generate embedding for the search query
-    console.log('🔮 Generating query embedding...');
-    
-    const queryEmbeddingResponse = await fetch('https://ai.gateway.lovable.dev/v1/embeddings', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        input: searchQuery,
-        model: 'text-embedding-3-small'
-      }),
-    });
-
-    if (!queryEmbeddingResponse.ok) {
-      console.error('Failed to generate query embedding:', await queryEmbeddingResponse.text());
-      throw new Error('Query embedding generation failed');
-    }
-
-    const queryEmbeddingData = await queryEmbeddingResponse.json();
-    const queryEmbedding = JSON.stringify(queryEmbeddingData.data[0].embedding);
-
-    // Step 3: Search documents using semantic similarity
-    console.log('🔍 Searching for semantically relevant chunks...');
+    // Step 2: Search documents with improved text search
+    console.log('🔍 Searching for relevant document chunks...');
     
     const { data: chunks, error: searchError } = await supabaseAdmin.rpc(
-      'search_document_content_semantic',
+      'search_document_content',
       { 
-        query_embedding: queryEmbedding,
-        match_threshold: 0.5,
+        search_query: searchQuery,
         match_count: 20
       }
     );
 
-    console.log('🔎 Semantic search response:', { 
+    console.log('🔎 Search response:', { 
       chunksCount: chunks?.length || 0, 
       hasError: !!searchError,
       error: searchError
@@ -122,9 +98,6 @@ serve(async (req) => {
       : [];
     
     console.log('📚 Retrieved chunks:', relevantChunks.length);
-    if (relevantChunks.length > 0) {
-      console.log('🎯 Top similarity score:', relevantChunks[0].similarity);
-    }
 
     const isoContext = relevantChunks.length > 0
       ? `\n### CONTEXTO DOS DOCUMENTOS TÉCNICOS (WIRELOCK, ISO 4309, ETC):\n${relevantChunks.map((c: any) => c.content).join('\n\n---\n\n')}\n### FIM DO CONTEXTO DOS DOCUMENTOS`
