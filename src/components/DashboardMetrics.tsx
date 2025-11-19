@@ -54,13 +54,13 @@ export const DashboardMetrics = () => {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         {[1, 2, 3, 4, 5].map((i) => (
-          <Card key={i} className="animate-pulse">
+          <Card key={i} className="overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div className="h-4 w-24 bg-muted rounded" />
-              <div className="h-4 w-4 bg-muted rounded" />
+              <div className="h-4 w-24 bg-muted rounded shimmer" />
+              <div className="h-4 w-4 bg-muted rounded shimmer" />
             </CardHeader>
             <CardContent>
-              <div className="h-8 w-16 bg-muted rounded" />
+              <div className="h-8 w-16 bg-muted rounded shimmer" />
             </CardContent>
           </Card>
         ))}
@@ -107,20 +107,21 @@ export const DashboardMetrics = () => {
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-      {metricCards.map((metric) => {
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 animate-fade-in">
+      {metricCards.map((metric, index) => {
         const Icon = metric.icon;
         return (
-          <Link key={metric.title} to={metric.href}>
-            <Card className="transition-all hover:shadow-lg cursor-pointer">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+          <Link key={metric.title} to={metric.href} style={{ animationDelay: `${index * 100}ms` }}>
+            <Card className="card-hover group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-mesh opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
+                <CardTitle className="text-sm font-medium transition-colors group-hover:text-primary">
                   {metric.title}
                 </CardTitle>
-                <Icon className={`h-4 w-4 ${metric.color}`} />
+                <Icon className={`h-4 w-4 ${metric.color} transition-transform group-hover:scale-110`} />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{metric.value}</div>
+              <CardContent className="relative z-10">
+                <div className="text-2xl font-bold transition-all group-hover:scale-105">{metric.value}</div>
               </CardContent>
             </Card>
           </Link>

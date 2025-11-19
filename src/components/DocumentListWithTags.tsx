@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Download, Trash2, FileText, Calendar } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/EmptyState";
+import { Download, Trash2, FileText, Calendar, FolderOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { logActivity } from "@/utils/activityLogger";
 import {
@@ -187,24 +189,51 @@ export const DocumentListWithTags = ({
   };
 
   if (loading) {
-    return <p className="text-muted-foreground">Carregando documentos...</p>;
-  }
-
-  if (documents.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        <FileText className="h-12 w-12 mx-auto mb-2 opacity-50" />
-        <p>Nenhum documento encontrado nesta pasta</p>
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="border rounded-lg p-4">
+            <div className="flex items-start justify-between">
+              <div className="flex-1 space-y-3">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-6 w-20" />
+                  <Skeleton className="h-6 w-24" />
+                </div>
+                <div className="flex gap-4">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Skeleton className="h-9 w-9" />
+                <Skeleton className="h-9 w-9" />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
 
+  if (documents.length === 0) {
+    return (
+      <EmptyState
+        icon={FolderOpen}
+        title="Nenhum documento encontrado"
+        description="Esta pasta ainda não contém documentos. Faça o upload do primeiro documento para começar."
+      />
+    );
+  }
+
   return (
-    <div className="space-y-4">
-      {documents.map((doc) => (
+    <div className="space-y-4 animate-fade-in">
+      {documents.map((doc, index) => (
         <div
           key={doc.id}
-          className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+          className="border rounded-lg p-4 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1 hover:border-primary/20 animate-fade-in"
+          style={{ animationDelay: `${index * 50}ms` }}
         >
           <div className="flex items-start justify-between">
             <div className="flex-1">
@@ -239,6 +268,7 @@ export const DocumentListWithTags = ({
                 variant="outline"
                 size="sm"
                 onClick={() => handleDownload(doc.file_path, doc.file_name)}
+                className="transition-all hover:scale-105 active:scale-95"
               >
                 <Download className="h-4 w-4" />
               </Button>
