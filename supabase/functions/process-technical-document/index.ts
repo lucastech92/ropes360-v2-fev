@@ -102,55 +102,21 @@ serve(async (req) => {
       .delete()
       .eq('document_id', documentId);
 
-    // Generate embeddings using Lovable AI
-    console.log('🤖 Generating embeddings with Lovable AI...');
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
-    }
-
-    const embeddings = [];
-    for (let index = 0; index < chunks.length; index++) {
-      const chunk = chunks[index];
-      console.log(`📊 Processing chunk ${index + 1}/${chunks.length}...`);
-      
-      // Generate embedding for this chunk
-      const embeddingResponse = await fetch('https://ai.gateway.lovable.dev/v1/embeddings', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          input: chunk,
-          model: 'text-embedding-3-small'
-        }),
-      });
-
-      if (!embeddingResponse.ok) {
-        const errorText = await embeddingResponse.text();
-        console.error(`Failed to generate embedding for chunk ${index}:`, errorText);
-        throw new Error(`Embedding generation failed for chunk ${index}`);
-      }
-
-      const embeddingData = await embeddingResponse.json();
-      const embedding = embeddingData.data[0].embedding;
-
-      embeddings.push({
-        document_id: documentId,
+    // Store chunks for text-based search
+    console.log('💾 Preparing chunks for storage...');
+    const embeddings = chunks.map((chunk, index) => ({
+      document_id: documentId,
+      chunk_index: index,
+      content: chunk,
+      embedding: null, // No embeddings - using text search
+      metadata: {
+        document_title: document.title,
+        document_type: document.document_type,
         chunk_index: index,
-        content: chunk,
-        embedding: JSON.stringify(embedding),
-        metadata: {
-          document_title: document.title,
-          document_type: document.document_type,
-          chunk_index: index,
-          total_chunks: chunks.length,
-          char_count: chunk.length
-        }
-      });
-    }
-
+        total_chunks: chunks.length,
+        char_count: chunk.length
+      }
+    }));
     // Insert all embeddings at once
     console.log('💾 Storing embeddings in database...');
     const { error: insertError } = await supabaseAdmin
