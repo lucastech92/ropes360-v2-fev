@@ -33,6 +33,7 @@ export const DocumentUploadWithTags = ({
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [newTagName, setNewTagName] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -95,6 +96,29 @@ export const DocumentUploadWithTags = ({
       setFile(selectedFile);
       if (!title) {
         setTitle(selectedFile.name.replace(/\.[^/.]+$/, ""));
+      }
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const droppedFile = e.dataTransfer.files[0];
+      setFile(droppedFile);
+      if (!title) {
+        setTitle(droppedFile.name.replace(/\.[^/.]+$/, ""));
       }
     }
   };
@@ -218,94 +242,102 @@ export const DocumentUploadWithTags = ({
 
   return (
     <div className="space-y-4">
-      <div>
-        <Label htmlFor="file">Arquivo *</Label>
-        <Input
-          id="file"
-          type="file"
-          onChange={handleFileChange}
-          disabled={uploading}
-        />
-        {file && (
-          <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-            <span>{file.name}</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setFile(null)}
-              disabled={uploading}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+      <form onSubmit={(e) => { e.preventDefault(); handleUpload(); }} className="space-y-4">
+        <div>
+          <Label htmlFor="file">Arquivo *</Label>
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`border-2 border-dashed rounded-lg p-8 text-center transition-all cursor-pointer ${
+              isDragging
+                ? 'border-primary bg-primary/5 scale-105'
+                : 'border-border hover:border-primary/50 hover:bg-accent/5'
+            }`}
+            onClick={() => document.getElementById('file')?.click()}
+          >
+            <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-sm font-medium mb-1">
+              {file ? file.name : 'Arraste e solte ou clique para selecionar'}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Suporta PDF, DOC, DOCX, XLS, XLSX e mais
+            </p>
           </div>
-        )}
-      </div>
-
-      <div>
-        <Label htmlFor="title">Título *</Label>
-        <Input
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Nome do documento"
-          disabled={uploading}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="description">Descrição</Label>
-        <Textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Descrição opcional do documento"
-          disabled={uploading}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="expiry">Data de Validade</Label>
-        <Input
-          id="expiry"
-          type="date"
-          value={expiryDate}
-          onChange={(e) => setExpiryDate(e.target.value)}
-          disabled={uploading}
-        />
-      </div>
-
-      <div>
-        <Label>Tags * (obrigatório para rastreamento)</Label>
-        <div className="flex gap-2 mt-2 mb-3">
           <Input
-            placeholder="Nova tag"
-            value={newTagName}
-            onChange={(e) => setNewTagName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && createTag()}
+            id="file"
+            type="file"
+            onChange={handleFileChange}
+            disabled={uploading}
+            className="hidden"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="title">Título *</Label>
+          <Input
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Nome do documento"
             disabled={uploading}
           />
-          <Button onClick={createTag} disabled={uploading} variant="outline">
-            Criar Tag
-          </Button>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {availableTags.map((tag) => (
-            <Badge
-              key={tag.id}
-              variant={selectedTags.includes(tag.id) ? "default" : "outline"}
-              className="cursor-pointer"
-              onClick={() => !uploading && toggleTag(tag.id)}
-            >
-              {tag.name}
-            </Badge>
-          ))}
+
+        <div>
+          <Label htmlFor="description">Descrição</Label>
+          <Textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Descrição opcional do documento"
+            disabled={uploading}
+          />
         </div>
-        {selectedTags.length === 0 && (
-          <p className="text-sm text-muted-foreground mt-2">
-            Selecione pelo menos uma tag para continuar
-          </p>
-        )}
-      </div>
+
+        <div>
+          <Label htmlFor="expiry">Data de Validade</Label>
+          <Input
+            id="expiry"
+            type="date"
+            value={expiryDate}
+            onChange={(e) => setExpiryDate(e.target.value)}
+            disabled={uploading}
+          />
+        </div>
+
+        <div>
+          <Label>Tags * (obrigatório para rastreamento)</Label>
+          <div className="flex gap-2 mt-2 mb-3">
+            <Input
+              placeholder="Nova tag"
+              value={newTagName}
+              onChange={(e) => setNewTagName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && createTag()}
+              disabled={uploading}
+            />
+            <Button onClick={createTag} disabled={uploading} variant="outline">
+              Criar Tag
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {availableTags.map((tag) => (
+              <Badge
+                key={tag.id}
+                variant={selectedTags.includes(tag.id) ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => !uploading && toggleTag(tag.id)}
+              >
+                {tag.name}
+              </Badge>
+            ))}
+          </div>
+          {selectedTags.length === 0 && (
+            <p className="text-sm text-muted-foreground mt-2">
+              Selecione pelo menos uma tag para continuar
+            </p>
+          )}
+        </div>
 
       <Button onClick={handleUpload} disabled={uploading || !file} className="w-full">
         <Upload className="h-4 w-4 mr-2" />
