@@ -44,6 +44,7 @@ serve(async (req) => {
 
     // Perform text-based search with more chunks
     console.log('🔍 Searching for relevant document chunks...');
+    console.log('📝 User message:', userMessage);
     
     const { data: chunks, error: searchError } = await supabaseAdmin.rpc(
       'search_document_content',
@@ -53,8 +54,19 @@ serve(async (req) => {
       }
     );
 
+    console.log('🔎 RPC Response:', { 
+      chunksCount: chunks?.length || 0, 
+      hasError: !!searchError,
+      error: searchError,
+      firstChunkPreview: chunks?.[0] ? {
+        hasContent: !!chunks[0].content,
+        contentLength: chunks[0].content?.length,
+        contentPreview: chunks[0].content?.substring(0, 100)
+      } : null
+    });
+
     if (searchError) {
-      console.error('Search error:', searchError);
+      console.error('❌ Search error:', searchError);
     }
 
     const relevantChunks = chunks && chunks.length > 0 ? chunks : [];
@@ -63,6 +75,9 @@ serve(async (req) => {
       : [];
     
     console.log('📚 Retrieved chunks:', relevantChunks.length);
+    if (relevantChunks.length > 0) {
+      console.log('✅ Sample chunk content length:', relevantChunks[0]?.content?.length);
+    }
 
     const isoContext = relevantChunks.length > 0 
       ? `\n### CONTEXTO DOS DOCUMENTOS TÉCNICOS (WIRELOCK, ISO 4309, ETC):\n${relevantChunks.map((c: any) => c.content).join('\n\n---\n\n')}\n### FIM DO CONTEXTO DOS DOCUMENTOS`
