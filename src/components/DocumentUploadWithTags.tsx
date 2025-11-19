@@ -339,10 +339,11 @@ export const DocumentUploadWithTags = ({
           )}
         </div>
 
-      <Button onClick={handleUpload} disabled={uploading || !file} className="w-full">
-        <Upload className="h-4 w-4 mr-2" />
-        {uploading ? "Enviando..." : "Enviar Documento"}
-      </Button>
+        <Button type="submit" disabled={uploading || !file || selectedTags.length === 0} className="w-full">
+          <Upload className="h-4 w-4 mr-2" />
+          {uploading ? "Enviando..." : "Enviar Documento"}
+        </Button>
+      </form>
     </div>
   );
 };

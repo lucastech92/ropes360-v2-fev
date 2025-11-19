@@ -237,86 +237,25 @@ const Inventario = () => {
                       Adicionar Item
                     </Button>
                   </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Adicionar Novo Item</DialogTitle>
-                    <DialogDescription>
-                      Preencha os dados do novo item do inventário
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="name">Nome do Item *</Label>
-                      <Input
-                        id="name"
-                        value={newItem.item_name}
-                        onChange={(e) => setNewItem({ ...newItem, item_name: e.target.value })}
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="category">Categoria</Label>
-                        <Input
-                          id="category"
-                          value={newItem.category || ""}
-                          onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="location">Localização</Label>
-                        <Input
-                          id="location"
-                          value={newItem.location || ""}
-                          onChange={(e) => setNewItem({ ...newItem, location: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="quantity">Quantidade</Label>
-                        <Input
-                          id="quantity"
-                          type="number"
-                          value={newItem.quantity}
-                          onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) || 0 })}
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="unit">Unidade</Label>
-                        <Input
-                          id="unit"
-                          value={newItem.unit || ""}
-                          onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })}
-                          placeholder="ex: un, kg, L"
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="min">Qtd. Mínima</Label>
-                        <Input
-                          id="min"
-                          type="number"
-                          value={newItem.min_quantity || ""}
-                          onChange={(e) => setNewItem({ ...newItem, min_quantity: parseInt(e.target.value) || 0 })}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="notes">Observações</Label>
-                      <Input
-                        id="notes"
-                        value={newItem.notes || ""}
-                        onChange={(e) => setNewItem({ ...newItem, notes: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button onClick={addItem}>Adicionar Item</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+                  <DialogContent className="max-w-2xl">
+...
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
+            <div className="mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por item, categoria ou localização..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
