@@ -1,0 +1,59 @@
+{
+  "header": {
+    "title": "Hub de Inspectores",
+    "subtitle": "Centro de Inteligencia",
+    "dashboard": "Panel",
+    "documents": "Documentos",
+    "logout": "Salir"
+  },
+  "dashboard": {
+    "title": "Panel de Control",
+    "totalDocuments": "Total de Documentos",
+    "expiringDocuments": "Documentos por Vencer",
+    "lowInventory": "Stock Bajo",
+    "pendingMaintenance": "Mantenimiento Pendiente",
+    "weeklyActivity": "Actividad Semanal"
+  },
+  "modules": {
+    "knowledge": "Conocimiento",
+    "operations": "Operaciones",
+    "management": "Gestión",
+    "duvidasFrequentes": "Preguntas Frecuentes",
+    "manuaisBridon": "Manuales Bridon",
+    "checkLists": "Listas de Verificación",
+    "procedimentosOficiais": "Procedimientos Oficiales",
+    "controleManutencao": "Control de Mantenimiento",
+    "relatorioInspecao": "Informe de Inspección de Cable",
+    "inventario": "Inventario/Almacén",
+    "modelosRelatorios": "Plantillas de Informes",
+    "servicos": "Servicios",
+    "assistenteTecnico": "Asistente Técnico (Beta)",
+    "treinamento": "Capacitación",
+    "historico": "Historial"
+  },
+  "search": {
+    "placeholder": "Buscar en todos los módulos...",
+    "noResults": "No se encontraron resultados",
+    "documents": "Documentos",
+    "services": "Servicios",
+    "inventory": "Inventario",
+    "maintenance": "Mantenimiento",
+    "employees": "Empleados"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "add": "Agregar",
+    "create": "Crear",
+    "upload": "Cargar",
+    "download": "Descargar",
+    "close": "Cerrar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito"
+  }
+}

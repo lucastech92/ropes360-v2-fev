@@ -1,0 +1,59 @@
+{
+  "header": {
+    "title": "Inspector Hub",
+    "subtitle": "Intelligence Center",
+    "dashboard": "Dashboard",
+    "documents": "Documents",
+    "logout": "Logout"
+  },
+  "dashboard": {
+    "title": "Control Panel",
+    "totalDocuments": "Total Documents",
+    "expiringDocuments": "Expiring Documents",
+    "lowInventory": "Low Stock",
+    "pendingMaintenance": "Pending Maintenance",
+    "weeklyActivity": "Weekly Activity"
+  },
+  "modules": {
+    "knowledge": "Knowledge",
+    "operations": "Operations",
+    "management": "Management",
+    "duvidasFrequentes": "Frequent Questions",
+    "manuaisBridon": "Bridon Manuals",
+    "checkLists": "Checklists",
+    "procedimentosOficiais": "Official Procedures",
+    "controleManutencao": "Maintenance Control",
+    "relatorioInspecao": "Wire Rope Inspection Report",
+    "inventario": "Inventory/Warehouse",
+    "modelosRelatorios": "Report Templates",
+    "servicos": "Services",
+    "assistenteTecnico": "Technical Assistant (Beta)",
+    "treinamento": "Training",
+    "historico": "History"
+  },
+  "search": {
+    "placeholder": "Search all modules...",
+    "noResults": "No results found",
+    "documents": "Documents",
+    "services": "Services",
+    "inventory": "Inventory",
+    "maintenance": "Maintenance",
+    "employees": "Employees"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "create": "Create",
+    "upload": "Upload",
+    "download": "Download",
+    "close": "Close",
+    "search": "Search",
+    "filter": "Filter",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  }
+}
