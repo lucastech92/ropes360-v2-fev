@@ -1,0 +1,59 @@
+{
+  "header": {
+    "title": "Hub de Inspetores",
+    "subtitle": "Centro de Inteligência",
+    "dashboard": "Dashboard",
+    "documents": "Documentos",
+    "logout": "Sair"
+  },
+  "dashboard": {
+    "title": "Painel de Controle",
+    "totalDocuments": "Total de Documentos",
+    "expiringDocuments": "Documentos a Vencer",
+    "lowInventory": "Estoque Baixo",
+    "pendingMaintenance": "Manutenção Pendente",
+    "weeklyActivity": "Atividade Semanal"
+  },
+  "modules": {
+    "knowledge": "Conhecimento",
+    "operations": "Operações",
+    "management": "Gestão",
+    "duvidasFrequentes": "Dúvidas Frequentes",
+    "manuaisBridon": "Manuais Bridon",
+    "checkLists": "Check-Lists",
+    "procedimentosOficiais": "Procedimentos Oficiais",
+    "controleManutencao": "Controle de Manutenção",
+    "relatorioInspecao": "Relatório de Inspeção de Cabo de Aço",
+    "inventario": "Inventário/Almoxarife",
+    "modelosRelatorios": "Modelos de Relatórios",
+    "servicos": "Serviços",
+    "assistenteTecnico": "Assistente Técnico (Beta)",
+    "treinamento": "Treinamento",
+    "historico": "Histórico"
+  },
+  "search": {
+    "placeholder": "Buscar em todos os módulos...",
+    "noResults": "Nenhum resultado encontrado",
+    "documents": "Documentos",
+    "services": "Serviços",
+    "inventory": "Inventário",
+    "maintenance": "Manutenção",
+    "employees": "Funcionários"
+  },
+  "common": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "add": "Adicionar",
+    "create": "Criar",
+    "upload": "Upload",
+    "download": "Baixar",
+    "close": "Fechar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso"
+  }
+}

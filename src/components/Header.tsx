@@ -3,12 +3,15 @@ import { FileText, Home, LogOut, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { NotificationBell } from "./NotificationBell";
+import { LanguageSelector } from "./LanguageSelector";
 
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -35,8 +38,8 @@ const Header = () => {
             <FileText className="h-6 w-6 text-primary-foreground" />
           </div>
           <div className="flex flex-col">
-            <span className="text-lg font-bold leading-tight">Hub de Inspetores</span>
-            <span className="text-xs text-muted-foreground">Centro de Inteligência</span>
+            <span className="text-lg font-bold leading-tight">{t('header.title')}</span>
+            <span className="text-xs text-muted-foreground">{t('header.subtitle')}</span>
           </div>
         </Link>
         
@@ -45,7 +48,7 @@ const Header = () => {
             <Button variant="ghost" size="sm" asChild>
               <Link to="/">
                 <LayoutDashboard className="mr-2 h-4 w-4" />
-                Dashboard
+                {t('header.dashboard')}
               </Link>
             </Button>
           )}
@@ -53,14 +56,15 @@ const Header = () => {
             <Button variant="ghost" size="sm" asChild>
               <Link to="/documentos">
                 <FileText className="mr-2 h-4 w-4" />
-                Documentos
+                {t('header.documents')}
               </Link>
             </Button>
           )}
+          <LanguageSelector />
           <NotificationBell />
           <Button variant="ghost" size="sm" onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
-            Sair
+            {t('header.logout')}
           </Button>
         </nav>
       </div>

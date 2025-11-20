@@ -690,6 +690,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          language_preference: string | null
           position: string | null
           updated_at: string | null
           user_id: string
@@ -700,6 +701,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          language_preference?: string | null
           position?: string | null
           updated_at?: string | null
           user_id: string
@@ -710,6 +712,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          language_preference?: string | null
           position?: string | null
           updated_at?: string | null
           user_id?: string

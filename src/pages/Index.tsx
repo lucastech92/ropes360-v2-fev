@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import ModuleCard from "@/components/ModuleCard";
 import { DashboardMetrics } from "@/components/DashboardMetrics";
@@ -10,24 +11,25 @@ import { DocumentUploadWithTags } from "@/components/DocumentUploadWithTags";
 import { DocumentListWithTags } from "@/components/DocumentListWithTags";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const Index = () => {
+  const { t } = useTranslation();
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [selectedFolderName, setSelectedFolderName] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const modulesByCategory = {
     knowledge: [{
-      title: "Procedimentos Oficiais",
+      title: t('modules.procedimentosOficiais'),
       description: "Acesse todos os procedimentos e normas oficiais da empresa, incluindo ISO 4309 e diretrizes de segurança.",
       icon: FileCheck,
       href: "/procedimentos-oficiais",
       color: "primary"
     }, {
-      title: "Manuais Bridon",
+      title: t('modules.manuaisBridon'),
       description: "Instruções detalhadas para instalação, soquetagem, remoção e manutenção de cabos de aço.",
       icon: Wrench,
       href: "/procedimentos-tecnicos",
       color: "primary"
     }, {
-      title: "Treinamento e Glossário",
+      title: t('modules.treinamento'),
       description: "Materiais de treinamento, glossário técnico e vídeos educativos para desenvolvimento contínuo.",
       icon: GraduationCap,
       href: "/treinamento",
@@ -39,45 +41,45 @@ const Index = () => {
       href: "/resolucao-problemas",
       color: "primary"
     }, {
-      title: "Documentação da Equipe",
+      title: t('modules.duvidasFrequentes'),
       description: "Perguntas mais comuns dos inspetores e suas respostas, além de dicas práticas do dia a dia.",
       icon: HelpCircle,
       href: "/duvidas-frequentes",
       color: "primary"
     }],
     operations: [{
-      title: "JBR - Serviços",
+      title: t('modules.servicos'),
       description: "Gerencie todos os serviços registrados com código JBR, cliente, escopo e equipamentos.",
       icon: ClipboardList,
       href: "/servicos",
       color: "accent"
     }, {
-      title: "Check List",
+      title: t('modules.checkLists'),
       description: "Checklists preenchíveis para montagem de containers e verificação de ferramentas (JBR).",
       icon: ClipboardList,
       href: "/checklist",
       color: "accent"
     }, {
-      title: "Modelos e Relatórios",
+      title: t('modules.modelosRelatorios'),
       description: "Upload e download de modelos de relatórios para inspeções e procedimentos.",
       icon: FileText,
       href: "/modelos-relatorios",
       color: "accent"
     }, {
-      title: "Inventário / Almoxarife",
+      title: t('modules.inventario'),
       description: "Controle de itens e consumíveis disponíveis na base com alertas de estoque mínimo.",
       icon: Package,
       href: "/inventario",
       color: "accent"
     }],
     management: [{
-      title: "Histórico e Acompanhamento",
+      title: t('modules.historico'),
       description: "Registros de inspeções anteriores, rastreabilidade e acompanhamento de manutenções.",
       icon: History,
       href: "/historico",
       color: "primary"
     }, {
-      title: "Controle de Manutenção",
+      title: t('modules.controleManutencao'),
       description: "Sistema completo de gestão de manutenções preventivas, corretivas e preditivas de equipamentos.",
       icon: Settings,
       href: "/manutencao",
@@ -115,21 +117,21 @@ const Index = () => {
 
         <div className="space-y-8">
           <div>
-            <h2 className="text-2xl font-semibold mb-4">Base de Conhecimento</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t('modules.knowledge')}</h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {modulesByCategory.knowledge.map(module => <ModuleCard key={module.href} {...module} />)}
             </div>
           </div>
 
           <div>
-            <h2 className="text-2xl font-semibold mb-4">Operações</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t('modules.operations')}</h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {modulesByCategory.operations.map(module => <ModuleCard key={module.href} {...module} />)}
             </div>
           </div>
 
           <div>
-            <h2 className="text-2xl font-semibold mb-4">Gestão</h2>
+            <h2 className="text-2xl font-semibold mb-4">{t('modules.management')}</h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {modulesByCategory.management.map(module => <ModuleCard key={module.href} {...module} />)}
             </div>
