@@ -12,7 +12,11 @@
     "expiringDocuments": "Documentos a Vencer",
     "lowInventory": "Estoque Baixo",
     "pendingMaintenance": "Manutenção Pendente",
-    "weeklyActivity": "Atividade Semanal"
+    "weeklyActivity": "Atividade Semanal",
+    "viewDetails": "Ver Detalhes",
+    "noData": "Sem dados disponíveis",
+    "servicesScope": "Distribuição de Escopo de Serviços",
+    "maintenanceTimeline": "Linha do Tempo de Manutenção"
   },
   "modules": {
     "knowledge": "Conhecimento",
@@ -29,7 +33,8 @@
     "servicos": "Serviços",
     "assistenteTecnico": "Assistente Técnico (Beta)",
     "treinamento": "Treinamento",
-    "historico": "Histórico"
+    "historico": "Histórico",
+    "gerenciarUsuarios": "Gerenciar Usuários"
   },
   "search": {
     "placeholder": "Buscar em todos os módulos...",
@@ -54,6 +59,176 @@
     "filter": "Filtrar",
     "loading": "Carregando...",
     "error": "Erro",
-    "success": "Sucesso"
+    "success": "Sucesso",
+    "confirm": "Confirmar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior",
+    "submit": "Enviar",
+    "clear": "Limpar"
+  },
+  "services": {
+    "title": "Serviços",
+    "newService": "Novo Serviço",
+    "serviceCode": "Código JBR",
+    "client": "Cliente",
+    "scope": "Escopo",
+    "equipment": "Equipamentos",
+    "application": "Aplicação",
+    "startDate": "Data de Início",
+    "endDate": "Data de Término",
+    "otherScope": "Outros (especificar)",
+    "scopeOptions": {
+      "mrt": "MRT - Eletromagnético",
+      "visual": "Inspeção Visual",
+      "socketing": "Soquetagem",
+      "lubrication": "Lubrificação",
+      "spooler": "Spooler",
+      "other": "Outros"
+    }
+  },
+  "inventory": {
+    "title": "Inventário/Almoxarife",
+    "addItem": "Adicionar Item",
+    "itemName": "Nome do Item",
+    "category": "Categoria",
+    "quantity": "Quantidade",
+    "minQuantity": "Quantidade Mínima",
+    "unit": "Unidade",
+    "location": "Localização",
+    "notes": "Observações",
+    "lastUpdated": "Última Atualização",
+    "lowStock": "Estoque Baixo"
+  },
+  "maintenance": {
+    "title": "Controle de Manutenção",
+    "newMaintenance": "Nova Manutenção",
+    "equipmentName": "Nome do Equipamento",
+    "equipmentCode": "Código do Equipamento",
+    "maintenanceType": "Tipo de Manutenção",
+    "priority": "Prioridade",
+    "status": "Status",
+    "scheduledDate": "Data Agendada",
+    "completionDate": "Data de Conclusão",
+    "technician": "Técnico",
+    "description": "Descrição",
+    "actionsTaken": "Ações Realizadas",
+    "partsUsed": "Peças Utilizadas",
+    "hoursSpent": "Horas Gastas",
+    "cost": "Custo",
+    "nextMaintenance": "Próxima Manutenção",
+    "statusOptions": {
+      "pending": "Pendente",
+      "inProgress": "Em Progresso",
+      "completed": "Concluída"
+    },
+    "priorityOptions": {
+      "low": "Baixa",
+      "medium": "Média",
+      "high": "Alta",
+      "critical": "Crítica"
+    }
+  },
+  "checklists": {
+    "title": "Check-Lists",
+    "newChecklist": "Novo Check-List",
+    "checklistName": "Nome do Check-List",
+    "checklistType": "Tipo de Check-List",
+    "serviceTag": "Tag de Serviço",
+    "addItem": "Adicionar Item",
+    "itemText": "Texto do Item",
+    "targetQuantity": "Quantidade Alvo",
+    "currentQuantity": "Quantidade Atual",
+    "typeOptions": {
+      "entrada": "Entrada",
+      "saida": "Saída"
+    }
+  },
+  "documents": {
+    "title": "Documentos",
+    "uploadDocument": "Upload de Documento",
+    "documentTitle": "Título",
+    "description": "Descrição",
+    "category": "Categoria",
+    "expiryDate": "Data de Validade",
+    "tags": "Tags",
+    "folder": "Pasta",
+    "fileName": "Nome do Arquivo",
+    "fileSize": "Tamanho",
+    "uploadedAt": "Enviado em",
+    "noDocuments": "Nenhum documento encontrado",
+    "createFolder": "Criar Pasta",
+    "folderName": "Nome da Pasta"
+  },
+  "wireRope": {
+    "title": "Relatório de Inspeção de Cabo de Aço",
+    "reportNumber": "Número do Relatório",
+    "inspectionDate": "Data de Inspeção",
+    "inspector": "Inspetor",
+    "client": "Cliente",
+    "location": "Localização",
+    "cableData": "Dados do Cabo",
+    "manufacturer": "Fabricante",
+    "installationDate": "Data de Instalação",
+    "fabricationDate": "Data de Fabricação",
+    "specifications": "Especificações",
+    "diameter": "Diâmetro",
+    "length": "Comprimento",
+    "severityAssessment": "Avaliação de Severidade",
+    "mrtResults": "Resultados MRT",
+    "photoGallery": "Galeria de Fotos",
+    "conclusion": "Conclusão",
+    "recommendations": "Recomendações",
+    "generatePDF": "Gerar PDF"
+  },
+  "assistant": {
+    "title": "Assistente Técnico",
+    "beta": "Beta",
+    "chat": "Chat",
+    "uploadDocument": "Upload de Documento",
+    "askQuestion": "Faça uma pergunta...",
+    "send": "Enviar",
+    "sources": "Fontes",
+    "iso4309": "ISO 4309",
+    "internalData": "Dados Internos",
+    "accessProfiles": "Perfis de Acesso",
+    "noMessages": "Nenhuma mensagem ainda. Comece fazendo uma pergunta!"
+  },
+  "history": {
+    "title": "Histórico",
+    "activity": "Atividade",
+    "user": "Usuário",
+    "action": "Ação",
+    "module": "Módulo",
+    "timestamp": "Data/Hora",
+    "details": "Detalhes",
+    "filterByModule": "Filtrar por Módulo",
+    "filterByAction": "Filtrar por Ação"
+  },
+  "users": {
+    "title": "Gerenciar Usuários",
+    "name": "Nome",
+    "email": "Email",
+    "role": "Função",
+    "company": "Empresa",
+    "position": "Cargo",
+    "status": "Status",
+    "approved": "Aprovado",
+    "pending": "Pendente",
+    "approve": "Aprovar",
+    "reject": "Rejeitar",
+    "roles": {
+      "admin": "Administrador",
+      "moderator": "Moderador",
+      "inspector": "Inspetor",
+      "viewer": "Visualizador"
+    }
+  },
+  "notifications": {
+    "title": "Notificações",
+    "markAsRead": "Marcar como lida",
+    "markAllAsRead": "Marcar todas como lidas",
+    "noNotifications": "Nenhuma notificação",
+    "new": "Nova"
   }
 }
