@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +27,7 @@ interface Service {
 }
 
 const Servicos = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [services, setServices] = useState<Service[]>([]);
@@ -94,9 +96,9 @@ const Servicos = () => {
         <div className="space-y-6 mb-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">JBR - Serviços</h1>
+              <h1 className="text-3xl font-bold text-foreground">{t('services.title')}</h1>
               <p className="text-muted-foreground mt-2">
-                Gerencie todos os serviços registrados
+                {t('services.manageServices')}
               </p>
             </div>
             <div className="flex gap-2">
@@ -107,14 +109,14 @@ const Servicos = () => {
                 disabled={filteredServices.length === 0}
               >
                 <Download className="h-4 w-4" />
-                Exportar Excel
+                {t('common.download')} Excel
               </Button>
               <Button
                 onClick={() => navigate("/novo-servico")}
                 className="flex items-center gap-2 transition-all hover:scale-105 active:scale-95"
               >
                 <Plus className="h-4 w-4" />
-                Novo Serviço
+                {t('services.newService')}
               </Button>
             </div>
           </div>
@@ -122,7 +124,7 @@ const Servicos = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar por código JBR, cliente ou aplicação..."
+              placeholder={t('services.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -132,9 +134,9 @@ const Servicos = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Lista de Serviços</CardTitle>
+            <CardTitle>{t('services.serviceList')}</CardTitle>
             <CardDescription>
-              Todos os serviços cadastrados no sistema
+              {t('services.allServices')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -153,23 +155,23 @@ const Servicos = () => {
             ) : filteredServices.length === 0 ? (
               <EmptyState
                 icon={searchTerm ? Search : ClipboardList}
-                title={searchTerm ? "Nenhum resultado encontrado" : "Nenhum serviço cadastrado"}
-                description={searchTerm ? "Tente ajustar os termos de busca" : "Comece criando seu primeiro serviço JBR. Clique no botão 'Novo Serviço' para começar."}
-                actionLabel="Criar Primeiro Serviço"
+                title={searchTerm ? t('search.noResults') : t('services.noServices')}
+                description={searchTerm ? t('services.adjustSearch') : t('services.createFirst')}
+                actionLabel={t('services.createFirstService')}
                 onAction={() => navigate("/novo-servico")}
               />
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Código JBR</TableHead>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Escopo</TableHead>
-                    <TableHead>Aplicação</TableHead>
-                    <TableHead>Equipamentos</TableHead>
-                    <TableHead>Data Início</TableHead>
-                    <TableHead>Data Término</TableHead>
-                    <TableHead>Ações</TableHead>
+                    <TableHead>{t('services.serviceCode')}</TableHead>
+                    <TableHead>{t('services.client')}</TableHead>
+                    <TableHead>{t('services.scope')}</TableHead>
+                    <TableHead>{t('services.application')}</TableHead>
+                    <TableHead>{t('services.equipment')}</TableHead>
+                    <TableHead>{t('services.startDate')}</TableHead>
+                    <TableHead>{t('services.endDate')}</TableHead>
+                    <TableHead>{t('common.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
