@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import ModuleCard from "@/components/ModuleCard";
@@ -25,6 +26,7 @@ import { ServicesDetailsDialog } from "@/components/dashboard/ServicesDetailsDia
 import { MaintenanceDetailsDialog } from "@/components/dashboard/MaintenanceDetailsDialog";
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const [inventoryDialogOpen, setInventoryDialogOpen] = useState(false);
   const [servicesDialogOpen, setServicesDialogOpen] = useState(false);
   const [maintenanceDialogOpen, setMaintenanceDialogOpen] = useState(false);
@@ -171,17 +173,17 @@ const Dashboard = () => {
       <Header />
       <div className="container mx-auto py-8 px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t('dashboard.title')}</h1>
           <p className="text-muted-foreground">
-            Visão geral de todas as operações e métricas do sistema
+            {t('dashboard.overview')}
           </p>
         </div>
 
         {/* Assistente Técnico */}
         <div className="mb-8">
           <ModuleCard
-            title="Assistente Técnico (Beta)"
-            description="Consulte a ISO 4309 e dados internos da plataforma"
+            title={t('modules.assistenteTecnico')}
+            description={t('dashboard.assistantDescription')}
             icon={Bot}
             href="/assistente-tecnico"
             color="primary"
@@ -193,7 +195,7 @@ const Dashboard = () => {
           <Card className="hover:shadow-lg transition-all cursor-pointer border-primary/20" onClick={() => {}}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Total de Documentos
+                {t('dashboard.totalDocuments')}
               </CardTitle>
               <FileText className="h-4 w-4 text-primary" />
             </CardHeader>
@@ -202,7 +204,7 @@ const Dashboard = () => {
               {dashboardData.documents.expiring > 0 && (
                 <p className="text-xs text-destructive flex items-center gap-1 mt-2">
                   <AlertTriangle className="h-3 w-3" />
-                  {dashboardData.documents.expiring} expirando em breve
+                  {dashboardData.documents.expiring} {t('dashboard.expiringSoon')}
                 </p>
               )}
             </CardContent>
@@ -214,7 +216,7 @@ const Dashboard = () => {
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Serviços JBR
+                {t('dashboard.servicesJBR')}
               </CardTitle>
               <ClipboardList className="h-4 w-4 text-accent group-hover:scale-110 transition-transform" />
             </CardHeader>
@@ -222,7 +224,7 @@ const Dashboard = () => {
               <div className="text-2xl font-bold">{dashboardData.services.total}</div>
               <div className="flex items-center justify-between mt-2">
                 <p className="text-xs text-muted-foreground">
-                  {dashboardData.services.thisMonth} neste mês
+                  {dashboardData.services.thisMonth} {t('dashboard.thisMonth')}
                 </p>
                 <ArrowRight className="h-3 w-3 text-accent opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
@@ -235,7 +237,7 @@ const Dashboard = () => {
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Inventário
+                {t('inventory.title')}
               </CardTitle>
               <Package className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
             </CardHeader>
@@ -245,12 +247,12 @@ const Dashboard = () => {
                 {dashboardData.inventory.lowStock > 0 ? (
                   <p className="text-xs text-yellow-600 flex items-center gap-1">
                     <AlertTriangle className="h-3 w-3" />
-                    {dashboardData.inventory.lowStock} itens baixos
+                    {dashboardData.inventory.lowStock} {t('dashboard.lowItems')}
                   </p>
                 ) : (
                   <p className="text-xs text-green-600 flex items-center gap-1">
                     <CheckCircle2 className="h-3 w-3" />
-                    Estoque OK
+                    {t('dashboard.stockOk')}
                   </p>
                 )}
                 <ArrowRight className="h-3 w-3 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -261,14 +263,14 @@ const Dashboard = () => {
           <Card className="hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Atividade Semanal
+                {t('dashboard.weeklyActivity')}
               </CardTitle>
               <TrendingUp className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{dashboardData.activity.weekly}</div>
               <p className="text-xs text-muted-foreground mt-2">
-                Últimos 7 dias
+                {t('dashboard.last7Days')}
               </p>
             </CardContent>
           </Card>
@@ -285,14 +287,14 @@ const Dashboard = () => {
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     <Settings className="h-5 w-5" />
-                    Status de Manutenção
+                    {t('dashboard.maintenanceStatus')}
                   </CardTitle>
                   <CardDescription>
-                    Visão geral das manutenções e seu progresso
+                    {t('dashboard.maintenanceOverview')}
                   </CardDescription>
                 </div>
                 <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  Ver Detalhes
+                  {t('dashboard.viewDetails')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
@@ -300,7 +302,7 @@ const Dashboard = () => {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Progresso Geral</span>
+                  <span className="text-sm font-medium">{t('dashboard.overallProgress')}</span>
                   <span className="text-sm text-muted-foreground">
                     {Math.round(maintenanceProgress)}%
                   </span>
@@ -311,7 +313,7 @@ const Dashboard = () => {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-yellow-600">
                       <Clock className="h-4 w-4" />
-                      <span className="text-xs font-medium">Pendente</span>
+                      <span className="text-xs font-medium">{t('maintenance.statusOptions.pending')}</span>
                     </div>
                     <p className="text-2xl font-bold">{dashboardData.maintenance.pending}</p>
                   </div>
@@ -319,7 +321,7 @@ const Dashboard = () => {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-blue-600">
                       <Activity className="h-4 w-4" />
-                      <span className="text-xs font-medium">Em Andamento</span>
+                      <span className="text-xs font-medium">{t('maintenance.statusOptions.inProgress')}</span>
                     </div>
                     <p className="text-2xl font-bold">{dashboardData.maintenance.inProgress}</p>
                   </div>
@@ -327,7 +329,7 @@ const Dashboard = () => {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-green-600">
                       <CheckCircle2 className="h-4 w-4" />
-                      <span className="text-xs font-medium">Concluído</span>
+                      <span className="text-xs font-medium">{t('maintenance.statusOptions.completed')}</span>
                     </div>
                     <p className="text-2xl font-bold">{dashboardData.maintenance.completed}</p>
                   </div>
@@ -341,10 +343,10 @@ const Dashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ClipboardList className="h-5 w-5" />
-                Checklists
+                {t('modules.checkLists')}
               </CardTitle>
               <CardDescription>
-                Templates disponíveis
+                {t('dashboard.availableTemplates')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -353,7 +355,7 @@ const Dashboard = () => {
                   {dashboardData.checklists.total}
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Templates criados
+                  {t('dashboard.templatesCreated')}
                 </p>
               </div>
             </CardContent>
@@ -365,16 +367,16 @@ const Dashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="h-5 w-5" />
-              Atividades Recentes
+              {t('dashboard.recentActivities')}
             </CardTitle>
             <CardDescription>
-              Últimas 5 ações realizadas no sistema
+              {t('dashboard.last5Actions')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {dashboardData.activity.recent.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
-                Nenhuma atividade registrada ainda
+                {t('dashboard.noActivity')}
               </p>
             ) : (
               <div className="space-y-4">

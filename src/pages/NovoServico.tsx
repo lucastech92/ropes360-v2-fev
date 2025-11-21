@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +22,7 @@ const ESCOPO_OPTIONS = [
 ];
 
 const NovoServico = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
   const { toast } = useToast();
@@ -145,20 +147,20 @@ const NovoServico = () => {
           className="mb-6"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Voltar
+          {t('common.back')}
         </Button>
 
         <Card>
           <CardHeader>
-            <CardTitle>{id ? "Editar Serviço" : "Novo Serviço"}</CardTitle>
+            <CardTitle>{id ? t('services.editService') : t('services.newService')}</CardTitle>
             <CardDescription>
-              {id ? "Atualize os dados do serviço" : "Preencha os dados do serviço a ser cadastrado"}
+              {id ? t('services.updateData') : t('services.fillData')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="codigo_jbr">Código JBR *</Label>
+                <Label htmlFor="codigo_jbr">{t('services.serviceCode')} *</Label>
                 <Input
                   id="codigo_jbr"
                   value={formData.codigo_jbr}
@@ -171,20 +173,20 @@ const NovoServico = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="cliente">Cliente *</Label>
+                <Label htmlFor="cliente">{t('services.client')} *</Label>
                 <Input
                   id="cliente"
                   value={formData.cliente}
                   onChange={(e) =>
                     setFormData({ ...formData, cliente: e.target.value })
                   }
-                  placeholder="Nome do cliente"
+                  placeholder={t('services.clientName')}
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Escopo *</Label>
+                <Label>{t('services.scope')} *</Label>
                 <div className="space-y-3">
                   {ESCOPO_OPTIONS.map((option) => (
                     <div key={option} className="flex items-center space-x-2">
@@ -225,34 +227,34 @@ const NovoServico = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="aplicacao">Aplicação</Label>
+                <Label htmlFor="aplicacao">{t('services.application')}</Label>
                 <Textarea
                   id="aplicacao"
                   value={formData.aplicacao}
                   onChange={(e) =>
                     setFormData({ ...formData, aplicacao: e.target.value })
                   }
-                  placeholder="Descreva a aplicação"
+                  placeholder={t('services.applicationDesc')}
                   rows={3}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="equipamentos">Equipamentos</Label>
+                <Label htmlFor="equipamentos">{t('services.equipment')}</Label>
                 <Textarea
                   id="equipamentos"
                   value={formData.equipamentos}
                   onChange={(e) =>
                     setFormData({ ...formData, equipamentos: e.target.value })
                   }
-                  placeholder="Liste os equipamentos necessários"
+                  placeholder={t('services.equipmentList')}
                   rows={4}
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="data_inicio">Data de Início</Label>
+                  <Label htmlFor="data_inicio">{t('services.startDate')}</Label>
                   <Input
                     id="data_inicio"
                     type="date"
@@ -264,7 +266,7 @@ const NovoServico = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="data_termino">Data de Término</Label>
+                  <Label htmlFor="data_termino">{t('services.endDate')}</Label>
                   <Input
                     id="data_termino"
                     type="date"
@@ -283,10 +285,10 @@ const NovoServico = () => {
                   onClick={() => navigate("/servicos")}
                   disabled={loading}
                 >
-                  Cancelar
+                  {t('common.cancel')}
                 </Button>
                 <Button type="submit" disabled={loading}>
-                  {loading ? "Salvando..." : id ? "Atualizar" : "Salvar"}
+                  {loading ? t('common.saving') : id ? t('common.update') : t('common.save')}
                 </Button>
               </div>
             </form>
