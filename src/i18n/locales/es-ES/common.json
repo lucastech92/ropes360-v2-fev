@@ -3,7 +3,7 @@
     "title": "Hub de Inspectores",
     "subtitle": "Centro de Inteligencia",
     "dashboard": "Panel",
-    "documents": "Documentos",
+    "documents": "Principal",
     "logout": "Salir"
   },
   "dashboard": {
@@ -12,7 +12,11 @@
     "expiringDocuments": "Documentos por Vencer",
     "lowInventory": "Stock Bajo",
     "pendingMaintenance": "Mantenimiento Pendiente",
-    "weeklyActivity": "Actividad Semanal"
+    "weeklyActivity": "Actividad Semanal",
+    "viewDetails": "Ver Detalles",
+    "noData": "Sin datos disponibles",
+    "servicesScope": "Distribución de Alcance de Servicios",
+    "maintenanceTimeline": "Línea de Tiempo de Mantenimiento"
   },
   "modules": {
     "knowledge": "Conocimiento",
@@ -29,7 +33,8 @@
     "servicos": "Servicios",
     "assistenteTecnico": "Asistente Técnico (Beta)",
     "treinamento": "Capacitación",
-    "historico": "Historial"
+    "historico": "Historial",
+    "gerenciarUsuarios": "Gestionar Usuarios"
   },
   "search": {
     "placeholder": "Buscar en todos los módulos...",
@@ -54,6 +59,176 @@
     "filter": "Filtrar",
     "loading": "Cargando...",
     "error": "Error",
-    "success": "Éxito"
+    "success": "Éxito",
+    "confirm": "Confirmar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "submit": "Enviar",
+    "clear": "Limpiar"
+  },
+  "services": {
+    "title": "Servicios",
+    "newService": "Nuevo Servicio",
+    "serviceCode": "Código JBR",
+    "client": "Cliente",
+    "scope": "Alcance",
+    "equipment": "Equipos",
+    "application": "Aplicación",
+    "startDate": "Fecha de Inicio",
+    "endDate": "Fecha de Término",
+    "otherScope": "Otros (especificar)",
+    "scopeOptions": {
+      "mrt": "MRT - Electromagnético",
+      "visual": "Inspección Visual",
+      "socketing": "Encaje",
+      "lubrication": "Lubricación",
+      "spooler": "Carrete",
+      "other": "Otros"
+    }
+  },
+  "inventory": {
+    "title": "Inventario/Almacén",
+    "addItem": "Agregar Artículo",
+    "itemName": "Nombre del Artículo",
+    "category": "Categoría",
+    "quantity": "Cantidad",
+    "minQuantity": "Cantidad Mínima",
+    "unit": "Unidad",
+    "location": "Ubicación",
+    "notes": "Notas",
+    "lastUpdated": "Última Actualización",
+    "lowStock": "Stock Bajo"
+  },
+  "maintenance": {
+    "title": "Control de Mantenimiento",
+    "newMaintenance": "Nuevo Mantenimiento",
+    "equipmentName": "Nombre del Equipo",
+    "equipmentCode": "Código del Equipo",
+    "maintenanceType": "Tipo de Mantenimiento",
+    "priority": "Prioridad",
+    "status": "Estado",
+    "scheduledDate": "Fecha Programada",
+    "completionDate": "Fecha de Finalización",
+    "technician": "Técnico",
+    "description": "Descripción",
+    "actionsTaken": "Acciones Realizadas",
+    "partsUsed": "Piezas Utilizadas",
+    "hoursSpent": "Horas Trabajadas",
+    "cost": "Costo",
+    "nextMaintenance": "Próximo Mantenimiento",
+    "statusOptions": {
+      "pending": "Pendiente",
+      "inProgress": "En Progreso",
+      "completed": "Completado"
+    },
+    "priorityOptions": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta",
+      "critical": "Crítica"
+    }
+  },
+  "checklists": {
+    "title": "Listas de Verificación",
+    "newChecklist": "Nueva Lista",
+    "checklistName": "Nombre de la Lista",
+    "checklistType": "Tipo de Lista",
+    "serviceTag": "Etiqueta de Servicio",
+    "addItem": "Agregar Elemento",
+    "itemText": "Texto del Elemento",
+    "targetQuantity": "Cantidad Objetivo",
+    "currentQuantity": "Cantidad Actual",
+    "typeOptions": {
+      "entrada": "Entrada",
+      "saida": "Salida"
+    }
+  },
+  "documents": {
+    "title": "Documentos",
+    "uploadDocument": "Cargar Documento",
+    "documentTitle": "Título",
+    "description": "Descripción",
+    "category": "Categoría",
+    "expiryDate": "Fecha de Vencimiento",
+    "tags": "Etiquetas",
+    "folder": "Carpeta",
+    "fileName": "Nombre del Archivo",
+    "fileSize": "Tamaño",
+    "uploadedAt": "Cargado en",
+    "noDocuments": "No se encontraron documentos",
+    "createFolder": "Crear Carpeta",
+    "folderName": "Nombre de la Carpeta"
+  },
+  "wireRope": {
+    "title": "Informe de Inspección de Cable",
+    "reportNumber": "Número de Informe",
+    "inspectionDate": "Fecha de Inspección",
+    "inspector": "Inspector",
+    "client": "Cliente",
+    "location": "Ubicación",
+    "cableData": "Datos del Cable",
+    "manufacturer": "Fabricante",
+    "installationDate": "Fecha de Instalación",
+    "fabricationDate": "Fecha de Fabricación",
+    "specifications": "Especificaciones",
+    "diameter": "Diámetro",
+    "length": "Longitud",
+    "severityAssessment": "Evaluación de Severidad",
+    "mrtResults": "Resultados MRT",
+    "photoGallery": "Galería de Fotos",
+    "conclusion": "Conclusión",
+    "recommendations": "Recomendaciones",
+    "generatePDF": "Generar PDF"
+  },
+  "assistant": {
+    "title": "Asistente Técnico",
+    "beta": "Beta",
+    "chat": "Chat",
+    "uploadDocument": "Cargar Documento",
+    "askQuestion": "Haga una pregunta...",
+    "send": "Enviar",
+    "sources": "Fuentes",
+    "iso4309": "ISO 4309",
+    "internalData": "Datos Internos",
+    "accessProfiles": "Perfiles de Acceso",
+    "noMessages": "No hay mensajes todavía. ¡Comience haciendo una pregunta!"
+  },
+  "history": {
+    "title": "Historial",
+    "activity": "Actividad",
+    "user": "Usuario",
+    "action": "Acción",
+    "module": "Módulo",
+    "timestamp": "Fecha/Hora",
+    "details": "Detalles",
+    "filterByModule": "Filtrar por Módulo",
+    "filterByAction": "Filtrar por Acción"
+  },
+  "users": {
+    "title": "Gestionar Usuarios",
+    "name": "Nombre",
+    "email": "Correo",
+    "role": "Rol",
+    "company": "Empresa",
+    "position": "Cargo",
+    "status": "Estado",
+    "approved": "Aprobado",
+    "pending": "Pendiente",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "roles": {
+      "admin": "Administrador",
+      "moderator": "Moderador",
+      "inspector": "Inspector",
+      "viewer": "Visualizador"
+    }
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "markAsRead": "Marcar como leída",
+    "markAllAsRead": "Marcar todas como leídas",
+    "noNotifications": "Sin notificaciones",
+    "new": "Nueva"
   }
 }
