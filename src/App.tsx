@@ -23,7 +23,10 @@ import GerenciarUsuarios from "./pages/GerenciarUsuarios";
 import Servicos from "./pages/Servicos";
 import NovoServico from "./pages/NovoServico";
 import AssistenteTecnico from "./pages/AssistenteTecnico";
+import Install from "./pages/Install";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { OfflineIndicator } from "./components/OfflineIndicator";
+import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 
 const queryClient = new QueryClient();
 
@@ -35,9 +38,12 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <OfflineIndicator />
+        <PWAInstallPrompt />
         <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/install" element={<Install />} />
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/documentos" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/procedimentos-oficiais" element={<ProtectedRoute><ProcedimentosOficiais /></ProtectedRoute>} />
