@@ -2,10 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useLanguagePreference } from "./hooks/useLanguagePreference";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
@@ -33,25 +31,21 @@ import { NotificationPermissionPrompt } from "./components/NotificationPermissio
 
 const queryClient = new QueryClient();
 
-function AppContent() {
-  const location = useLocation();
-  const hideSidebar = ["/auth", "/install"].includes(location.pathname);
-
-  if (hideSidebar) {
-    return (
-      <Routes>
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/install" element={<Install />} />
-      </Routes>
-    );
-  }
-
+const App = () => {
+  useLanguagePreference();
+  
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar />
-        <main className="flex-1">
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+      <OfflineIndicator />
+      <PWAInstallPrompt />
+      <NotificationPermissionPrompt />
+        <BrowserRouter>
           <Routes>
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/install" element={<Install />} />
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/documentos" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/procedimentos-oficiais" element={<ProtectedRoute><ProcedimentosOficiais /></ProtectedRoute>} />
@@ -70,27 +64,9 @@ function AppContent() {
             <Route path="/novo-servico" element={<ProtectedRoute><NovoServico /></ProtectedRoute>} />
             <Route path="/editar-servico/:id" element={<ProtectedRoute><NovoServico /></ProtectedRoute>} />
             <Route path="/assistente-tecnico" element={<ProtectedRoute><AssistenteTecnico /></ProtectedRoute>} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </main>
-      </div>
-    </SidebarProvider>
-  );
-}
-
-const App = () => {
-  useLanguagePreference();
-  
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <OfflineIndicator />
-        <PWAInstallPrompt />
-        <NotificationPermissionPrompt />
-        <BrowserRouter>
-          <AppContent />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
