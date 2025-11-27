@@ -262,7 +262,15 @@
     "markAsRead": "Mark as read",
     "markAllAsRead": "Mark all as read",
     "noNotifications": "No notifications",
-    "new": "New"
+    "new": "New",
+    "enableTitle": "Enable Push Notifications",
+    "enableDescription": "Receive important alerts even when the app is closed",
+    "benefit1": "Documents expiring soon",
+    "benefit2": "Scheduled maintenance",
+    "benefit3": "Low stock items",
+    "later": "Later",
+    "enable": "Enable",
+    "enabling": "Enabling..."
   },
   "pwa": {
     "offline": "Offline",

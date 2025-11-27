@@ -262,7 +262,15 @@
     "markAsRead": "Marcar como lida",
     "markAllAsRead": "Marcar todas como lidas",
     "noNotifications": "Nenhuma notificação",
-    "new": "Nova"
+    "new": "Nova",
+    "enableTitle": "Ativar Notificações Push",
+    "enableDescription": "Receba alertas importantes mesmo quando o app estiver fechado",
+    "benefit1": "Documentos expirando em breve",
+    "benefit2": "Manutenções agendadas",
+    "benefit3": "Itens com estoque baixo",
+    "later": "Mais tarde",
+    "enable": "Ativar",
+    "enabling": "Ativando..."
   },
   "pwa": {
     "offline": "Offline",
