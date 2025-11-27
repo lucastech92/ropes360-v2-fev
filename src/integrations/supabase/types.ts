@@ -578,6 +578,33 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string | null
+          endpoint: string
+          id: string
+          p256dh: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           aplicacao: string | null
@@ -782,6 +809,18 @@ export type Database = {
       }
     }
     Functions: {
+      check_expiring_documents: { Args: never; Returns: undefined }
+      create_notification_with_push: {
+        Args: {
+          p_message: string
+          p_related_id?: string
+          p_related_module?: string
+          p_title: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
