@@ -18,6 +18,7 @@ import Historico from "./pages/Historico";
 import CheckList from "./pages/CheckList";
 import Inventario from "./pages/Inventario";
 import WireRopeInspection from "./pages/WireRopeInspection";
+import SavedReports from "./pages/SavedReports";
 import Manutencao from "./pages/Manutencao";
 import GerenciarUsuarios from "./pages/GerenciarUsuarios";
 import Servicos from "./pages/Servicos";
@@ -53,6 +54,7 @@ const App = () => {
             <Route path="/treinamento" element={<ProtectedRoute><Treinamento /></ProtectedRoute>} />
             <Route path="/modelos-relatorios" element={<ProtectedRoute><ModelosRelatorios /></ProtectedRoute>} />
             <Route path="/wire-rope-inspection" element={<ProtectedRoute><WireRopeInspection /></ProtectedRoute>} />
+            <Route path="/saved-reports" element={<ProtectedRoute><SavedReports /></ProtectedRoute>} />
             <Route path="/resolucao-problemas" element={<ProtectedRoute><ResolucaoProblemas /></ProtectedRoute>} />
             <Route path="/duvidas-frequentes" element={<ProtectedRoute><DuvidasFrequentes /></ProtectedRoute>} />
             <Route path="/historico" element={<ProtectedRoute><Historico /></ProtectedRoute>} />
