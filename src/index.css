@@ -13,34 +13,34 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Cores de fundo e texto principal */
-    --background: 209 40% 96%;
+    --background: 220 15% 97%;
     --foreground: 222 47% 11%;
 
     /* Cards e superfícies */
-    --card: 210 40% 98%;
+    --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
 
     /* Popovers e dropdowns */
-    --popover: 214 31% 91%;
+    --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
     /* Cor primária - azul profissional inspirado em Bridon-Bekaert */
-    --primary: 200 98% 39%;
-    --primary-foreground: 204 100% 97%;
+    --primary: 215 90% 48%;
+    --primary-foreground: 0 0% 100%;
     --primary-light: 215 85% 60%;
     --primary-dark: 215 95% 38%;
 
     /* Cor secundária */
-    --secondary: 215 24% 26%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 13% 91%;
+    --secondary-foreground: 222 47% 11%;
 
     /* Elementos neutros */
-    --muted: 215 20% 65%;
-    --muted-foreground: 222 47% 11%;
+    --muted: 220 13% 94%;
+    --muted-foreground: 215 16% 47%;
 
     /* Cor de destaque - laranja Bekaert */
-    --accent: 210 40% 98%;
-    --accent-foreground: 215 19% 34%;
+    --accent: 25 95% 55%;
+    --accent-foreground: 0 0% 100%;
     --accent-light: 25 90% 65%;
 
     /* Sucesso */
@@ -52,23 +52,23 @@ All colors MUST be HSL.
     --warning-foreground: 0 0% 100%;
 
     /* Destruição/erro */
-    --destructive: 0 72% 50%;
-    --destructive-foreground: 0 85% 97%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
     /* Bordas e inputs */
-    --border: 212 26% 83%;
-    --input: 212 26% 83%;
-    --ring: 200 98% 39%;
+    --border: 220 13% 87%;
+    --input: 220 13% 91%;
+    --ring: 215 90% 48%;
 
     /* Raio de borda padrão */
     --radius: 0.5rem;
 
     /* Advanced shadows and visual effects */
-    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
-    --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
-    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
+    --shadow-xs: 0 1px 2px 0 hsl(var(--primary) / 0.05);
+    --shadow-sm: 0 1px 3px 0 hsl(var(--primary) / 0.1), 0 1px 2px -1px hsl(var(--primary) / 0.1);
+    --shadow-md: 0 4px 6px -1px hsl(var(--primary) / 0.1), 0 2px 4px -2px hsl(var(--primary) / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(var(--primary) / 0.1), 0 4px 6px -4px hsl(var(--primary) / 0.1);
+    --shadow-xl: 0 20px 25px -5px hsl(var(--primary) / 0.1), 0 8px 10px -6px hsl(var(--primary) / 0.1);
     --shadow-card: 0 2px 8px -2px hsl(var(--primary) / 0.08);
     --shadow-card-hover: 0 8px 24px -4px hsl(var(--primary) / 0.15), 0 0 40px -8px hsl(var(--primary) / 0.2);
     --shadow-glow: 0 0 20px hsl(var(--primary) / 0.2);
@@ -122,30 +122,30 @@ All colors MUST be HSL.
     --foreground: 210 40% 98%;
 
     /* Cards e superfícies */
-    --card: 217 32% 17%;
+    --card: 222 40% 14%;
     --card-foreground: 210 40% 98%;
 
     /* Popovers e dropdowns */
-    --popover: 215 24% 26%;
+    --popover: 222 40% 14%;
     --popover-foreground: 210 40% 98%;
 
     /* Cor primária */
-    --primary: 198 93% 59%;
-    --primary-foreground: 204 80% 15%;
+    --primary: 215 90% 60%;
+    --primary-foreground: 0 0% 100%;
     --primary-light: 215 85% 70%;
     --primary-dark: 215 95% 50%;
 
     /* Cor secundária */
-    --secondary: 212 26% 83%;
-    --secondary-foreground: 228 84% 4%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
 
     /* Elementos neutros */
-    --muted: 215 16% 46%;
-    --muted-foreground: 210 40% 98%;
+    --muted: 217 33% 20%;
+    --muted-foreground: 215 20% 65%;
 
     /* Cor de destaque */
-    --accent: 228 84% 4%;
-    --accent-foreground: 215 20% 65%;
+    --accent: 25 95% 60%;
+    --accent-foreground: 0 0% 100%;
     --accent-light: 25 90% 70%;
 
     /* Sucesso */
@@ -157,13 +157,13 @@ All colors MUST be HSL.
     --warning-foreground: 0 0% 100%;
 
     /* Destruição/erro */
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 85% 97%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
 
     /* Bordas e inputs */
-    --border: 215 19% 34%;
-    --input: 215 19% 34%;
-    --ring: 198 93% 59%;
+    --border: 217 33% 24%;
+    --input: 217 33% 20%;
+    --ring: 215 90% 60%;
 
     --shadow-card: 0 2px 8px -2px hsl(var(--primary) / 0.06);
     --shadow-card-hover: 0 8px 24px -4px hsl(var(--primary) / 0.12), 0 0 40px -8px hsl(var(--primary) / 0.15);
