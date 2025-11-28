@@ -296,10 +296,10 @@ const Manutencao = () => {
 
   const getPriorityBadge = (priority: string) => {
     const priorityConfig = {
-      baixa: { className: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200", label: "Baixa" },
-      media: { className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200", label: "Média" },
-      alta: { className: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200", label: "Alta" },
-      urgente: { className: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200", label: "Urgente" }
+      baixa: { className: "bg-muted text-muted-foreground", label: "Baixa" },
+      media: { className: "bg-muted text-muted-foreground", label: "Média" },
+      alta: { className: "bg-muted text-muted-foreground", label: "Alta" },
+      urgente: { className: "bg-muted text-muted-foreground", label: "Urgente" }
     };
 
     const config = priorityConfig[priority as keyof typeof priorityConfig];
@@ -313,9 +313,9 @@ const Manutencao = () => {
 
   const getTypeBadge = (type: string) => {
     const typeConfig = {
-      preventiva: { className: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200", label: "Preventiva" },
-      corretiva: { className: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200", label: "Corretiva" },
-      preditiva: { className: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200", label: "Preditiva" }
+      preventiva: { className: "bg-muted text-muted-foreground", label: "Preventiva" },
+      corretiva: { className: "bg-muted text-muted-foreground", label: "Corretiva" },
+      preditiva: { className: "bg-muted text-muted-foreground", label: "Preditiva" }
     };
 
     const config = typeConfig[type as keyof typeof typeConfig];
