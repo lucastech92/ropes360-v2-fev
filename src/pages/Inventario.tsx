@@ -25,6 +25,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 
 interface InventoryItem {
@@ -53,6 +63,7 @@ const Inventario = () => {
     notes: "",
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -170,11 +181,13 @@ const Inventario = () => {
     fetchItems();
   };
 
-  const deleteItem = async (id: string) => {
+  const confirmDeleteItem = async () => {
+    if (!deleteItemId) return;
+
     const { error } = await supabase
       .from("inventory")
       .delete()
-      .eq("id", id);
+      .eq("id", deleteItemId);
 
     if (error) {
       toast({
@@ -190,6 +203,7 @@ const Inventario = () => {
       description: "Item foi removido do inventário",
     });
 
+    setDeleteItemId(null);
     fetchItems();
   };
 
@@ -380,7 +394,7 @@ const Inventario = () => {
                                 <Button size="sm" variant="outline" onClick={() => setEditingItem(item)}>
                                   Editar
                                 </Button>
-                                <Button size="sm" variant="outline" onClick={() => deleteItem(item.id)}>
+                                <Button size="sm" variant="outline" onClick={() => setDeleteItemId(item.id)}>
                                   <Trash2 className="h-4 w-4 text-destructive" />
                                 </Button>
                               </>
@@ -395,6 +409,23 @@ const Inventario = () => {
             </div>
           </CardContent>
         </Card>
+
+        <AlertDialog open={!!deleteItemId} onOpenChange={(open) => !open && setDeleteItemId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja remover este item do inventário? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDeleteItem} className="bg-destructive hover:bg-destructive/90">
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </main>
     </div>
   );

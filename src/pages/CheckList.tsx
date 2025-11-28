@@ -23,6 +23,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -65,6 +75,7 @@ const CheckList = () => {
   const [newChecklistDescription, setNewChecklistDescription] = useState("");
   const [newChecklistServiceTag, setNewChecklistServiceTag] = useState("");
   const [newChecklistType, setNewChecklistType] = useState<'entrada' | 'saida'>('saida');
+  const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -194,11 +205,13 @@ const CheckList = () => {
     });
   };
 
-  const deleteItem = async (itemId: string) => {
+  const confirmDeleteItem = async () => {
+    if (!deleteItemId) return;
+
     const { error } = await supabase
       .from("checklist_items")
       .delete()
-      .eq("id", itemId);
+      .eq("id", deleteItemId);
 
     if (error) {
       toast({
@@ -209,7 +222,8 @@ const CheckList = () => {
       return;
     }
 
-    setItems(items.filter(item => item.id !== itemId));
+    setItems(items.filter(item => item.id !== deleteItemId));
+    setDeleteItemId(null);
     await fetchInventoryItems();
     toast({
       title: "Item removido",
@@ -564,7 +578,7 @@ const CheckList = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => deleteItem(item.id)}
+                      onClick={() => setDeleteItemId(item.id)}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
@@ -604,6 +618,23 @@ const CheckList = () => {
             </Card>
           )}
         </div>
+
+        <AlertDialog open={!!deleteItemId} onOpenChange={(open) => !open && setDeleteItemId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja remover este item do checklist? O estoque será atualizado automaticamente e esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDeleteItem} className="bg-destructive hover:bg-destructive/90">
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </main>
     </div>
   );

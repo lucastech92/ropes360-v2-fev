@@ -10,7 +10,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const ESCOPO_OPTIONS = [
   "MRT - Eletromagnético",
@@ -27,6 +37,7 @@ const NovoServico = () => {
   const { id } = useParams();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [formData, setFormData] = useState({
     codigo_jbr: "",
     cliente: "",
@@ -134,6 +145,37 @@ const NovoServico = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!id) return;
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from("services")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Serviço excluído",
+        description: "O serviço foi removido com sucesso.",
+      });
+
+      navigate("/servicos");
+    } catch (error) {
+      console.error("Error deleting service:", error);
+      toast({
+        title: "Erro ao excluir serviço",
+        description: "Não foi possível remover o serviço. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+      setShowDeleteDialog(false);
     }
   };
 
@@ -278,22 +320,53 @@ const NovoServico = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate("/servicos")}
-                  disabled={loading}
-                >
-                  {t('common.cancel')}
-                </Button>
-                <Button type="submit" disabled={loading}>
-                  {loading ? t('common.saving') : id ? t('common.update') : t('common.save')}
-                </Button>
+              <div className="flex justify-between gap-4">
+                {id && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowDeleteDialog(true)}
+                    disabled={loading}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Excluir Serviço
+                  </Button>
+                )}
+                <div className="flex gap-4 ml-auto">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => navigate("/servicos")}
+                    disabled={loading}
+                  >
+                    {t('common.cancel')}
+                  </Button>
+                  <Button type="submit" disabled={loading}>
+                    {loading ? t('common.saving') : id ? t('common.update') : t('common.save')}
+                  </Button>
+                </div>
               </div>
             </form>
           </CardContent>
         </Card>
+
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir o serviço {formData.codigo_jbr}? Esta ação não pode ser desfeita e todos os dados relacionados serão permanentemente removidos.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+                Excluir Serviço
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
