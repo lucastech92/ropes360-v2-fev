@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
-import { FileText, ClipboardList } from "lucide-react";
+import { FileText, ClipboardList, FolderOpen } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,9 +46,19 @@ const ModelosRelatorios = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full">
-                    Criar Novo Relatório
-                  </Button>
+                  <div className="space-y-2">
+                    <Button className="w-full" onClick={(e) => { e.stopPropagation(); navigate("/wire-rope-inspection"); }}>
+                      Criar Novo Relatório
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full" 
+                      onClick={(e) => { e.stopPropagation(); navigate("/saved-reports"); }}
+                    >
+                      <FolderOpen className="h-4 w-4 mr-2" />
+                      Ver Relatórios Salvos
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </div>

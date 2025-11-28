@@ -440,6 +440,42 @@ export type Database = {
           },
         ]
       }
+      inspection_reports: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          report_data: Json
+          report_number: string
+          status: string
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          report_data: Json
+          report_number: string
+          status?: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          report_data?: Json
+          report_number?: string
+          status?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       inventory: {
         Row: {
           category: string | null

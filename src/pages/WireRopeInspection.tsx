@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,9 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, Trash2, Upload, FileText } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Plus, Trash2, Upload, FileText, Save, Clock, FolderOpen } from "lucide-react";
 import { toast } from "sonner";
 import { generateWireRopeReportPDF } from "@/utils/wireRopeReportPDF";
+import { supabase } from "@/integrations/supabase/client";
+import { useAutoSave } from "@/hooks/useAutoSave";
 
 interface MeasurementRow {
   id: string;
@@ -33,6 +36,13 @@ interface PhotoEntry {
 
 const WireRopeInspection = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const reportId = searchParams.get('id');
+  
+  const [currentReportId, setCurrentReportId] = useState<string | null>(reportId);
+  const [loading, setLoading] = useState(!!reportId);
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
+  
   const [reportNumber, setReportNumber] = useState(`LS BR ${String(Math.floor(Math.random() * 9000) + 1000)}`);
   const [inspectionDate, setInspectionDate] = useState(new Date().toISOString().split('T')[0]);
   const [inspector, setInspector] = useState("");
@@ -79,6 +89,164 @@ const WireRopeInspection = () => {
   const [recommendations, setRecommendations] = useState("");
   const [conductedBy, setConductedBy] = useState("");
   const [approvedBy, setApprovedBy] = useState("");
+
+  // Prepare data for auto-save
+  const reportData = {
+    reportNumber,
+    inspectionDate,
+    inspector,
+    client,
+    location,
+    jbr,
+    application,
+    manufacturer,
+    installationDate,
+    manufacturingDate,
+    originalCertificate,
+    construction,
+    nominalDiameter,
+    referenceDiameter,
+    measuredDiameter,
+    originalLength,
+    magneticHead,
+    magneticHeadSerial,
+    sensorUsed,
+    dataLoggerSerial,
+    measurements,
+    lmaGraphPreview,
+    lfGraphPreview,
+    velocityGraphPreview,
+    lmaObservations,
+    lfObservations,
+    photos: photos.map(p => ({ id: p.id, preview: p.preview, caption: p.caption })),
+    conclusion,
+    recommendations,
+    conductedBy,
+    approvedBy
+  };
+
+  // Auto-save hook
+  useAutoSave({
+    data: reportData,
+    reportId: currentReportId,
+    onSave: (id) => {
+      if (!currentReportId) {
+        setCurrentReportId(id);
+        window.history.replaceState({}, '', `/wire-rope-inspection?id=${id}`);
+      }
+    },
+    enabled: autoSaveEnabled
+  });
+
+  // Load report data if editing
+  useEffect(() => {
+    if (reportId) {
+      loadReport(reportId);
+    }
+  }, [reportId]);
+
+  const loadReport = async (id: string) => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('inspection_reports')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+
+      const rd = data.report_data as any;
+      setReportNumber(rd.reportNumber || '');
+      setInspectionDate(rd.inspectionDate || '');
+      setInspector(rd.inspector || '');
+      setClient(rd.client || '');
+      setLocation(rd.location || '');
+      setJbr(rd.jbr || '');
+      setApplication(rd.application || '');
+      setManufacturer(rd.manufacturer || '');
+      setInstallationDate(rd.installationDate || '');
+      setManufacturingDate(rd.manufacturingDate || '');
+      setOriginalCertificate(rd.originalCertificate || '');
+      setConstruction(rd.construction || '');
+      setNominalDiameter(rd.nominalDiameter || '');
+      setReferenceDiameter(rd.referenceDiameter || '');
+      setMeasuredDiameter(rd.measuredDiameter || '');
+      setOriginalLength(rd.originalLength || '');
+      setMagneticHead(rd.magneticHead || '');
+      setMagneticHeadSerial(rd.magneticHeadSerial || '');
+      setSensorUsed(rd.sensorUsed || '');
+      setDataLoggerSerial(rd.dataLoggerSerial || '');
+      setMeasurements(rd.measurements || []);
+      setLmaGraphPreview(rd.lmaGraphPreview || '');
+      setLfGraphPreview(rd.lfGraphPreview || '');
+      setVelocityGraphPreview(rd.velocityGraphPreview || '');
+      setLmaObservations(rd.lmaObservations || '');
+      setLfObservations(rd.lfObservations || '');
+      
+      if (rd.photos && Array.isArray(rd.photos)) {
+        const loadedPhotos: PhotoEntry[] = rd.photos.map((p: any) => ({
+          id: p.id,
+          file: null as any,
+          preview: p.preview,
+          caption: p.caption || ''
+        }));
+        setPhotos(loadedPhotos);
+      }
+      
+      setConclusion(rd.conclusion || '');
+      setRecommendations(rd.recommendations || '');
+      setConductedBy(rd.conductedBy || '');
+      setApprovedBy(rd.approvedBy || '');
+
+      toast.success("Relatório carregado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao carregar relatório:", error);
+      toast.error("Erro ao carregar o relatório");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const manualSave = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      const saveData = {
+        user_id: user.id,
+        report_number: reportNumber,
+        title: client ? `${client} - ${location || 'Sem local'}` : 'Rascunho sem título',
+        status: 'draft',
+        report_data: reportData as any,
+        updated_at: new Date().toISOString()
+      };
+
+      if (currentReportId) {
+        const { error } = await supabase
+          .from('inspection_reports')
+          .update(saveData)
+          .eq('id', currentReportId);
+
+        if (error) throw error;
+      } else {
+        const { data: newReport, error } = await supabase
+          .from('inspection_reports')
+          .insert([saveData])
+          .select()
+          .single();
+
+        if (error) throw error;
+        setCurrentReportId(newReport.id);
+        window.history.replaceState({}, '', `/wire-rope-inspection?id=${newReport.id}`);
+      }
+
+      toast.success("Rascunho salvo com sucesso!");
+    } catch (error) {
+      console.error("Erro ao salvar:", error);
+      toast.error("Erro ao salvar o rascunho");
+    }
+  };
 
   const addMeasurement = () => {
     const newMeasurement: MeasurementRow = {
@@ -149,41 +317,21 @@ const WireRopeInspection = () => {
 
   const generatePDF = async () => {
     try {
-      const reportData = {
-        reportNumber,
-        inspectionDate,
-        inspector,
-        client,
-        location,
-        jbr,
-        application,
-        manufacturer,
+      // Mark as completed when generating PDF
+      if (currentReportId) {
+        await supabase
+          .from('inspection_reports')
+          .update({ status: 'completed', completed_at: new Date().toISOString() })
+          .eq('id', currentReportId);
+      }
+
+      const pdfData = {
+        ...reportData,
         installationDate: installationDate || "Não informado",
-        manufacturingDate,
-        originalCertificate,
-        construction,
-        nominalDiameter,
-        referenceDiameter,
-        measuredDiameter,
-        originalLength,
-        magneticHead,
-        magneticHeadSerial,
-        sensorUsed,
-        dataLoggerSerial,
-        measurements,
-        lmaGraphPreview,
-        lfGraphPreview,
-        velocityGraphPreview,
-        lmaObservations,
-        lfObservations,
-        photos,
-        conclusion,
-        recommendations,
-        conductedBy,
-        approvedBy
+        photos: photos
       };
 
-      await generateWireRopeReportPDF(reportData);
+      await generateWireRopeReportPDF(pdfData);
       toast.success("Relatório PDF gerado com sucesso!");
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
@@ -191,16 +339,54 @@ const WireRopeInspection = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container py-8">
+          <div className="text-center py-20">
+            <Clock className="h-12 w-12 mx-auto mb-4 text-muted-foreground animate-spin" />
+            <p className="text-muted-foreground">Carregando relatório...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container py-8">
-        <div className="mb-6 flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate("/modelos-relatorios")}>
-            <ArrowLeft className="h-4 w-4" />
-            Voltar
-          </Button>
-          <h1 className="text-3xl font-bold">Relatório de Inspeção de Cabo de Aço</h1>
+        <div className="mb-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" onClick={() => navigate("/modelos-relatorios")}>
+                <ArrowLeft className="h-4 w-4" />
+                Voltar
+              </Button>
+              <div>
+                <h1 className="text-3xl font-bold">Relatório de Inspeção de Cabo de Aço</h1>
+                {currentReportId && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant="outline" className="text-xs">
+                      <Clock className="h-3 w-3 mr-1" />
+                      Auto-save ativo
+                    </Badge>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => navigate("/saved-reports")}>
+                <FolderOpen className="h-4 w-4 mr-2" />
+                Ver Relatórios
+              </Button>
+              <Button variant="outline" onClick={manualSave}>
+                <Save className="h-4 w-4 mr-2" />
+                Salvar Agora
+              </Button>
+            </div>
+          </div>
         </div>
 
         <Tabs defaultValue="header" className="space-y-6">
