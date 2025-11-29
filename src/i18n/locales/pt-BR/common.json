@@ -245,7 +245,13 @@
     "iso4309": "ISO 4309",
     "internalData": "Dados Internos",
     "accessProfiles": "Perfis de Acesso",
-    "noMessages": "Nenhuma mensagem ainda. Comece fazendo uma pergunta!"
+    "noMessages": "Nenhuma mensagem ainda. Comece fazendo uma pergunta!",
+    "sendImage": "Enviar imagem",
+    "analyzing": "Analisando imagem...",
+    "imageAnalyzed": "Imagem analisada com sucesso",
+    "imageError": "Erro ao analisar imagem",
+    "addComment": "Adicione um comentário (opcional)...",
+    "typeOrSendImage": "Digite sua pergunta ou envie uma imagem..."
   },
   "history": {
     "title": "Histórico",
