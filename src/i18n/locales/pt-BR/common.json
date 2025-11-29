@@ -212,7 +212,27 @@
     "photoGallery": "Galeria de Fotos",
     "conclusion": "Conclusão",
     "recommendations": "Recomendações",
-    "generatePDF": "Gerar PDF"
+    "generatePDF": "Gerar PDF",
+    "aiAnalysis": {
+      "analyzing": "Analisando imagem com IA...",
+      "analyzeButton": "Analisar com IA",
+      "result": "Resultado da Análise",
+      "confidence": "Confiança",
+      "overallSeverity": "Severidade Geral",
+      "suggestedAction": "Ação Sugerida",
+      "damagesIdentified": "Danos Identificados",
+      "recommendations": "Recomendações",
+      "actions": {
+        "continue": "Continuar operação",
+        "monitor": "Monitorar",
+        "replace": "Substituir"
+      },
+      "severityLevels": {
+        "mild": "Leve",
+        "moderate": "Moderado",
+        "severe": "Severo"
+      }
+    }
   },
   "assistant": {
     "title": "Assistente Técnico",

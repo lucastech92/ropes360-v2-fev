@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { generateWireRopeReportPDF } from "@/utils/wireRopeReportPDF";
 import { supabase } from "@/integrations/supabase/client";
 import { useAutoSave } from "@/hooks/useAutoSave";
+import { CableImageAnalyzer } from "@/components/CableImageAnalyzer";
 
 interface MeasurementRow {
   id: string;
@@ -811,23 +812,36 @@ const WireRopeInspection = () => {
                 <div className="grid gap-4">
                   {photos.map((photo) => (
                     <Card key={photo.id} className="p-4">
-                      <div className="grid gap-4 md:grid-cols-[200px,1fr,auto]">
-                        <img src={photo.preview} alt="Inspection" className="rounded-lg object-cover h-32 w-full" />
-                        <div className="space-y-2">
-                          <Label>Legenda</Label>
-                          <Textarea
-                            value={photo.caption}
-                            onChange={(e) => updatePhotoCaption(photo.id, e.target.value)}
-                            rows={3}
-                          />
+                      <div className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-[200px,1fr,auto]">
+                          <img src={photo.preview} alt="Inspection" className="rounded-lg object-cover h-32 w-full" />
+                          <div className="space-y-2">
+                            <Label>Legenda</Label>
+                            <Textarea
+                              value={photo.caption}
+                              onChange={(e) => updatePhotoCaption(photo.id, e.target.value)}
+                              rows={3}
+                            />
+                          </div>
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            onClick={() => removePhoto(photo.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => removePhoto(photo.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <CableImageAnalyzer 
+                          imagePreview={photo.preview}
+                          onAnalysisComplete={(analysis) => {
+                            // Auto-fill caption with first damage type
+                            if (analysis.damageTypes.length > 0) {
+                              const firstDamage = analysis.damageTypes[0];
+                              const autoCaption = `${firstDamage.type} - Severidade: ${firstDamage.severity}% - ${firstDamage.location}`;
+                              updatePhotoCaption(photo.id, autoCaption);
+                            }
+                          }}
+                        />
                       </div>
                     </Card>
                   ))}
