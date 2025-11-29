@@ -44,11 +44,11 @@ serve(async (req) => {
       console.log('⚠️ Auth check failed, continuing as anonymous');
     }
 
-    const { reportId, fileBase64, fileName, scopeType, client } = await req.json();
-    console.log('📄 Processing:', { reportId, fileName, scopeType, client });
+    const { reportId, fileBase64, fileContent, fileName, scopeType, client } = await req.json();
+    console.log('📄 Processing:', { reportId, fileName, scopeType, client, hasBase64: !!fileBase64, hasContent: !!fileContent });
 
     let reportData: any = null;
-    let fileContent = '';
+    let documentContent = '';
 
     // Get report data from database or file
     if (reportId) {
@@ -60,10 +60,13 @@ serve(async (req) => {
       
       if (error) throw error;
       reportData = data;
-      fileContent = JSON.stringify(data.report_data, null, 2);
+      documentContent = JSON.stringify(data.report_data, null, 2);
+    } else if (fileContent) {
+      // Text extracted from DOCX/XLSX
+      documentContent = fileContent;
     } else if (fileBase64) {
-      // For PDF files, we'll analyze the structure
-      fileContent = `Arquivo PDF: ${fileName}`;
+      // For PDFs, we'll use visual analysis (no text content needed here)
+      documentContent = `Arquivo PDF: ${fileName}`;
     }
 
     // Get existing patterns for this scope type
@@ -117,21 +120,22 @@ Analise o relatório fornecido e retorne uma avaliação estruturada.`;
       { type: 'text', text: userPrompt }
     ];
 
-    // Add document content - use multimodal for files, text for JSON data
-    if (fileBase64) {
-      // For files (PDF, DOCX, etc), send as base64 for visual analysis
-      const mimeType = fileName.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 
-                       fileName.toLowerCase().endsWith('.docx') ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' :
-                       fileName.toLowerCase().endsWith('.xlsx') ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' :
-                       'application/octet-stream';
+    // Add document content - use multimodal only for PDFs, text for everything else
+    if (fileBase64 && fileName.toLowerCase().endsWith('.pdf')) {
+      // Only PDFs support visual analysis with Gemini
       contentArray.push({
         type: 'image_url',
-        image_url: { url: `data:${mimeType};base64,${fileBase64}` }
+        image_url: { url: `data:application/pdf;base64,${fileBase64}` }
       });
-      console.log('📎 Sending file for visual analysis:', fileName, mimeType);
-    } else if (fileContent) {
-      // For JSON data from database
-      contentArray[0].text += `\n\nCONTEÚDO DO RELATÓRIO:\n${fileContent}`;
+      console.log('📎 Sending PDF for visual analysis:', fileName);
+    } else if (documentContent) {
+      // For extracted text from DOCX/XLSX or JSON data from database
+      contentArray[0].text += `\n\n=== CONTEÚDO DO RELATÓRIO ===\n${documentContent}\n=== FIM DO CONTEÚDO ===`;
+      console.log('📄 Sending extracted text for analysis');
+    } else if (fileBase64) {
+      // DOCX/XLSX sent as base64 - should have been extracted on client
+      console.error('⚠️ Received non-PDF binary file - text extraction should happen on client');
+      throw new Error('Arquivos DOCX/XLSX devem ter o texto extraído antes do envio. Por favor, tente novamente.');
     }
 
     console.log('🤖 Calling AI with tool calling for structured output...');
