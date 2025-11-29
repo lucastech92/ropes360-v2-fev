@@ -24,6 +24,9 @@ import { Button } from "@/components/ui/button";
 import { InventoryDetailsDialog } from "@/components/dashboard/InventoryDetailsDialog";
 import { ServicesDetailsDialog } from "@/components/dashboard/ServicesDetailsDialog";
 import { MaintenanceDetailsDialog } from "@/components/dashboard/MaintenanceDetailsDialog";
+import { ServicesEvolutionChart } from "@/components/dashboard/ServicesEvolutionChart";
+import { MaintenanceTypeChart } from "@/components/dashboard/MaintenanceTypeChart";
+import { InventoryTrendsChart } from "@/components/dashboard/InventoryTrendsChart";
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -362,43 +365,93 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Atividades Recentes */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              {t('dashboard.recentActivities')}
-            </CardTitle>
-            <CardDescription>
-              {t('dashboard.last5Actions')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {dashboardData.activity.recent.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                {t('dashboard.noActivity')}
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {dashboardData.activity.recent.map((activity) => (
-                  <div key={activity.id} className="flex items-start gap-4 pb-4 border-b last:border-0">
-                    <div className="mt-1">
-                      <Badge variant="outline" className="capitalize">
-                        {activity.module}
-                      </Badge>
+        {/* Gráficos Analíticos */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Evolução de Serviços
+              </CardTitle>
+              <CardDescription>
+                Serviços executados nos últimos 6 meses
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ServicesEvolutionChart services={dashboardData.services.data} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Tipos de Manutenção
+              </CardTitle>
+              <CardDescription>
+                Distribuição por tipo
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <MaintenanceTypeChart maintenanceRecords={dashboardData.maintenance.data} />
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                Análise de Inventário
+              </CardTitle>
+              <CardDescription>
+                Itens por categoria e status de estoque
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <InventoryTrendsChart inventory={dashboardData.inventory.data} />
+            </CardContent>
+          </Card>
+
+          {/* Atividades Recentes */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                {t('dashboard.recentActivities')}
+              </CardTitle>
+              <CardDescription>
+                {t('dashboard.last5Actions')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {dashboardData.activity.recent.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">
+                  {t('dashboard.noActivity')}
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {dashboardData.activity.recent.map((activity) => (
+                    <div key={activity.id} className="flex items-start gap-4 pb-4 border-b last:border-0">
+                      <div className="mt-1">
+                        <Badge variant="outline" className="capitalize">
+                          {activity.module}
+                        </Badge>
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <p className="text-sm font-medium">{activity.description}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(activity.created_at).toLocaleString("pt-BR")}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium">{activity.description}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(activity.created_at).toLocaleString("pt-BR")}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Dialogs */}
         <InventoryDetailsDialog
