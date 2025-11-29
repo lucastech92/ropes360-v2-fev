@@ -12,22 +12,40 @@ serve(async (req) => {
   }
 
   try {
+    console.log('📥 Request received for analyze-report');
+    
+    const authHeader = req.headers.get('Authorization');
+    console.log('📋 Auth header present:', !!authHeader);
+
+    // Client for reading data (uses anon key with optional auth)
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
         global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
+          headers: authHeader ? { Authorization: authHeader } : {},
         },
       }
     );
 
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) {
-      throw new Error('Unauthorized');
+    // Admin client for writing data (uses service role)
+    const adminClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    // Try to get user, but don't fail if not authenticated
+    let userId: string | null = null;
+    try {
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      userId = user?.id || null;
+      console.log('👤 User ID:', userId || 'anonymous');
+    } catch (e) {
+      console.log('⚠️ Auth check failed, continuing as anonymous');
     }
 
     const { reportId, fileBase64, fileName, scopeType, client } = await req.json();
+    console.log('📄 Processing:', { reportId, fileName, scopeType, client });
 
     let reportData: any = null;
     let fileContent = '';
@@ -120,8 +138,10 @@ Retorne em formato JSON estruturado.`;
     const aiData = await aiResponse.json();
     const analysis = JSON.parse(aiData.choices[0].message.content);
 
-    // Store the knowledge
-    const { data: knowledge, error: knowledgeError } = await supabaseClient
+    console.log('✅ AI analysis complete. Score:', analysis.quality_score);
+
+    // Store the knowledge using admin client
+    const { data: knowledge, error: knowledgeError } = await adminClient
       .from('report_knowledge')
       .insert({
         report_id: reportId,
@@ -132,19 +152,22 @@ Retorne em formato JSON estruturado.`;
         quality_score: analysis.quality_score,
         strengths: analysis.strengths || [],
         improvements: analysis.improvements || [],
-        created_by: user.id,
+        created_by: userId,
       })
       .select()
       .single();
 
     if (knowledgeError) {
-      console.error('Error storing knowledge:', knowledgeError);
+      console.error('❌ Error storing knowledge:', knowledgeError);
+    } else {
+      console.log('💾 Knowledge stored with ID:', knowledge?.id);
     }
 
-    // Update or create patterns
+    // Update or create patterns using admin client
     if (analysis.new_patterns && Array.isArray(analysis.new_patterns)) {
+      console.log('🔄 Processing', analysis.new_patterns.length, 'new patterns');
       for (const pattern of analysis.new_patterns) {
-        const { data: existing } = await supabaseClient
+        const { data: existing } = await adminClient
           .from('report_patterns')
           .select('*')
           .eq('scope_type', scopeType || 'general')
@@ -154,7 +177,7 @@ Retorne em formato JSON estruturado.`;
 
         if (existing) {
           // Update frequency and average score
-          await supabaseClient
+          await adminClient
             .from('report_patterns')
             .update({
               frequency: existing.frequency + 1,
@@ -162,9 +185,10 @@ Retorne em formato JSON estruturado.`;
               updated_at: new Date().toISOString(),
             })
             .eq('id', existing.id);
+          console.log('📈 Updated pattern:', pattern.type);
         } else {
           // Create new pattern
-          await supabaseClient
+          await adminClient
             .from('report_patterns')
             .insert({
               scope_type: scopeType || 'general',
@@ -174,6 +198,7 @@ Retorne em formato JSON estruturado.`;
               average_score: analysis.quality_score,
               examples: [{ report_id: reportId, knowledge_id: knowledge?.id }],
             });
+          console.log('✨ Created new pattern:', pattern.type);
         }
       }
     }
