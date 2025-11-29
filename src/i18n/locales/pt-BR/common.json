@@ -251,7 +251,14 @@
     "imageAnalyzed": "Imagem analisada com sucesso",
     "imageError": "Erro ao analisar imagem",
     "addComment": "Adicione um comentário (opcional)...",
-    "typeOrSendImage": "Digite sua pergunta ou envie uma imagem..."
+    "typeOrSendImage": "Digite sua pergunta, envie uma imagem ou relatório...",
+    "uploadReport": "Enviar relatório",
+    "analyzingReport": "Analisando relatório...",
+    "reportAnalyzed": "Relatório analisado com sucesso",
+    "reportError": "Erro ao analisar relatório",
+    "addContext": "Adicione contexto sobre o relatório (opcional)...",
+    "unsupportedFormat": "Formato não suportado",
+    "supportedFormats": "Por favor, envie um arquivo PDF, DOCX ou XLSX"
   },
   "history": {
     "title": "Histórico",

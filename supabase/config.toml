@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.analyze-cable-image]
 verify_jwt = false
+
+[functions.analyze-report]
+verify_jwt = false

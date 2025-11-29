@@ -641,6 +641,92 @@ export type Database = {
         }
         Relationships: []
       }
+      report_knowledge: {
+        Row: {
+          client: string | null
+          created_at: string
+          created_by: string | null
+          extracted_data: Json | null
+          id: string
+          improvements: string[] | null
+          quality_score: number | null
+          report_id: string | null
+          scope_type: string
+          strengths: string[] | null
+          uploaded_file_path: string | null
+        }
+        Insert: {
+          client?: string | null
+          created_at?: string
+          created_by?: string | null
+          extracted_data?: Json | null
+          id?: string
+          improvements?: string[] | null
+          quality_score?: number | null
+          report_id?: string | null
+          scope_type: string
+          strengths?: string[] | null
+          uploaded_file_path?: string | null
+        }
+        Update: {
+          client?: string | null
+          created_at?: string
+          created_by?: string | null
+          extracted_data?: Json | null
+          id?: string
+          improvements?: string[] | null
+          quality_score?: number | null
+          report_id?: string | null
+          scope_type?: string
+          strengths?: string[] | null
+          uploaded_file_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_knowledge_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "inspection_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_patterns: {
+        Row: {
+          average_score: number | null
+          created_at: string
+          description: string
+          examples: Json | null
+          frequency: number
+          id: string
+          pattern_type: string
+          scope_type: string
+          updated_at: string
+        }
+        Insert: {
+          average_score?: number | null
+          created_at?: string
+          description: string
+          examples?: Json | null
+          frequency?: number
+          id?: string
+          pattern_type: string
+          scope_type: string
+          updated_at?: string
+        }
+        Update: {
+          average_score?: number | null
+          created_at?: string
+          description?: string
+          examples?: Json | null
+          frequency?: number
+          id?: string
+          pattern_type?: string
+          scope_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           aplicacao: string | null
