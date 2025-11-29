@@ -21,7 +21,10 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
-  Clock
+  Clock,
+  Camera,
+  X,
+  Image as ImageIcon
 } from "lucide-react";
 
 interface Message {
@@ -41,7 +44,11 @@ const AssistenteTecnico = () => {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [analyzingImage, setAnalyzingImage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     checkUserRole();
@@ -204,9 +211,75 @@ const AssistenteTecnico = () => {
     }
   };
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const analyzeImage = async (imageBase64: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-cable-image', {
+        body: { imageBase64 }
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (error: any) {
+      console.error('Error analyzing image:', error);
+      throw error;
+    }
+  };
+
+  const formatAnalysisResult = (analysis: any) => {
+    const { overallSeverity, suggestedAction, damageTypes, recommendations, overallAssessment, confidence } = analysis;
+    
+    let result = `## 📊 Análise de Imagem Completa\n\n`;
+    result += `**Severidade Geral:** ${overallSeverity}% - ${overallSeverity < 30 ? 'Leve' : overallSeverity < 60 ? 'Moderada' : 'Severa'}\n`;
+    result += `**Ação Sugerida:** ${suggestedAction === 'continue' ? '✅ Continuar em Uso' : suggestedAction === 'monitor' ? '⚠️ Monitorar Regularmente' : '🔴 Substituir Imediatamente'}\n`;
+    result += `**Confiança:** ${confidence}%\n\n`;
+    
+    if (damageTypes && damageTypes.length > 0) {
+      result += `### Danos Detectados:\n`;
+      damageTypes.forEach((damage: any) => {
+        result += `- **${damage.type}** (${damage.severity}%): ${damage.description}\n`;
+      });
+      result += `\n`;
+    }
+    
+    if (overallAssessment) {
+      result += `### Avaliação:\n${overallAssessment}\n\n`;
+    }
+    
+    if (recommendations && recommendations.length > 0) {
+      result += `### Recomendações:\n`;
+      recommendations.forEach((rec: string) => {
+        result += `- ${rec}\n`;
+      });
+    }
+    
+    return result;
+  };
+
   const sendMessage = async () => {
-    console.log('sendMessage called', { inputMessage, conversationId });
-    if (!inputMessage.trim() || !conversationId) {
+    console.log('sendMessage called', { inputMessage, conversationId, hasImage: !!selectedImage });
+    
+    // Allow sending if there's either a message or an image
+    if ((!inputMessage.trim() && !selectedImage) || !conversationId) {
       console.log('Validation failed', { hasInput: !!inputMessage.trim(), hasConversation: !!conversationId });
       if (!conversationId) {
         toast({
@@ -218,6 +291,72 @@ const AssistenteTecnico = () => {
       return;
     }
 
+    // Handle image analysis if image is present
+    if (selectedImage && imagePreview) {
+      const imageMessage: Message = { 
+        role: 'user', 
+        content: inputMessage.trim() || '📷 Imagem enviada para análise' 
+      };
+      setMessages(prev => [...prev, imageMessage]);
+      setInputMessage("");
+      setIsLoading(true);
+      setAnalyzingImage(true);
+
+      try {
+        // Save user message
+        await (supabase as any).from('assistant_messages').insert({
+          conversation_id: conversationId,
+          role: 'user',
+          content: imageMessage.content,
+        });
+
+        // Show analyzing message
+        setMessages(prev => [...prev, { role: 'assistant', content: '🔍 Analisando imagem...' }]);
+
+        // Analyze image
+        const analysisResult = await analyzeImage(imagePreview);
+        
+        if (analysisResult.success) {
+          const formattedResult = formatAnalysisResult(analysisResult.analysis);
+          
+          // Update last message with analysis result
+          setMessages(prev => {
+            const newMessages = [...prev];
+            newMessages[newMessages.length - 1] = { role: 'assistant', content: formattedResult };
+            return newMessages;
+          });
+
+          // Save assistant message
+          await (supabase as any).from('assistant_messages').insert({
+            conversation_id: conversationId,
+            role: 'assistant',
+            content: formattedResult,
+          });
+
+          toast({
+            title: "Análise Concluída",
+            description: "A imagem foi analisada com sucesso.",
+          });
+        } else {
+          throw new Error(analysisResult.error || 'Erro ao analisar imagem');
+        }
+      } catch (error: any) {
+        // Remove analyzing message and show error
+        setMessages(prev => prev.slice(0, -1));
+        toast({
+          title: "Erro ao analisar imagem",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+        setAnalyzingImage(false);
+        clearImage();
+      }
+      return;
+    }
+
+    // Regular text message
     const userMessage: Message = { role: 'user', content: inputMessage };
     setMessages(prev => [...prev, userMessage]);
     setInputMessage("");
@@ -455,18 +594,62 @@ const AssistenteTecnico = () => {
                       <p className="text-sm">Inicializando conversa...</p>
                     </div>
                   ) : (
-                    <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
-                      <Input
-                        value={inputMessage}
-                        onChange={(e) => setInputMessage(e.target.value)}
-                        placeholder="Digite sua pergunta..."
-                        disabled={isLoading}
-                        className="flex-1"
-                      />
-                      <Button type="submit" disabled={isLoading || !inputMessage.trim()}>
-                        <Send className="h-4 w-4" />
-                      </Button>
-                    </form>
+                    <div className="space-y-2">
+                      {imagePreview && (
+                        <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                          <div className="relative w-16 h-16 rounded overflow-hidden">
+                            <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{selectedImage?.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {selectedImage ? (selectedImage.size / 1024 / 1024).toFixed(2) : '0'} MB
+                            </p>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={clearImage}
+                            disabled={isLoading}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                      <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageSelect}
+                          className="hidden"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isLoading || !!selectedImage}
+                          title="Enviar imagem"
+                        >
+                          <Camera className="h-4 w-4" />
+                        </Button>
+                        <Input
+                          value={inputMessage}
+                          onChange={(e) => setInputMessage(e.target.value)}
+                          placeholder={selectedImage ? "Adicione um comentário (opcional)..." : "Digite sua pergunta ou envie uma imagem..."}
+                          disabled={isLoading}
+                          className="flex-1"
+                        />
+                        <Button 
+                          type="submit" 
+                          disabled={isLoading || (!inputMessage.trim() && !selectedImage)}
+                        >
+                          {analyzingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                        </Button>
+                      </form>
+                    </div>
                   )}
                 </div>
               </CardContent>
