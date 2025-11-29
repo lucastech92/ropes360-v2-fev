@@ -47,8 +47,11 @@ const AssistenteTecnico = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [analyzingImage, setAnalyzingImage] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<File | null>(null);
+  const [analyzingDocument, setAnalyzingDocument] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     checkUserRole();
@@ -231,6 +234,98 @@ const AssistenteTecnico = () => {
     }
   };
 
+  const handleDocumentSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && (file.type === 'application/pdf' || 
+                 file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+                 file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+      setSelectedDocument(file);
+    } else {
+      toast({
+        title: "Formato não suportado",
+        description: "Por favor, envie um arquivo PDF, DOCX ou XLSX",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const clearDocument = () => {
+    setSelectedDocument(null);
+    if (documentInputRef.current) {
+      documentInputRef.current.value = '';
+    }
+  };
+
+  const analyzeDocument = async (file: File, scopeType?: string, client?: string) => {
+    try {
+      setAnalyzingDocument(true);
+      
+      // Convert file to base64
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          const base64String = reader.result as string;
+          const base64Data = base64String.split(',')[1];
+          resolve(base64Data);
+        };
+        reader.onerror = reject;
+      });
+      reader.readAsDataURL(file);
+      
+      const fileBase64 = await base64Promise;
+
+      const { data, error } = await supabase.functions.invoke('analyze-report', {
+        body: {
+          fileBase64,
+          fileName: file.name,
+          scopeType: scopeType || 'general',
+          client: client
+        }
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (error: any) {
+      console.error('Error analyzing document:', error);
+      throw error;
+    } finally {
+      setAnalyzingDocument(false);
+    }
+  };
+
+  const formatReportAnalysis = (analysis: any) => {
+    const { quality_score, strengths, improvements, comparison } = analysis;
+    
+    let result = `## 📊 Análise de Relatório Completa\n\n`;
+    result += `**Score de Qualidade:** ${quality_score}/100 `;
+    result += quality_score >= 80 ? '🟢 Excelente' : quality_score >= 60 ? '🟡 Bom' : '🟠 Precisa Melhorar';
+    result += `\n\n`;
+    
+    if (comparison && comparison.average_score) {
+      result += `**Comparação:**\n`;
+      result += `- Seu relatório: ${comparison.your_score}/100\n`;
+      result += `- Média do escopo: ${comparison.average_score}/100\n`;
+      result += `- Total analisados: ${comparison.total_reports_analyzed} relatórios\n\n`;
+    }
+    
+    if (strengths && strengths.length > 0) {
+      result += `### ✅ Pontos Fortes:\n`;
+      strengths.forEach((strength: string) => {
+        result += `- ${strength}\n`;
+      });
+      result += `\n`;
+    }
+    
+    if (improvements && improvements.length > 0) {
+      result += `### ⚠️ Sugestões de Melhoria:\n`;
+      improvements.forEach((improvement: string) => {
+        result += `- ${improvement}\n`;
+      });
+    }
+    
+    return result;
+  };
+
   const analyzeImage = async (imageBase64: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('analyze-cable-image', {
@@ -276,10 +371,10 @@ const AssistenteTecnico = () => {
   };
 
   const sendMessage = async () => {
-    console.log('sendMessage called', { inputMessage, conversationId, hasImage: !!selectedImage });
+    console.log('sendMessage called', { inputMessage, conversationId, hasImage: !!selectedImage, hasDocument: !!selectedDocument });
     
-    // Allow sending if there's either a message or an image
-    if ((!inputMessage.trim() && !selectedImage) || !conversationId) {
+    // Allow sending if there's either a message, an image, or a document
+    if ((!inputMessage.trim() && !selectedImage && !selectedDocument) || !conversationId) {
       console.log('Validation failed', { hasInput: !!inputMessage.trim(), hasConversation: !!conversationId });
       if (!conversationId) {
         toast({
@@ -287,6 +382,77 @@ const AssistenteTecnico = () => {
           description: "Aguarde a inicialização da conversa...",
           variant: "destructive",
         });
+      }
+      return;
+    }
+
+    // Handle document analysis if document is present
+    if (selectedDocument) {
+      const documentMessage: Message = { 
+        role: 'user', 
+        content: inputMessage.trim() || `📄 Relatório enviado para análise: ${selectedDocument.name}` 
+      };
+      setMessages(prev => [...prev, documentMessage]);
+      setInputMessage("");
+      setIsLoading(true);
+
+      // Show analyzing message
+      const analyzingMsg: Message = { role: 'assistant', content: '🔍 Analisando relatório...' };
+      setMessages(prev => [...prev, analyzingMsg]);
+
+      try {
+        const result = await analyzeDocument(selectedDocument);
+        
+        if (result.success && result.analysis) {
+          const analysisText = formatReportAnalysis(result.analysis);
+          
+          // Replace analyzing message with actual analysis
+          setMessages(prev => {
+            const newMessages = [...prev];
+            newMessages[newMessages.length - 1] = {
+              role: 'assistant',
+              content: analysisText
+            };
+            return newMessages;
+          });
+
+          // Save to database
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            await supabase.from('assistant_messages').insert([
+              {
+                conversation_id: conversationId,
+                role: 'user',
+                content: documentMessage.content,
+              },
+              {
+                conversation_id: conversationId,
+                role: 'assistant',
+                content: analysisText,
+              }
+            ]);
+          }
+        } else {
+          throw new Error('Falha na análise do relatório');
+        }
+      } catch (error: any) {
+        console.error('Error analyzing document:', error);
+        setMessages(prev => {
+          const newMessages = [...prev];
+          newMessages[newMessages.length - 1] = {
+            role: 'assistant',
+            content: `❌ Erro ao analisar relatório: ${error.message}`
+          };
+          return newMessages;
+        });
+        toast({
+          title: "Erro na análise",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+        clearDocument();
       }
       return;
     }
@@ -617,6 +783,26 @@ const AssistenteTecnico = () => {
                           </Button>
                         </div>
                       )}
+                      {selectedDocument && (
+                        <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                          <FileText className="h-8 w-8 text-muted-foreground" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{selectedDocument.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {(selectedDocument.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={clearDocument}
+                            disabled={isLoading}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
                       <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
                         <input
                           ref={fileInputRef}
@@ -625,28 +811,49 @@ const AssistenteTecnico = () => {
                           onChange={handleImageSelect}
                           className="hidden"
                         />
+                        <input
+                          ref={documentInputRef}
+                          type="file"
+                          accept=".pdf,.docx,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                          onChange={handleDocumentSelect}
+                          className="hidden"
+                        />
                         <Button
                           type="button"
                           variant="outline"
                           size="icon"
                           onClick={() => fileInputRef.current?.click()}
-                          disabled={isLoading || !!selectedImage}
+                          disabled={isLoading || !!selectedImage || !!selectedDocument}
                           title="Enviar imagem"
                         >
                           <Camera className="h-4 w-4" />
                         </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => documentInputRef.current?.click()}
+                          disabled={isLoading || !!selectedImage || !!selectedDocument}
+                          title="Enviar relatório (PDF, DOCX, XLSX)"
+                        >
+                          <Upload className="h-4 w-4" />
+                        </Button>
                         <Input
                           value={inputMessage}
                           onChange={(e) => setInputMessage(e.target.value)}
-                          placeholder={selectedImage ? "Adicione um comentário (opcional)..." : "Digite sua pergunta ou envie uma imagem..."}
+                          placeholder={
+                            selectedImage ? "Adicione um comentário (opcional)..." : 
+                            selectedDocument ? "Adicione contexto sobre o relatório (opcional)..." :
+                            "Digite sua pergunta, envie uma imagem ou relatório..."
+                          }
                           disabled={isLoading}
                           className="flex-1"
                         />
                         <Button 
                           type="submit" 
-                          disabled={isLoading || (!inputMessage.trim() && !selectedImage)}
+                          disabled={isLoading || (!inputMessage.trim() && !selectedImage && !selectedDocument)}
                         >
-                          {analyzingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                          {(analyzingImage || analyzingDocument) ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                         </Button>
                       </form>
                     </div>

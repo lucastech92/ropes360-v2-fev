@@ -173,6 +173,28 @@ ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnic
             properties: {}
           }
         }
+      },
+      {
+        type: "function",
+        function: {
+          name: "buscar_padroes_relatorios",
+          description: "Busca padrões aprendidos de relatórios históricos por tipo de escopo. Use quando perguntar sobre melhores práticas, problemas comuns, ou sugestões de melhoria para relatórios.",
+          parameters: {
+            type: "object",
+            properties: {
+              scope_type: {
+                type: "string",
+                description: "Tipo de escopo do serviço (ex: MRT, MPI, END, VT, PM, etc.)"
+              },
+              pattern_type: {
+                type: "string",
+                enum: ["best_practice", "common_issue", "recommendation", "all"],
+                description: "Tipo de padrão a buscar: best_practice (melhores práticas), common_issue (problemas comuns), recommendation (recomendações), ou all (todos)"
+              }
+            },
+            required: ["scope_type"]
+          }
+        }
       }
     ];
 
@@ -223,6 +245,8 @@ ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnic
           result = await executarBuscaServicos(supabaseAdmin, args.cliente_filter);
         } else if (toolCall.function.name === 'buscar_manutencao') {
           result = await executarBuscaManutencao(supabaseAdmin);
+        } else if (toolCall.function.name === 'buscar_padroes_relatorios') {
+          result = await executarBuscaPadroesRelatorios(supabaseAdmin, args.scope_type, args.pattern_type);
         }
 
         console.log('📊 Tool result:', result.substring(0, 100) + '...');
@@ -439,6 +463,78 @@ async function executarBuscaManutencao(supabase: any): Promise<string> {
     overdue.forEach((m: any) => {
       result += `• ${m.equipment_name} (${m.equipment_code})\n`;
       result += `  Previsto: ${new Date(m.scheduled_date).toLocaleDateString('pt-BR')}\n`;
+    });
+  }
+
+  return result;
+}
+
+async function executarBuscaPadroesRelatorios(supabase: any, scopeType: string, patternType?: string): Promise<string> {
+  console.log('📊 Fetching report patterns, scope:', scopeType, 'type:', patternType || 'all');
+  
+  let query = supabase
+    .from('report_patterns')
+    .select('*')
+    .eq('scope_type', scopeType)
+    .order('frequency', { ascending: false });
+  
+  if (patternType && patternType !== 'all') {
+    query = query.eq('pattern_type', patternType);
+  }
+  
+  const { data: patterns, error } = await query;
+  
+  if (error) {
+    console.error('Error fetching patterns:', error);
+    return `Erro ao buscar padrões para ${scopeType}`;
+  }
+  
+  if (!patterns || patterns.length === 0) {
+    return `Ainda não há padrões aprendidos para o escopo "${scopeType}". Envie relatórios para que eu possa aprender!`;
+  }
+
+  // Get knowledge base stats
+  const { data: knowledge } = await supabase
+    .from('report_knowledge')
+    .select('quality_score')
+    .eq('scope_type', scopeType);
+
+  const avgScore = knowledge && knowledge.length > 0
+    ? Math.round(knowledge.reduce((sum: number, k: any) => sum + (k.quality_score || 0), 0) / knowledge.length)
+    : null;
+
+  let result = `📊 PADRÕES APRENDIDOS - ${scopeType.toUpperCase()}\n\n`;
+  result += `Base: ${knowledge?.length || 0} relatórios analisados\n`;
+  if (avgScore) result += `Score médio: ${avgScore}/100\n`;
+  result += `\n`;
+
+  const bestPractices = patterns.filter((p: any) => p.pattern_type === 'best_practice');
+  const commonIssues = patterns.filter((p: any) => p.pattern_type === 'common_issue');
+  const recommendations = patterns.filter((p: any) => p.pattern_type === 'recommendation');
+
+  if (bestPractices.length > 0) {
+    result += `✅ MELHORES PRÁTICAS (${bestPractices.length}):\n`;
+    bestPractices.slice(0, 5).forEach((p: any) => {
+      result += `\n• ${p.description}\n`;
+      result += `  Frequência: ${p.frequency}x | Score médio: ${Math.round(p.average_score || 0)}/100\n`;
+    });
+    result += `\n`;
+  }
+
+  if (commonIssues.length > 0) {
+    result += `⚠️ PROBLEMAS COMUNS (${commonIssues.length}):\n`;
+    commonIssues.slice(0, 5).forEach((p: any) => {
+      result += `\n• ${p.description}\n`;
+      result += `  Identificado em: ${p.frequency} relatórios\n`;
+    });
+    result += `\n`;
+  }
+
+  if (recommendations.length > 0) {
+    result += `💡 RECOMENDAÇÕES (${recommendations.length}):\n`;
+    recommendations.slice(0, 5).forEach((p: any) => {
+      result += `\n• ${p.description}\n`;
+      result += `  Baseado em: ${p.frequency} casos\n`;
     });
   }
 
