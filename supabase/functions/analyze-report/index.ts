@@ -81,10 +81,8 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    const analysisPrompt = `Você é um especialista em análise de qualidade de relatórios de inspeção técnica.
-
-RELATÓRIO A ANALISAR:
-${fileContent}
+    // Prepare system prompt with context
+    const systemPrompt = `Você é um especialista em análise de qualidade de relatórios de inspeção técnica.
 
 ESCOPO: ${scopeType || 'Geral'}
 CLIENTE: ${client || 'Não especificado'}
@@ -95,7 +93,9 @@ ${bestPractices.map(bp => `- ${bp.description} (frequência: ${bp.frequency}x)`)
 PROBLEMAS COMUNS IDENTIFICADOS EM OUTROS RELATÓRIOS:
 ${commonIssues.map(ci => `- ${ci.description} (frequência: ${ci.frequency}x)`).join('\n')}
 
-Por favor, analise este relatório e forneça:
+Analise o relatório fornecido e retorne uma avaliação estruturada.`;
+
+    const userPrompt = `Por favor, analise este relatório de inspeção técnica e forneça:
 
 1. SCORE DE QUALIDADE (0-100): Baseado em:
    - Completude das informações
@@ -104,15 +104,37 @@ Por favor, analise este relatório e forneça:
    - Aderência às normas
    - Organização e formatação
 
-2. PONTOS FORTES (3-5 itens): O que está bem feito
+2. PONTOS FORTES (3-5 itens): O que está bem feito no relatório
 
 3. ÁREAS DE MELHORIA (3-5 itens): Sugestões concretas e acionáveis
 
-4. PADRÕES IDENTIFICADOS: Novos padrões que podem ser aprendidos deste relatório
+4. PADRÕES IDENTIFICADOS: Novos padrões que podem ser aprendidos deste relatório (tipo e descrição)
 
-5. DADOS EXTRAÍDOS: Informações estruturadas importantes
+5. DADOS EXTRAÍDOS: Informações estruturadas importantes do relatório`;
 
-Retorne em formato JSON estruturado.`;
+    // Prepare content array for multimodal request
+    const contentArray: any[] = [
+      { type: 'text', text: userPrompt }
+    ];
+
+    // Add document content - use multimodal for files, text for JSON data
+    if (fileBase64) {
+      // For files (PDF, DOCX, etc), send as base64 for visual analysis
+      const mimeType = fileName.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 
+                       fileName.toLowerCase().endsWith('.docx') ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' :
+                       fileName.toLowerCase().endsWith('.xlsx') ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' :
+                       'application/octet-stream';
+      contentArray.push({
+        type: 'image_url',
+        image_url: { url: `data:${mimeType};base64,${fileBase64}` }
+      });
+      console.log('📎 Sending file for visual analysis:', fileName, mimeType);
+    } else if (fileContent) {
+      // For JSON data from database
+      contentArray[0].text += `\n\nCONTEÚDO DO RELATÓRIO:\n${fileContent}`;
+    }
+
+    console.log('🤖 Calling AI with tool calling for structured output...');
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -123,22 +145,94 @@ Retorne em formato JSON estruturado.`;
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash',
         messages: [
-          { role: 'system', content: 'Você é um especialista em análise de qualidade de relatórios técnicos. Sempre responda em JSON estruturado.' },
-          { role: 'user', content: analysisPrompt }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: contentArray }
         ],
-        response_format: { type: "json_object" }
+        tools: [{
+          type: "function",
+          function: {
+            name: "analyze_report",
+            description: "Analisar relatório de inspeção técnica e retornar dados estruturados",
+            parameters: {
+              type: "object",
+              properties: {
+                quality_score: {
+                  type: "number",
+                  description: "Score de qualidade geral de 0-100 baseado em completude, precisão e clareza"
+                },
+                strengths: {
+                  type: "array",
+                  items: { type: "string" },
+                  description: "Lista de pontos fortes específicos encontrados no relatório"
+                },
+                improvements: {
+                  type: "array",
+                  items: { type: "string" },
+                  description: "Lista de sugestões concretas para melhorar o relatório"
+                },
+                extracted_data: {
+                  type: "object",
+                  description: "Dados estruturados extraídos do relatório (IDs de equipamentos, datas, medições, etc.)"
+                },
+                new_patterns: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      type: { 
+                        type: "string", 
+                        enum: ["best_practice", "common_issue"],
+                        description: "Tipo de padrão identificado" 
+                      },
+                      description: { 
+                        type: "string", 
+                        description: "Descrição detalhada do padrão" 
+                      }
+                    },
+                    required: ["type", "description"]
+                  },
+                  description: "Padrões ou temas recorrentes identificados"
+                }
+              },
+              required: ["quality_score", "strengths", "improvements"],
+              additionalProperties: false
+            }
+          }
+        }],
+        tool_choice: { type: "function", function: { name: "analyze_report" } }
       }),
     });
 
     if (!aiResponse.ok) {
-      console.error('AI API error:', await aiResponse.text());
-      throw new Error('Failed to analyze report with AI');
+      const errorText = await aiResponse.text();
+      console.error('❌ AI API error:', aiResponse.status, errorText);
+      throw new Error(`AI API error: ${aiResponse.statusText}`);
     }
 
     const aiData = await aiResponse.json();
-    const analysis = JSON.parse(aiData.choices[0].message.content);
+    console.log('🤖 AI raw response:', JSON.stringify(aiData, null, 2));
 
+    // Extract analysis from tool call
+    const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
+    if (!toolCall || !toolCall.function?.arguments) {
+      console.error('❌ No tool call in AI response:', aiData);
+      throw new Error('AI não retornou análise estruturada');
+    }
+
+    const analysis = JSON.parse(toolCall.function.arguments);
     console.log('✅ AI analysis complete. Score:', analysis.quality_score);
+
+    // Validate required fields
+    if (typeof analysis.quality_score !== 'number' || !Array.isArray(analysis.strengths) || !Array.isArray(analysis.improvements)) {
+      console.error('❌ AI response missing required fields:', analysis);
+      throw new Error('Análise incompleta da IA - campos obrigatórios ausentes');
+    }
+
+    // Ensure quality_score is in valid range
+    if (analysis.quality_score < 0 || analysis.quality_score > 100) {
+      console.warn('⚠️ Quality score out of range, clamping:', analysis.quality_score);
+      analysis.quality_score = Math.max(0, Math.min(100, analysis.quality_score));
+    }
 
     // Store the knowledge using admin client
     const { data: knowledge, error: knowledgeError } = await adminClient
