@@ -260,23 +260,51 @@ const AssistenteTecnico = () => {
     try {
       setAnalyzingDocument(true);
       
-      // Convert file to base64
-      const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve, reject) => {
-        reader.onloadend = () => {
-          const base64String = reader.result as string;
-          const base64Data = base64String.split(',')[1];
-          resolve(base64Data);
-        };
-        reader.onerror = reject;
-      });
-      reader.readAsDataURL(file);
+      let fileBase64: string | undefined;
+      let fileContent: string | undefined;
       
-      const fileBase64 = await base64Promise;
+      // For PDFs, send as base64 for visual analysis
+      if (file.type === 'application/pdf') {
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve, reject) => {
+          reader.onloadend = () => {
+            const base64String = reader.result as string;
+            const base64Data = base64String.split(',')[1];
+            resolve(base64Data);
+          };
+          reader.onerror = reject;
+        });
+        reader.readAsDataURL(file);
+        fileBase64 = await base64Promise;
+      }
+      // For DOCX, extract text using mammoth
+      else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        const mammoth = await import('mammoth');
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        fileContent = result.value;
+        console.log('📄 Extracted text from DOCX:', fileContent.substring(0, 200) + '...');
+      }
+      // For XLSX, extract text from all sheets
+      else if (file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+        const XLSX = await import('xlsx');
+        const arrayBuffer = await file.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        
+        let extractedText = '';
+        workbook.SheetNames.forEach(sheetName => {
+          const worksheet = workbook.Sheets[sheetName];
+          const sheetText = XLSX.utils.sheet_to_txt(worksheet);
+          extractedText += `\n\n=== ${sheetName} ===\n${sheetText}`;
+        });
+        fileContent = extractedText;
+        console.log('📊 Extracted text from XLSX:', fileContent.substring(0, 200) + '...');
+      }
 
       const { data, error } = await supabase.functions.invoke('analyze-report', {
         body: {
           fileBase64,
+          fileContent,
           fileName: file.name,
           scopeType: scopeType || 'general',
           client: client
