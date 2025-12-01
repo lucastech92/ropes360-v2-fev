@@ -7,6 +7,35 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Retry logic for transient AI gateway errors
+async function fetchWithRetry(url: string, options: RequestInit, maxRetries = 3): Promise<Response> {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await fetch(url, options);
+      // Return if successful or client error (4xx)
+      if (response.ok || (response.status >= 400 && response.status < 500)) {
+        return response;
+      }
+      // Retry on server errors (5xx)
+      if (response.status >= 500 && i < maxRetries - 1) {
+        const waitTime = 1000 * Math.pow(2, i); // Exponential backoff
+        console.log(`⚠️ AI gateway returned ${response.status}, retrying in ${waitTime}ms (attempt ${i + 1}/${maxRetries})...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        continue;
+      }
+      return response;
+    } catch (error) {
+      if (i < maxRetries - 1) {
+        const waitTime = 1000 * Math.pow(2, i);
+        console.log(`⚠️ Network error, retrying in ${waitTime}ms (attempt ${i + 1}/${maxRetries})...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw new Error(`Failed after ${maxRetries} retries`);
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -50,7 +79,7 @@ serve(async (req) => {
     // Step 1: Translate query to English for better document matching
     console.log('🌐 Translating query for multi-language search...');
     
-    const translationResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const translationResponse = await fetchWithRetry('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${LOVABLE_API_KEY}`,
@@ -117,7 +146,13 @@ serve(async (req) => {
       : '';
 
     const excelContext = excelData 
-      ? `\n### DADOS EXCEL ENVIADOS PELO USUÁRIO:\nArquivo: ${fileName || 'planilha.xlsx'}\nLinhas: ${excelData.length}\nDados parseados:\n${JSON.stringify(excelData.slice(0, 5), null, 2)}${excelData.length > 5 ? `\n... e mais ${excelData.length - 5} linhas` : ''}\n\n⚠️ IMPORTANTE: Use a ferramenta 'importar_excel' para processar esses dados. SEMPRE mostre um preview primeiro (preview_only=true) e aguarde confirmação do usuário antes de importar.\n`
+      ? `\n### 🚨 DADOS EXCEL DETECTADOS - AÇÃO OBRIGATÓRIA:\nArquivo: ${fileName || 'planilha.xlsx'}\nLinhas: ${excelData.length}\nDados parseados:\n${JSON.stringify(excelData.slice(0, 5), null, 2)}${excelData.length > 5 ? `\n... e mais ${excelData.length - 5} linhas` : ''}
+
+⚠️ VOCÊ DEVE OBRIGATORIAMENTE:
+1. Chamar a ferramenta 'importar_excel' com preview_only=true IMEDIATAMENTE
+2. NÃO responda sobre o conteúdo sem usar a ferramenta primeiro
+3. Se o usuário não especificou a tabela de destino, pergunte: inventory (inventário), services (serviços) ou maintenance_records (manutenção)
+4. Mostre o preview dos dados mapeados e aguarde confirmação antes de importar definitivamente\n`
       : '';
 
     const systemPrompt = `Você é o Assistente Técnico do Hub Ropes360, especializado em cabos de aço e gestão operacional.
@@ -214,18 +249,18 @@ ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnic
         type: "function",
         function: {
           name: "importar_excel",
-          description: "Importa dados de uma planilha Excel para o sistema. Use quando o usuário enviar um arquivo Excel e pedir para importar/adicionar dados ao inventário, serviços ou manutenção.",
+          description: "FERRAMENTA OBRIGATÓRIA quando há dados Excel. Importa dados de planilha Excel para o sistema. CRITICAL: Quando detectar dados Excel no contexto (seção 'DADOS EXCEL DETECTADOS'), você DEVE chamar esta função IMEDIATAMENTE com preview_only=true para mostrar o preview ao usuário ANTES de qualquer outra resposta. Não responda sobre o Excel sem executar esta ferramenta primeiro.",
           parameters: {
             type: "object",
             properties: {
               target_table: {
                 type: "string",
                 enum: ["inventory", "services", "maintenance_records"],
-                description: "Tabela de destino: inventory (inventário), services (serviços), maintenance_records (manutenção)"
+                description: "Tabela de destino: inventory (inventário), services (serviços), maintenance_records (manutenção). Se não especificado pelo usuário, pergunte antes de continuar."
               },
               preview_only: {
                 type: "boolean",
-                description: "Se true, apenas mostra preview sem inserir. SEMPRE use true primeiro para confirmar com usuário."
+                description: "SEMPRE use true na primeira chamada para mostrar preview. Só use false após confirmação explícita do usuário."
               }
             },
             required: ["target_table"]
@@ -236,7 +271,7 @@ ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnic
 
     // First AI call with tools
     console.log('🤖 Calling AI with function calling...');
-    const initialResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const initialResponse = await fetchWithRetry('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${LOVABLE_API_KEY}`,
@@ -305,7 +340,7 @@ ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnic
 
       // Second AI call with tool results
       console.log('🤖 Calling AI with tool results (streaming)...');
-      const finalResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      const finalResponse = await fetchWithRetry('https://ai.gateway.lovable.dev/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${LOVABLE_API_KEY}`,
@@ -347,7 +382,7 @@ ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnic
       });
     } else {
       // No tools needed
-      const directResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      const directResponse = await fetchWithRetry('https://ai.gateway.lovable.dev/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${LOVABLE_API_KEY}`,
