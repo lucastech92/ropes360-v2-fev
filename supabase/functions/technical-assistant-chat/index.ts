@@ -466,22 +466,72 @@ async function executarImportacaoExcel(
     return '🚫 Apenas administradores e moderadores podem importar dados.';
   }
 
+  // Detect pivoted structure (rows as columns, like MRT equipment table)
+  const firstRow = data[0] || {};
+  const firstColKey = Object.keys(firstRow)[0] || '';
+  const isPivoted = ['Modelo', 'SN', 'Cor', 'Ano de Aquisição', 'Status'].some(label => 
+    Object.values(firstRow).includes(label)
+  );
+
   // Map and validate data based on target table
   let mappedData: any[] = [];
   let tableName = '';
   
   if (targetTable === 'inventory') {
     tableName = 'Inventário';
-    mappedData = data.map((row: any) => ({
-      item_name: row.item_name || row.nome || row.name || row['Nome do Item'] || '',
-      quantity: parseInt(row.quantity || row.quantidade || row.qtd || row.qty || '0'),
-      unit: row.unit || row.unidade || row.un || 'un',
-      min_quantity: parseInt(row.min_quantity || row.minimo || row.min || row['Qtd Mínima'] || '0') || null,
-      location: row.location || row.localizacao || row.local || row.Local || '',
-      category: row.category || row.categoria || row.cat || '',
-      notes: row.notes || row.observacoes || row.obs || '',
-      updated_by: userId
-    }));
+    
+    // Handle pivoted structure (equipment in columns)
+    if (isPivoted) {
+      console.log('🔄 Detected pivoted structure for inventory');
+      const equipmentCols = Object.keys(firstRow).filter(key => 
+        !key.startsWith('__') && !key.includes('Unnamed') && key !== firstColKey
+      );
+      
+      for (const col of equipmentCols) {
+        const equipment: any = {};
+        
+        // Extract field values for this equipment
+        data.forEach((row: any) => {
+          const fieldLabel = row[firstColKey] || Object.values(row)[0];
+          const value = row[col];
+          if (fieldLabel && value !== undefined && value !== null && value !== '') {
+            equipment[String(fieldLabel).trim()] = value;
+          }
+        });
+        
+        // Map to inventory format
+        if (equipment['Modelo']) {
+          const notes = [
+            equipment['SN'] ? `SN: ${equipment['SN']}` : '',
+            equipment['Cor'] ? `Cor: ${equipment['Cor']}` : '',
+            equipment['Ano de Aquisição'] ? `Aquisição: ${equipment['Ano de Aquisição']}` : '',
+            equipment['Status'] ? `Status: ${equipment['Status']}` : ''
+          ].filter(Boolean).join(' | ');
+
+          mappedData.push({
+            item_name: `MH ${equipment['Modelo']} - INTRON`,
+            quantity: 1,
+            unit: 'un',
+            location: equipment['Local'] || 'Almoxarifado',
+            category: 'Equipamento MRT',
+            notes: notes,
+            updated_by: userId
+          });
+        }
+      }
+    } else {
+      // Normal structure (columns as headers)
+      mappedData = data.map((row: any) => ({
+        item_name: row.item_name || row.nome || row.name || row['Nome do Item'] || '',
+        quantity: parseInt(row.quantity || row.quantidade || row.qtd || row.qty || '0'),
+        unit: row.unit || row.unidade || row.un || 'un',
+        min_quantity: parseInt(row.min_quantity || row.minimo || row.min || row['Qtd Mínima'] || '0') || null,
+        location: row.location || row.localizacao || row.local || row.Local || '',
+        category: row.category || row.categoria || row.cat || '',
+        notes: row.notes || row.observacoes || row.obs || '',
+        updated_by: userId
+      }));
+    }
   } else if (targetTable === 'services') {
     tableName = 'Serviços';
     mappedData = data.map((row: any) => ({
@@ -527,10 +577,13 @@ async function executarImportacaoExcel(
     let preview = `📊 PREVIEW - ${tableName} (${validData.length} registros válidos de ${data.length} total)\n\n`;
     
     if (targetTable === 'inventory') {
-      preview += '| Item | Qtd | Unidade | Mín | Local |\n';
-      preview += '|------|-----|---------|-----|-------|\n';
+      preview += '| Item | Qtd | Unidade | Local | Observações |\n';
+      preview += '|------|-----|---------|-------|-------------|\n';
       validData.slice(0, 10).forEach(item => {
-        preview += `| ${item.item_name} | ${item.quantity} | ${item.unit} | ${item.min_quantity || '-'} | ${item.location || '-'} |\n`;
+        const notes = item.notes && item.notes.length > 40 
+          ? item.notes.substring(0, 37) + '...' 
+          : item.notes || '-';
+        preview += `| ${item.item_name} | ${item.quantity} | ${item.unit} | ${item.location || '-'} | ${notes} |\n`;
       });
     } else if (targetTable === 'services') {
       preview += '| Código JBR | Cliente | Escopo |\n';
