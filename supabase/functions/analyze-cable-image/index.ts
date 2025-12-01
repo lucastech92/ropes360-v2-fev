@@ -45,12 +45,30 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-pro",
         messages: [
           {
             role: "system",
             content: `Você é um inspetor técnico especializado em cabos de aço conforme ISO 4309.
-Analise imagens de cabos de aço e identifique danos visíveis.
+Analise imagens de cabos de aço e identifique TODOS os danos visíveis com máxima atenção aos detalhes.
+
+⚠️ ATENÇÃO CRÍTICA PARA ARAMES ROMPIDOS:
+Arames rompidos são o dano mais CRÍTICO para segurança. Examine a imagem meticulosamente procurando por:
+- Pontas de arame salientes ou protuberantes da superfície do cabo
+- Fios soltos, desfiados ou separados do corpo da perna
+- Gaps, lacunas ou espaços vazios entre os arames da camada externa
+- Extremidades de arame visíveis (cortadas, quebradas ou fraturadas)
+- Arames que se destacam da estrutura helicoidal normal
+- Irregularidades na continuidade dos arames externos
+- Arames dobrados para fora ou em ângulos anormais
+- Fragmentos de arame soltos ou semi-destacados
+
+CRITÉRIOS ISO 4309 PARA ARAMES ROMPIDOS:
+- SE houver QUALQUER indício de arames rompidos: severidade mínima de 60%
+- 1-2 arames rompidos visíveis: severidade 60-70%, ação "monitor"
+- 3-5 arames rompidos: severidade 70-85%, ação "replace"
+- 6+ arames rompidos em 6d (6x diâmetro): severidade 90-100%, ação "replace" IMEDIATA
+- Múltiplos arames rompidos concentrados: severidade 85-100%, ação "replace"
 
 IMPORTANTE: Retorne APENAS um objeto JSON válido, sem texto adicional antes ou depois.
 O JSON deve ter exatamente esta estrutura:
@@ -60,7 +78,7 @@ O JSON deve ter exatamente esta estrutura:
       "type": "Nome do dano (ex: Corrosão, Arames rompidos, Abrasão, Deformação, Gaiola de passarinho)",
       "severity": número de 0 a 100,
       "location": "Externa/Interna, posição aproximada",
-      "description": "Descrição detalhada do dano observado"
+      "description": "Descrição detalhada do dano observado - conte arames rompidos se houver"
     }
   ],
   "overallSeverity": número de 0 a 100,
@@ -76,8 +94,8 @@ Critérios de avaliação:
 - 61-100: Danos severos, substituição recomendada
 
 Tipos comuns de danos:
+- Arames rompidos (PRIORIDADE MÁXIMA)
 - Corrosão (interna/externa)
-- Arames rompidos
 - Abrasão/desgaste
 - Deformação (gaiola de passarinho, amassamento)
 - Fadiga
@@ -88,7 +106,7 @@ Tipos comuns de danos:
             content: [
               {
                 type: "text",
-                text: "Analise esta imagem de cabo de aço e identifique todos os danos visíveis. Retorne APENAS o JSON, sem texto adicional."
+                text: "Analise esta imagem de cabo de aço com MÁXIMA ATENÇÃO aos arames rompidos. SEJA CONSERVADOR: se houver QUALQUER dúvida sobre arames rompidos, assuma que existem e conte-os. É preferível um falso positivo a ignorar um dano real que pode causar acidentes. Examine cada parte visível do cabo procurando por pontas salientes, fios soltos, gaps ou qualquer irregularidade. Retorne APENAS o JSON, sem texto adicional."
               },
               {
                 type: "image_url",
@@ -119,11 +137,14 @@ Tipos comuns de danos:
 
     const data = await response.json();
     console.log('Resposta da API recebida');
+    console.log('Resposta completa da IA:', JSON.stringify(data, null, 2));
     
     const content = data.choices?.[0]?.message?.content;
     if (!content) {
       throw new Error('Resposta vazia da API');
     }
+
+    console.log('Conteúdo extraído:', content);
 
     // Extract JSON from the response, handling potential markdown code blocks
     let jsonContent = content.trim();
@@ -151,6 +172,7 @@ Tipos comuns de danos:
     }
 
     console.log('Análise concluída com sucesso');
+    console.log('Análise detalhada:', JSON.stringify(analysis, null, 2));
 
     return new Response(
       JSON.stringify({ success: true, analysis }),
