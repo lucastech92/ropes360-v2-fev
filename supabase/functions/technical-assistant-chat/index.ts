@@ -525,11 +525,25 @@ async function executarImportacaoExcel(
   }
 
   // Detect pivoted structure (rows as columns, like MRT equipment table)
+  // Generic detection: Check if first column contains descriptive labels (field names)
   const firstRow = data[0] || {};
-  const firstColKey = Object.keys(firstRow)[0] || '';
-  const isPivoted = ['Modelo', 'SN', 'Cor', 'Ano de Aquisição', 'Status'].some(label => 
-    Object.values(firstRow).includes(label)
-  );
+  const keys = Object.keys(firstRow);
+  const firstColKey = keys[0] || '';
+  const firstColValues = data.slice(0, 5).map((row: any) => String(row[firstColKey] || '').trim().toLowerCase());
+  
+  // Common attribute keywords that indicate pivoted structure
+  const pivotIndicators = [
+    'fabricante', 'manufacturer', 'modelo', 'model', 'equipamento', 'equipment',
+    'sn', 'serial', 'cor', 'color', 'ano', 'year', 'status', 'aquisição', 'acquisition',
+    'conexao', 'connection', 'cabo', 'cable', 'quantidade', 'contador', 'counter',
+    'frame', 'calibração', 'calibration', 'acessórios', 'accessories', 'sensor'
+  ];
+  
+  const isPivoted = firstColValues.some(val => 
+    pivotIndicators.some(indicator => val.includes(indicator))
+  ) && keys.length > 2; // Must have multiple columns
+  
+  console.log('🔍 Structure detection:', { isPivoted, firstColKey, sampleValues: firstColValues });
 
   // Map and validate data based on target table
   let mappedData: any[] = [];
@@ -540,43 +554,61 @@ async function executarImportacaoExcel(
     
     // Handle pivoted structure (equipment in columns)
     if (isPivoted) {
-      console.log('🔄 Detected pivoted structure for inventory');
-      const equipmentCols = Object.keys(firstRow).filter(key => 
-        !key.startsWith('__') && !key.includes('Unnamed') && key !== firstColKey
-      );
+      console.log('🔄 Detected pivoted structure - transposing data...');
+      
+      // Get all equipment columns (excluding first column which contains labels)
+      const equipmentCols = keys.filter(key => key !== firstColKey);
       
       for (const col of equipmentCols) {
         const equipment: any = {};
         
-        // Extract field values for this equipment
+        // Extract all field-value pairs for this equipment
         data.forEach((row: any) => {
-          const fieldLabel = row[firstColKey] || Object.values(row)[0];
+          const fieldLabel = String(row[firstColKey] || '').trim();
           const value = row[col];
+          
           if (fieldLabel && value !== undefined && value !== null && value !== '') {
-            equipment[String(fieldLabel).trim()] = value;
+            equipment[fieldLabel] = value;
           }
         });
         
-        // Map to inventory format
-        if (equipment['Modelo']) {
-          const notes = [
-            equipment['SN'] ? `SN: ${equipment['SN']}` : '',
-            equipment['Cor'] ? `Cor: ${equipment['Cor']}` : '',
-            equipment['Ano de Aquisição'] ? `Aquisição: ${equipment['Ano de Aquisição']}` : '',
-            equipment['Status'] ? `Status: ${equipment['Status']}` : ''
-          ].filter(Boolean).join(' | ');
-
-          mappedData.push({
-            item_name: `MH ${equipment['Modelo']} - INTRON`,
-            quantity: 1,
-            unit: 'un',
-            location: equipment['Local'] || 'Almoxarifado',
-            category: 'Equipamento MRT',
-            notes: notes,
-            updated_by: userId
-          });
-        }
+        // Skip if no meaningful data
+        if (Object.keys(equipment).length < 2) continue;
+        
+        // Intelligently map to inventory fields
+        const itemName = 
+          equipment['Equipamento'] || 
+          equipment['Equipment'] || 
+          equipment['Modelo'] || 
+          equipment['Model'] ||
+          Object.values(equipment)[0]; // First non-empty value
+        
+        if (!itemName) continue;
+        
+        const manufacturer = equipment['Fabricante'] || equipment['Manufacturer'] || '';
+        const fullName = manufacturer ? `${itemName} - ${manufacturer}` : itemName;
+        
+        // Build notes from all other fields
+        const noteFields: string[] = [];
+        Object.entries(equipment).forEach(([key, val]) => {
+          const lowerKey = key.toLowerCase();
+          if (!['equipamento', 'equipment', 'modelo', 'model', 'fabricante', 'manufacturer'].includes(lowerKey)) {
+            if (val) noteFields.push(`${key}: ${val}`);
+          }
+        });
+        
+        mappedData.push({
+          item_name: fullName,
+          quantity: 1,
+          unit: 'un',
+          location: equipment['Local'] || equipment['Location'] || 'Almoxarifado',
+          category: equipment['Categoria'] || equipment['Category'] || 'Equipamento',
+          notes: noteFields.join(' | '),
+          updated_by: userId
+        });
       }
+      
+      console.log(`✅ Transposed ${equipmentCols.length} columns into ${mappedData.length} inventory items`);
     } else {
       // Normal structure (columns as headers)
       mappedData = data.map((row: any) => ({
