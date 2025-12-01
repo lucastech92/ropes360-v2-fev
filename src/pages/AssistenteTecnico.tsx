@@ -458,13 +458,21 @@ const AssistenteTecnico = () => {
           documentMessage,
         ];
 
+        // Get user session token
+        const { data: { session } } = await supabase.auth.getSession();
+        const userToken = session?.access_token;
+
+        if (!userToken) {
+          throw new Error('Usuário não autenticado');
+        }
+
         const response = await fetch(
           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/technical-assistant-chat`,
           {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              'Authorization': `Bearer ${userToken}`,
             },
             body: JSON.stringify({
               messages: messagesWithExcel,
@@ -701,13 +709,21 @@ const AssistenteTecnico = () => {
         content: inputMessage,
       });
 
+      // Get user session token
+      const { data: { session } } = await supabase.auth.getSession();
+      const userToken = session?.access_token;
+
+      if (!userToken) {
+        throw new Error('Usuário não autenticado');
+      }
+
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/technical-assistant-chat`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            'Authorization': `Bearer ${userToken}`,
           },
           body: JSON.stringify({
             messages: [...messages, userMessage],
