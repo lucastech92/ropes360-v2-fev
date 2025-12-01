@@ -209,6 +209,28 @@ ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnic
             required: ["scope_type"]
           }
         }
+      },
+      {
+        type: "function",
+        function: {
+          name: "importar_excel",
+          description: "Importa dados de uma planilha Excel para o sistema. Use quando o usuário enviar um arquivo Excel e pedir para importar/adicionar dados ao inventário, serviços ou manutenção.",
+          parameters: {
+            type: "object",
+            properties: {
+              target_table: {
+                type: "string",
+                enum: ["inventory", "services", "maintenance_records"],
+                description: "Tabela de destino: inventory (inventário), services (serviços), maintenance_records (manutenção)"
+              },
+              preview_only: {
+                type: "boolean",
+                description: "Se true, apenas mostra preview sem inserir. SEMPRE use true primeiro para confirmar com usuário."
+              }
+            },
+            required: ["target_table"]
+          }
+        }
       }
     ];
 
@@ -266,7 +288,7 @@ ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnic
         } else if (toolCall.function.name === 'buscar_padroes_relatorios') {
           result = await executarBuscaPadroesRelatorios(supabaseAdmin, args.scope_type, args.pattern_type);
         } else if (toolCall.function.name === 'importar_excel') {
-          result = await executarImportacaoExcel(supabaseAdmin, args.target_table, args.data, args.preview_only, userId);
+          result = await executarImportacaoExcel(supabaseAdmin, args.target_table, excelData || [], args.preview_only ?? true, userId);
         }
 
         console.log('📊 Tool result:', result.substring(0, 100) + '...');
@@ -449,10 +471,11 @@ async function executarImportacaoExcel(
   previewOnly: boolean = true,
   userId: string
 ): Promise<string> {
-  console.log('📊 Import Excel:', targetTable, 'rows:', data.length, 'preview:', previewOnly);
+  console.log('📊 Import Excel:', targetTable, 'rows:', data?.length || 0, 'preview:', previewOnly);
   
-  if (!data || data.length === 0) {
-    return '⚠️ Nenhum dado válido encontrado na planilha.';
+  // Validate data
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return '⚠️ Nenhum dado válido encontrado na planilha. Certifique-se de anexar um arquivo Excel.';
   }
 
   // Check user permissions (only admin and moderator can import)
