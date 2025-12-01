@@ -252,7 +252,95 @@ const Inventario = () => {
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-2xl">
-...
+                    <DialogHeader>
+                      <DialogTitle>Adicionar Novo Item</DialogTitle>
+                      <DialogDescription>
+                        Preencha os dados do novo item do inventário
+                      </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="item_name">Nome do Item *</Label>
+                          <Input
+                            id="item_name"
+                            value={newItem.item_name || ""}
+                            onChange={(e) => setNewItem({ ...newItem, item_name: e.target.value })}
+                            placeholder="Nome do item"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="category">Categoria</Label>
+                          <Input
+                            id="category"
+                            value={newItem.category || ""}
+                            onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
+                            placeholder="Categoria"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="quantity">Quantidade</Label>
+                          <Input
+                            id="quantity"
+                            type="number"
+                            value={newItem.quantity || 0}
+                            onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) || 0 })}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="unit">Unidade</Label>
+                          <Input
+                            id="unit"
+                            value={newItem.unit || ""}
+                            onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })}
+                            placeholder="un, kg, m..."
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="min_quantity">Qtd. Mínima</Label>
+                          <Input
+                            id="min_quantity"
+                            type="number"
+                            value={newItem.min_quantity || 0}
+                            onChange={(e) => setNewItem({ ...newItem, min_quantity: parseInt(e.target.value) || 0 })}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="location">Localização</Label>
+                        <Input
+                          id="location"
+                          value={newItem.location || ""}
+                          onChange={(e) => setNewItem({ ...newItem, location: e.target.value })}
+                          placeholder="Localização no almoxarifado"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="notes">Observações</Label>
+                        <Input
+                          id="notes"
+                          value={newItem.notes || ""}
+                          onChange={(e) => setNewItem({ ...newItem, notes: e.target.value })}
+                          placeholder="Observações adicionais"
+                        />
+                      </div>
+                    </div>
+                    
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                        Cancelar
+                      </Button>
+                      <Button onClick={addItem}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Adicionar
+                      </Button>
+                    </DialogFooter>
                   </DialogContent>
                 </Dialog>
               </div>
