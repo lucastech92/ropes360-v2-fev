@@ -14,8 +14,13 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, conversationId } = await req.json();
-    console.log('🚀 Request received:', { messagesCount: messages?.length, conversationId });
+    const { messages, conversationId, excelData, fileName } = await req.json();
+    console.log('🚀 Request received:', { 
+      messagesCount: messages?.length, 
+      conversationId,
+      hasExcelData: !!excelData,
+      excelRows: excelData?.length || 0 
+    });
     
     const authHeader = req.headers.get('Authorization');
     
@@ -111,6 +116,10 @@ serve(async (req) => {
       ? `\n### CONTEXTO DOS DOCUMENTOS TÉCNICOS (WIRELOCK, ISO 4309, ETC):\n${relevantChunks.map((c: any) => c.content).join('\n\n---\n\n')}\n### FIM DO CONTEXTO DOS DOCUMENTOS`
       : '';
 
+    const excelContext = excelData 
+      ? `\n### DADOS EXCEL ENVIADOS PELO USUÁRIO:\nArquivo: ${fileName || 'planilha.xlsx'}\nLinhas: ${excelData.length}\nDados parseados:\n${JSON.stringify(excelData.slice(0, 5), null, 2)}${excelData.length > 5 ? `\n... e mais ${excelData.length - 5} linhas` : ''}\n\n⚠️ IMPORTANTE: Use a ferramenta 'importar_excel' para processar esses dados. SEMPRE mostre um preview primeiro (preview_only=true) e aguarde confirmação do usuário antes de importar.\n`
+      : '';
+
     const systemPrompt = `Você é o Assistente Técnico do Hub Ropes360, especializado em cabos de aço e gestão operacional.
 
 SUAS CAPACIDADES:
@@ -118,6 +127,7 @@ SUAS CAPACIDADES:
 2. Acessar dados internos do inventário/almoxarife  
 3. Consultar informações de serviços e clientes
 4. Verificar registros de manutenção
+5. Importar dados de planilhas Excel para o sistema
 
 REGRAS CRÍTICAS:
 1. **USE O CONTEXTO**: Se encontrou chunks relevantes abaixo, USE-OS para responder. Não diga "não tenho informação" se há contexto disponível.
@@ -125,7 +135,7 @@ REGRAS CRÍTICAS:
 3. **CITE A FONTE**: Sempre mencione de onde veio a informação (ex: "Segundo o manual Wirelock...").
 4. **FERRAMENTAS**: Para dados internos (inventário, serviços, manutenção), use as ferramentas disponíveis.
 5. **SEM CONTEXTO**: Só diga "não disponível" se realmente NÃO houver contexto relevante abaixo.
-${isoContext}
+${excelContext}${isoContext}
 
 ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnicos acima. Analise-os cuidadosamente antes de responder. Se a resposta estiver lá, USE-A!' : ''}`;
 
@@ -234,6 +244,10 @@ ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnic
       tools: assistantMessage.tool_calls?.map((tc: any) => tc.function.name) || []
     });
 
+    // Get user ID for tool execution
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    const userId = user?.id || '';
+
     // Execute tools if AI requested them
     if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
       const toolMessages = [];
@@ -251,6 +265,8 @@ ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnic
           result = await executarBuscaManutencao(supabaseAdmin);
         } else if (toolCall.function.name === 'buscar_padroes_relatorios') {
           result = await executarBuscaPadroesRelatorios(supabaseAdmin, args.scope_type, args.pattern_type);
+        } else if (toolCall.function.name === 'importar_excel') {
+          result = await executarImportacaoExcel(supabaseAdmin, args.target_table, args.data, args.preview_only, userId);
         }
 
         console.log('📊 Tool result:', result.substring(0, 100) + '...');
@@ -424,6 +440,134 @@ async function executarBuscaInventario(supabase: any, itemFilter?: string, listA
   }
 
   return result;
+}
+
+async function executarImportacaoExcel(
+  supabase: any, 
+  targetTable: string, 
+  data: any[], 
+  previewOnly: boolean = true,
+  userId: string
+): Promise<string> {
+  console.log('📊 Import Excel:', targetTable, 'rows:', data.length, 'preview:', previewOnly);
+  
+  if (!data || data.length === 0) {
+    return '⚠️ Nenhum dado válido encontrado na planilha.';
+  }
+
+  // Check user permissions (only admin and moderator can import)
+  const { data: userRole, error: roleError } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId)
+    .single();
+
+  if (roleError || !['admin', 'moderator'].includes(userRole?.role)) {
+    return '🚫 Apenas administradores e moderadores podem importar dados.';
+  }
+
+  // Map and validate data based on target table
+  let mappedData: any[] = [];
+  let tableName = '';
+  
+  if (targetTable === 'inventory') {
+    tableName = 'Inventário';
+    mappedData = data.map((row: any) => ({
+      item_name: row.item_name || row.nome || row.name || row['Nome do Item'] || '',
+      quantity: parseInt(row.quantity || row.quantidade || row.qtd || row.qty || '0'),
+      unit: row.unit || row.unidade || row.un || 'un',
+      min_quantity: parseInt(row.min_quantity || row.minimo || row.min || row['Qtd Mínima'] || '0') || null,
+      location: row.location || row.localizacao || row.local || row.Local || '',
+      category: row.category || row.categoria || row.cat || '',
+      notes: row.notes || row.observacoes || row.obs || '',
+      updated_by: userId
+    }));
+  } else if (targetTable === 'services') {
+    tableName = 'Serviços';
+    mappedData = data.map((row: any) => ({
+      codigo_jbr: row.codigo_jbr || row.codigo || row.jbr || row['Código JBR'] || '',
+      cliente: row.cliente || row.client || row.customer || row.Cliente || '',
+      escopo: Array.isArray(row.escopo) ? row.escopo : (row.escopo || row.scope || '').split(',').map((s: string) => s.trim()).filter(Boolean),
+      equipamentos: row.equipamentos || row.equipment || row.equipments || '',
+      aplicacao: row.aplicacao || row.application || row.app || '',
+      data_inicio: row.data_inicio || row.start_date || row.inicio || null,
+      data_termino: row.data_termino || row.end_date || row.termino || null,
+      outros_escopo: row.outros_escopo || row.outros || null,
+      created_by: userId
+    }));
+  } else if (targetTable === 'maintenance_records') {
+    tableName = 'Manutenção';
+    mappedData = data.map((row: any) => ({
+      equipment_name: row.equipment_name || row.equipamento || row.equipment || row['Nome do Equipamento'] || '',
+      equipment_code: row.equipment_code || row.codigo || row.code || row['Código'] || '',
+      maintenance_type: row.maintenance_type || row.tipo || row.type || 'Preventiva',
+      priority: row.priority || row.prioridade || row.prior || 'Média',
+      status: row.status || row.estado || 'Pendente',
+      scheduled_date: row.scheduled_date || row.data_agendada || row.scheduled || new Date().toISOString(),
+      description: row.description || row.descricao || row.desc || '',
+      technician: row.technician || row.tecnico || row.tech || '',
+      created_by: userId
+    }));
+  }
+
+  // Filter out rows with empty required fields
+  const validData = mappedData.filter(row => {
+    if (targetTable === 'inventory') return row.item_name && row.item_name.trim() !== '';
+    if (targetTable === 'services') return row.codigo_jbr && row.cliente;
+    if (targetTable === 'maintenance_records') return row.equipment_name && row.equipment_code;
+    return false;
+  });
+
+  if (validData.length === 0) {
+    return '⚠️ Nenhum dado válido encontrado. Verifique se as colunas da planilha correspondem aos campos esperados.';
+  }
+
+  // If preview only, show the data that will be imported
+  if (previewOnly) {
+    let preview = `📊 PREVIEW - ${tableName} (${validData.length} registros válidos de ${data.length} total)\n\n`;
+    
+    if (targetTable === 'inventory') {
+      preview += '| Item | Qtd | Unidade | Mín | Local |\n';
+      preview += '|------|-----|---------|-----|-------|\n';
+      validData.slice(0, 10).forEach(item => {
+        preview += `| ${item.item_name} | ${item.quantity} | ${item.unit} | ${item.min_quantity || '-'} | ${item.location || '-'} |\n`;
+      });
+    } else if (targetTable === 'services') {
+      preview += '| Código JBR | Cliente | Escopo |\n';
+      preview += '|------------|---------|--------|\n';
+      validData.slice(0, 10).forEach(item => {
+        preview += `| ${item.codigo_jbr} | ${item.cliente} | ${Array.isArray(item.escopo) ? item.escopo.join(', ') : item.escopo} |\n`;
+      });
+    } else if (targetTable === 'maintenance_records') {
+      preview += '| Equipamento | Código | Tipo | Prioridade | Status |\n';
+      preview += '|-------------|--------|------|------------|--------|\n';
+      validData.slice(0, 10).forEach(item => {
+        preview += `| ${item.equipment_name} | ${item.equipment_code} | ${item.maintenance_type} | ${item.priority} | ${item.status} |\n`;
+      });
+    }
+    
+    if (validData.length > 10) {
+      preview += `\n... e mais ${validData.length - 10} registros.\n`;
+    }
+    
+    preview += `\n✅ Dados validados e prontos para importação!\n`;
+    preview += `⚠️ Para confirmar a importação, responda: "sim, pode importar" ou "confirmar importação"`;
+    
+    return preview;
+  }
+
+  // Actually insert the data
+  const { data: inserted, error } = await supabase
+    .from(targetTable)
+    .insert(validData)
+    .select();
+
+  if (error) {
+    console.error('Import error:', error);
+    return `❌ Erro ao importar dados: ${error.message}`;
+  }
+
+  return `✅ ${inserted.length} registros importados com sucesso para ${tableName}!`;
 }
 
 async function executarBuscaServicos(supabase: any, clienteFilter?: string): Promise<string> {

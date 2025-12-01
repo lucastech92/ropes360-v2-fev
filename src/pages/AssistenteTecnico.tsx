@@ -414,7 +414,129 @@ const AssistenteTecnico = () => {
       return;
     }
 
-    // Handle document analysis if document is present
+    // Handle Excel import if document is XLSX
+    if (selectedDocument && selectedDocument.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+      const documentMessage: Message = { 
+        role: 'user', 
+        content: inputMessage.trim() || `📊 Planilha Excel enviada: ${selectedDocument.name}` 
+      };
+      setMessages(prev => [...prev, documentMessage]);
+      setInputMessage("");
+      setIsLoading(true);
+
+      // Show parsing message
+      const parsingMsg: Message = { role: 'assistant', content: '📊 Analisando planilha Excel...' };
+      setMessages(prev => [...prev, parsingMsg]);
+
+      try {
+        // Parse Excel file
+        const XLSX = await import('xlsx');
+        const arrayBuffer = await selectedDocument.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        
+        // Get first sheet
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        // Convert to JSON with header row
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        
+        console.log('📊 Parsed Excel data:', jsonData);
+
+        // Send to bot with parsed data
+        const messagesWithExcel = [
+          ...messages.filter(m => m.role !== 'assistant' || m.content !== parsingMsg.content),
+          documentMessage,
+        ];
+
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/technical-assistant-chat`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({
+              messages: messagesWithExcel,
+              conversationId,
+              excelData: jsonData, // Send parsed data
+              fileName: selectedDocument.name
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let assistantResponse = '';
+
+        // Remove parsing message, add streaming message
+        setMessages(prev => {
+          const filtered = prev.filter(m => m.content !== parsingMsg.content);
+          return [...filtered, { role: 'assistant', content: '' }];
+        });
+
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n');
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6);
+                if (data === '[DONE]') continue;
+
+                try {
+                  const parsed = JSON.parse(data);
+                  const content = parsed.choices[0]?.delta?.content;
+                  if (content) {
+                    assistantResponse += content;
+                    setMessages(prev => {
+                      const newMessages = [...prev];
+                      newMessages[newMessages.length - 1] = {
+                        role: 'assistant',
+                        content: assistantResponse
+                      };
+                      return newMessages;
+                    });
+                  }
+                } catch (e) {
+                  // Ignore parse errors for incomplete chunks
+                }
+              }
+            }
+          }
+        }
+      } catch (error: any) {
+        console.error('Error processing Excel:', error);
+        setMessages(prev => {
+          const newMessages = [...prev];
+          newMessages[newMessages.length - 1] = {
+            role: 'assistant',
+            content: `❌ Erro ao processar planilha: ${error.message}`
+          };
+          return newMessages;
+        });
+        toast({
+          title: "Erro ao processar Excel",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+        clearDocument();
+      }
+      return;
+    }
+
+    // Handle document analysis if document is present (PDF/DOCX for report analysis)
     if (selectedDocument) {
       const documentMessage: Message = { 
         role: 'user', 
