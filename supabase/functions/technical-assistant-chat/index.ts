@@ -142,6 +142,10 @@ ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnic
               item_filter: {
                 type: "string",
                 description: "Nome ou parte do nome do item a buscar (opcional)"
+              },
+              list_all: {
+                type: "boolean",
+                description: "Se true, lista TODOS os itens com detalhes completos. Use quando o usuário pedir 'listar todos', 'mostrar tudo', 'lista completa', 'all items', etc."
               }
             }
           }
@@ -240,7 +244,7 @@ ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnic
         let result = '';
 
         if (toolCall.function.name === 'buscar_inventario') {
-          result = await executarBuscaInventario(supabaseAdmin, args.item_filter);
+          result = await executarBuscaInventario(supabaseAdmin, args.item_filter, args.list_all);
         } else if (toolCall.function.name === 'buscar_servicos') {
           result = await executarBuscaServicos(supabaseAdmin, args.cliente_filter);
         } else if (toolCall.function.name === 'buscar_manutencao') {
@@ -353,8 +357,8 @@ ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnic
   }
 });
 
-async function executarBuscaInventario(supabase: any, itemFilter?: string): Promise<string> {
-  console.log('📦 Fetching inventory, filter:', itemFilter || 'none');
+async function executarBuscaInventario(supabase: any, itemFilter?: string, listAll?: boolean): Promise<string> {
+  console.log('📦 Fetching inventory, filter:', itemFilter || 'none', 'listAll:', listAll);
   const { data: inventory, error } = await supabase.from('inventory').select('*');
   
   if (error) {
@@ -384,7 +388,20 @@ async function executarBuscaInventario(supabase: any, itemFilter?: string): Prom
   result += `Estoque total: ${totalQty} unidades\n`;
   result += `Críticos: ${lowStock.length}\n`;
 
-  if (itemFilter) {
+  // If list_all is true, list ALL items with details
+  if (listAll) {
+    result += `\n📋 LISTA COMPLETA (${totalItems} itens):\n`;
+    inventory.forEach((item: any) => {
+      const status = item.min_quantity && item.quantity < item.min_quantity ? '⚠️ CRÍTICO' : '✅ OK';
+      result += `\n• ${item.item_name} - ${status}\n`;
+      result += `  Qtd: ${item.quantity || 0} ${item.unit || 'un'}`;
+      if (item.min_quantity) result += ` (mín: ${item.min_quantity})`;
+      result += `\n`;
+      if (item.location) result += `  Local: ${item.location}\n`;
+      if (item.category) result += `  Categoria: ${item.category}\n`;
+    });
+  } else if (itemFilter) {
+    // If filtering by name
     if (matched.length > 0) {
       result += `\n🔍 "${itemFilter}" - ${matched.length} encontrado(s):\n`;
       matched.forEach((item: any) => {
@@ -396,13 +413,14 @@ async function executarBuscaInventario(supabase: any, itemFilter?: string): Prom
     } else {
       result += `\n⚠️ Nenhum item encontrado com "${itemFilter}"`;
     }
-  }
-
-  if (lowStock.length > 0) {
-    result += `\n\n⚠️ CRÍTICOS:\n`;
-    lowStock.forEach((item: any) => {
-      result += `• ${item.item_name}: ${item.quantity}/${item.min_quantity}\n`;
-    });
+  } else {
+    // Just summary + critical items (original behavior)
+    if (lowStock.length > 0) {
+      result += `\n\n⚠️ CRÍTICOS:\n`;
+      lowStock.forEach((item: any) => {
+        result += `• ${item.item_name}: ${item.quantity}/${item.min_quantity}\n`;
+      });
+    }
   }
 
   return result;
