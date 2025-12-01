@@ -418,9 +418,12 @@ const AssistenteTecnico = () => {
 
     // Handle Excel import if document is XLSX
     if (selectedDocument && selectedDocument.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+      // Auto-fill message if empty
+      const messageContent = inputMessage.trim() || "Analise essa planilha Excel e mostre um preview dos dados para importação.";
+      
       const documentMessage: Message = { 
         role: 'user', 
-        content: inputMessage.trim() || `📊 Planilha Excel enviada: ${selectedDocument.name}` 
+        content: messageContent 
       };
       setMessages(prev => [...prev, documentMessage]);
       setInputMessage("");
