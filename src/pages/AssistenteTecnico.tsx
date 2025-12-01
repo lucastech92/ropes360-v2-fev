@@ -49,6 +49,8 @@ const AssistenteTecnico = () => {
   const [analyzingImage, setAnalyzingImage] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<File | null>(null);
   const [analyzingDocument, setAnalyzingDocument] = useState(false);
+  const [pendingExcelData, setPendingExcelData] = useState<any[] | null>(null);
+  const [pendingExcelFileName, setPendingExcelFileName] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
@@ -443,6 +445,10 @@ const AssistenteTecnico = () => {
         
         console.log('📊 Parsed Excel data:', jsonData);
 
+        // Save to pending state for subsequent messages
+        setPendingExcelData(jsonData);
+        setPendingExcelFileName(selectedDocument.name);
+
         // Send to bot with parsed data
         const messagesWithExcel = [
           ...messages.filter(m => m.role !== 'assistant' || m.content !== parsingMsg.content),
@@ -497,7 +503,7 @@ const AssistenteTecnico = () => {
                   const parsed = JSON.parse(data);
                   const content = parsed.choices[0]?.delta?.content;
                   if (content) {
-                    assistantResponse += content;
+                assistantResponse += content;
                     setMessages(prev => {
                       const newMessages = [...prev];
                       newMessages[newMessages.length - 1] = {
@@ -513,6 +519,12 @@ const AssistenteTecnico = () => {
               }
             }
           }
+        }
+
+        // Check if import was successful and clear pending data
+        if (assistantResponse.includes('importados com sucesso') || assistantResponse.includes('✅')) {
+          setPendingExcelData(null);
+          setPendingExcelFileName(null);
         }
       } catch (error: any) {
         console.error('Error processing Excel:', error);
@@ -697,6 +709,9 @@ const AssistenteTecnico = () => {
           body: JSON.stringify({
             messages: [...messages, userMessage],
             conversationId,
+            // Include pending Excel data if exists
+            excelData: pendingExcelData,
+            fileName: pendingExcelFileName
           }),
         }
       );
@@ -760,6 +775,12 @@ const AssistenteTecnico = () => {
         console.error('Error saving assistant message:', saveError);
       } else {
         console.log('Assistant message saved successfully');
+      }
+
+      // Check if import was successful and clear pending data
+      if (assistantContent.includes('importados com sucesso') || assistantContent.includes('✅')) {
+        setPendingExcelData(null);
+        setPendingExcelFileName(null);
       }
 
     } catch (error: any) {
