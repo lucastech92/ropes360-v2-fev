@@ -832,6 +832,36 @@ export type Database = {
         }
         Relationships: []
       }
+      time_entries: {
+        Row: {
+          check_in_type: Database["public"]["Enums"]["check_in_type"]
+          created_at: string | null
+          entry_date: string
+          id: string
+          notes: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          check_in_type: Database["public"]["Enums"]["check_in_type"]
+          created_at?: string | null
+          entry_date: string
+          id?: string
+          notes?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          check_in_type?: Database["public"]["Enums"]["check_in_type"]
+          created_at?: string | null
+          entry_date?: string
+          id?: string
+          notes?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           company: string | null
@@ -962,6 +992,13 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "inspector" | "viewer" | "moderator"
+      check_in_type:
+        | "home_office"
+        | "offshore"
+        | "travel"
+        | "base"
+        | "day_off"
+        | "vacation"
       document_category:
         | "procedimentos_oficiais"
         | "inspecoes"
@@ -1099,6 +1136,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "inspector", "viewer", "moderator"],
+      check_in_type: [
+        "home_office",
+        "offshore",
+        "travel",
+        "base",
+        "day_off",
+        "vacation",
+      ],
       document_category: [
         "procedimentos_oficiais",
         "inspecoes",
