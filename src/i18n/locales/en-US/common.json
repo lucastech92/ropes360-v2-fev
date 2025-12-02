@@ -50,7 +50,8 @@
     "assistenteTecnico": "Technical Assistant (Beta)",
     "treinamento": "Training",
     "historico": "History",
-    "gerenciarUsuarios": "Manage Users"
+    "gerenciarUsuarios": "Manage Users",
+    "folhaPonto": "Timesheet"
   },
   "search": {
     "placeholder": "Search all modules...",
@@ -306,5 +307,35 @@
     "chromeInstructions": "In Chrome browser:",
     "chromeStep1": "Click the menu (three dots) in the top right corner",
     "chromeStep2": "Select 'Install app' or 'Add to home screen'"
+  },
+  "timesheet": {
+    "title": "Timesheet",
+    "description": "Record your daily check-in and track your monthly history",
+    "myTimesheet": "My Timesheet",
+    "teamView": "Team View",
+    "clickToCheckIn": "Click on a day to check in",
+    "legend": "Legend",
+    "monthlySummary": "Monthly Summary",
+    "summaryDescription": "Total days by check-in type this month",
+    "totalDays": "Total days recorded",
+    "teamTimesheet": "Team Timesheet",
+    "teamDescription": "View time records for all team members",
+    "newCheckIn": "New Check-in",
+    "editCheckIn": "Edit Check-in",
+    "checkInType": "Check-in Type",
+    "notes": "Notes",
+    "notesPlaceholder": "Add optional notes...",
+    "selectEmployee": "Select employee",
+    "allEmployees": "All employees",
+    "employee": "Employee",
+    "exportExcel": "Export Excel",
+    "types": {
+      "homeOffice": "Home Office",
+      "offshore": "Offshore",
+      "travel": "Travel",
+      "base": "Base",
+      "dayOff": "Day Off",
+      "vacation": "Vacation"
+    }
   }
 }

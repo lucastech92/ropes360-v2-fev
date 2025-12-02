@@ -50,7 +50,8 @@
     "assistenteTecnico": "Assistente Técnico (Beta)",
     "treinamento": "Treinamento",
     "historico": "Histórico",
-    "gerenciarUsuarios": "Gerenciar Usuários"
+    "gerenciarUsuarios": "Gerenciar Usuários",
+    "folhaPonto": "Folha de Ponto"
   },
   "search": {
     "placeholder": "Buscar em todos os módulos...",
@@ -339,5 +340,35 @@
     "chromeInstructions": "No navegador Chrome:",
     "chromeStep1": "Clique no menu (três pontos) no canto superior direito",
     "chromeStep2": "Selecione 'Instalar app' ou 'Adicionar à tela inicial'"
+  },
+  "timesheet": {
+    "title": "Folha de Ponto",
+    "description": "Registre seu check-in diário e acompanhe seu histórico mensal",
+    "myTimesheet": "Minha Folha",
+    "teamView": "Visão da Equipe",
+    "clickToCheckIn": "Clique em um dia para fazer check-in",
+    "legend": "Legenda",
+    "monthlySummary": "Resumo Mensal",
+    "summaryDescription": "Total de dias por tipo de check-in neste mês",
+    "totalDays": "Total de dias registrados",
+    "teamTimesheet": "Folha de Ponto da Equipe",
+    "teamDescription": "Visualize o registro de ponto de todos os colaboradores",
+    "newCheckIn": "Novo Check-in",
+    "editCheckIn": "Editar Check-in",
+    "checkInType": "Tipo de Check-in",
+    "notes": "Observações",
+    "notesPlaceholder": "Adicione observações opcionais...",
+    "selectEmployee": "Selecionar colaborador",
+    "allEmployees": "Todos os colaboradores",
+    "employee": "Colaborador",
+    "exportExcel": "Exportar Excel",
+    "types": {
+      "homeOffice": "Home Office",
+      "offshore": "Offshore",
+      "travel": "Viagem",
+      "base": "Base",
+      "dayOff": "Folga",
+      "vacation": "Férias"
+    }
   }
 }

@@ -50,7 +50,8 @@
     "assistenteTecnico": "Asistente Técnico (Beta)",
     "treinamento": "Capacitación",
     "historico": "Historial",
-    "gerenciarUsuarios": "Gestionar Usuarios"
+    "gerenciarUsuarios": "Gestionar Usuarios",
+    "folhaPonto": "Hoja de Asistencia"
   },
   "search": {
     "placeholder": "Buscar en todos los módulos...",
@@ -306,5 +307,35 @@
     "chromeInstructions": "En el navegador Chrome:",
     "chromeStep1": "Haz clic en el menú (tres puntos) en la esquina superior derecha",
     "chromeStep2": "Selecciona 'Instalar app' o 'Añadir a la pantalla de inicio'"
+  },
+  "timesheet": {
+    "title": "Hoja de Asistencia",
+    "description": "Registre su check-in diario y siga su historial mensual",
+    "myTimesheet": "Mi Hoja",
+    "teamView": "Vista del Equipo",
+    "clickToCheckIn": "Haga clic en un día para registrar",
+    "legend": "Leyenda",
+    "monthlySummary": "Resumen Mensual",
+    "summaryDescription": "Total de días por tipo de check-in este mes",
+    "totalDays": "Total de días registrados",
+    "teamTimesheet": "Hoja de Asistencia del Equipo",
+    "teamDescription": "Vea el registro de asistencia de todos los colaboradores",
+    "newCheckIn": "Nuevo Registro",
+    "editCheckIn": "Editar Registro",
+    "checkInType": "Tipo de Registro",
+    "notes": "Observaciones",
+    "notesPlaceholder": "Agregue observaciones opcionales...",
+    "selectEmployee": "Seleccionar colaborador",
+    "allEmployees": "Todos los colaboradores",
+    "employee": "Colaborador",
+    "exportExcel": "Exportar Excel",
+    "types": {
+      "homeOffice": "Home Office",
+      "offshore": "Offshore",
+      "travel": "Viaje",
+      "base": "Base",
+      "dayOff": "Descanso",
+      "vacation": "Vacaciones"
+    }
   }
 }

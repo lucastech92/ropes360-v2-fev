@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import ModuleCard from "@/components/ModuleCard";
 import { DashboardMetrics } from "@/components/DashboardMetrics";
 import { HomeSearch } from "@/components/HomeSearch";
-import { FileCheck, Wrench, GraduationCap, FileText, AlertTriangle, HelpCircle, History, ClipboardList, Package, FolderOpen, Settings, Shield } from "lucide-react";
+import { FileCheck, Wrench, GraduationCap, FileText, AlertTriangle, HelpCircle, History, ClipboardList, Package, FolderOpen, Settings, Shield, Calendar } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FolderManager } from "@/components/FolderManager";
 import { DocumentUploadWithTags } from "@/components/DocumentUploadWithTags";
@@ -83,6 +83,12 @@ const Index = () => {
       description: "Sistema completo de gestão de manutenções preventivas, corretivas e preditivas de equipamentos.",
       icon: Settings,
       href: "/manutencao",
+      color: "primary"
+    }, {
+      title: t('modules.folhaPonto'),
+      description: "Controle de ponto dos colaboradores com calendário interativo e tipos de check-in.",
+      icon: Calendar,
+      href: "/folha-ponto",
       color: "primary"
     }, {
       title: "Gerenciar Usuários",
