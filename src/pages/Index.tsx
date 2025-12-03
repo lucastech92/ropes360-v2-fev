@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import ModuleCard from "@/components/ModuleCard";
 import { DashboardMetrics } from "@/components/DashboardMetrics";
 import { HomeSearch } from "@/components/HomeSearch";
-import { FileCheck, Wrench, GraduationCap, FileText, AlertTriangle, HelpCircle, History, ClipboardList, Package, FolderOpen, Settings, Shield, Calendar } from "lucide-react";
+import { FileCheck, Wrench, GraduationCap, FileText, AlertTriangle, HelpCircle, History, ClipboardList, Package, FolderOpen, Settings, Shield, Calendar, Cog } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FolderManager } from "@/components/FolderManager";
 import { DocumentUploadWithTags } from "@/components/DocumentUploadWithTags";
@@ -70,6 +70,12 @@ const Index = () => {
       description: "Controle de itens e consumíveis disponíveis na base com alertas de estoque mínimo.",
       icon: Package,
       href: "/inventario",
+      color: "accent"
+    }, {
+      title: "Gestão de Equipamentos",
+      description: "Rastreamento de equipamentos com check-in/check-out, calibração e histórico de alocações.",
+      icon: Cog,
+      href: "/equipamentos",
       color: "accent"
     }],
     management: [{

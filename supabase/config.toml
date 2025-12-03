@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.analyze-report]
 verify_jwt = false
+
+[functions.equipment-ai]
+verify_jwt = false
