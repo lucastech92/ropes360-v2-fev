@@ -21,6 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { EquipmentSuggestions } from "@/components/equipment/EquipmentSuggestions";
 
 const ESCOPO_OPTIONS = [
   "MRT - Eletromagnético",
@@ -293,6 +294,12 @@ const NovoServico = () => {
                   rows={4}
                 />
               </div>
+
+              <EquipmentSuggestions
+                serviceScope={formData.escopo.filter(e => e !== "Outros")}
+                currentEquipmentText={formData.equipamentos}
+                onAddEquipment={(text) => setFormData({ ...formData, equipamentos: text })}
+              />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
