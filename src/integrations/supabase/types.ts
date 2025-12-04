@@ -634,42 +634,150 @@ export type Database = {
       }
       inventory: {
         Row: {
+          acquisition_date: string | null
+          calibration_interval_months: number | null
           category: string | null
+          code: string | null
+          condition: Database["public"]["Enums"]["equipment_condition"] | null
+          current_location: string | null
           id: string
           item_name: string
+          item_type: Database["public"]["Enums"]["item_type"]
+          last_calibration: string | null
           last_updated: string | null
           location: string | null
+          manufacturer: string | null
           min_quantity: number | null
+          model: string | null
+          next_calibration: string | null
           notes: string | null
+          photo_url: string | null
           quantity: number | null
+          serial_number: string | null
+          status: Database["public"]["Enums"]["equipment_status"] | null
           unit: string | null
           updated_by: string | null
         }
         Insert: {
+          acquisition_date?: string | null
+          calibration_interval_months?: number | null
           category?: string | null
+          code?: string | null
+          condition?: Database["public"]["Enums"]["equipment_condition"] | null
+          current_location?: string | null
           id?: string
           item_name: string
+          item_type?: Database["public"]["Enums"]["item_type"]
+          last_calibration?: string | null
           last_updated?: string | null
           location?: string | null
+          manufacturer?: string | null
           min_quantity?: number | null
+          model?: string | null
+          next_calibration?: string | null
           notes?: string | null
+          photo_url?: string | null
           quantity?: number | null
+          serial_number?: string | null
+          status?: Database["public"]["Enums"]["equipment_status"] | null
           unit?: string | null
           updated_by?: string | null
         }
         Update: {
+          acquisition_date?: string | null
+          calibration_interval_months?: number | null
           category?: string | null
+          code?: string | null
+          condition?: Database["public"]["Enums"]["equipment_condition"] | null
+          current_location?: string | null
           id?: string
           item_name?: string
+          item_type?: Database["public"]["Enums"]["item_type"]
+          last_calibration?: string | null
           last_updated?: string | null
           location?: string | null
+          manufacturer?: string | null
           min_quantity?: number | null
+          model?: string | null
+          next_calibration?: string | null
           notes?: string | null
+          photo_url?: string | null
           quantity?: number | null
+          serial_number?: string | null
+          status?: Database["public"]["Enums"]["equipment_status"] | null
           unit?: string | null
           updated_by?: string | null
         }
         Relationships: []
+      }
+      inventory_allocations: {
+        Row: {
+          checked_in_by: string | null
+          checked_out_by: string
+          checkin_date: string | null
+          checkin_notes: string | null
+          checkout_date: string
+          checkout_notes: string | null
+          condition_on_checkin:
+            | Database["public"]["Enums"]["equipment_condition"]
+            | null
+          condition_on_checkout: Database["public"]["Enums"]["equipment_condition"]
+          created_at: string | null
+          destination: string | null
+          id: string
+          inventory_item_id: string
+          service_id: string | null
+        }
+        Insert: {
+          checked_in_by?: string | null
+          checked_out_by: string
+          checkin_date?: string | null
+          checkin_notes?: string | null
+          checkout_date?: string
+          checkout_notes?: string | null
+          condition_on_checkin?:
+            | Database["public"]["Enums"]["equipment_condition"]
+            | null
+          condition_on_checkout: Database["public"]["Enums"]["equipment_condition"]
+          created_at?: string | null
+          destination?: string | null
+          id?: string
+          inventory_item_id: string
+          service_id?: string | null
+        }
+        Update: {
+          checked_in_by?: string | null
+          checked_out_by?: string
+          checkin_date?: string | null
+          checkin_notes?: string | null
+          checkout_date?: string
+          checkout_notes?: string | null
+          condition_on_checkin?:
+            | Database["public"]["Enums"]["equipment_condition"]
+            | null
+          condition_on_checkout?: Database["public"]["Enums"]["equipment_condition"]
+          created_at?: string | null
+          destination?: string | null
+          id?: string
+          inventory_item_id?: string
+          service_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_allocations_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_allocations_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       maintenance_records: {
         Row: {
@@ -684,6 +792,7 @@ export type Database = {
           equipment_name: string
           hours_spent: number | null
           id: string
+          inventory_item_id: string | null
           maintenance_type: string
           next_maintenance: string | null
           parts_used: string | null
@@ -705,6 +814,7 @@ export type Database = {
           equipment_name: string
           hours_spent?: number | null
           id?: string
+          inventory_item_id?: string | null
           maintenance_type: string
           next_maintenance?: string | null
           parts_used?: string | null
@@ -726,6 +836,7 @@ export type Database = {
           equipment_name?: string
           hours_spent?: number | null
           id?: string
+          inventory_item_id?: string | null
           maintenance_type?: string
           next_maintenance?: string | null
           parts_used?: string | null
@@ -741,6 +852,13 @@ export type Database = {
             columns: ["equipment_id"]
             isOneToOne: false
             referencedRelation: "equipment"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_records_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory"
             referencedColumns: ["id"]
           },
         ]
@@ -1187,6 +1305,7 @@ export type Database = {
         | "maintenance"
         | "calibration"
         | "inactive"
+      item_type: "consumivel" | "equipamento"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1347,6 +1466,7 @@ export const Constants = {
         "calibration",
         "inactive",
       ],
+      item_type: ["consumivel", "equipamento"],
     },
   },
 } as const
