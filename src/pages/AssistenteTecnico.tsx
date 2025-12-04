@@ -12,30 +12,17 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
-import { 
-  Bot, 
-  Send, 
-  Upload, 
-  FileText, 
-  Database, 
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
-  Clock,
-  Camera,
-  X,
-  Image as ImageIcon
-} from "lucide-react";
-
+import { Bot, Send, Upload, FileText, Database, Loader2, CheckCircle2, AlertCircle, Clock, Camera, X, Image as ImageIcon } from "lucide-react";
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   sources?: any[];
 }
-
 const AssistenteTecnico = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -54,144 +41,140 @@ const AssistenteTecnico = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
-
   useEffect(() => {
     checkUserRole();
     loadDocuments();
     createConversation();
   }, []);
-
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth"
+    });
   }, [messages]);
-
   const checkUserRole = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: {
+        user
+      }
+    } = await supabase.auth.getUser();
     if (!user) return;
-
-    const { data: roles } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id);
-
+    const {
+      data: roles
+    } = await supabase.from('user_roles').select('role').eq('user_id', user.id);
     setIsAdmin(roles?.some(r => r.role === 'admin') || false);
   };
-
   const loadDocuments = async () => {
-    const { data, error } = await (supabase as any)
-      .from('technical_documents')
-      .select('*')
-      .order('uploaded_at', { ascending: false });
-
+    const {
+      data,
+      error
+    } = await (supabase as any).from('technical_documents').select('*').order('uploaded_at', {
+      ascending: false
+    });
     if (!error && data) {
       setDocuments(data);
     }
   };
-
   const createConversation = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: {
+        user
+      }
+    } = await supabase.auth.getUser();
     if (!user) {
       console.error('No user found');
       return;
     }
-
     console.log('Creating conversation for user:', user.id);
-    const { data, error } = await (supabase as any)
-      .from('assistant_conversations')
-      .insert({ user_id: user.id, title: 'Nova Conversa' })
-      .select()
-      .single();
-
+    const {
+      data,
+      error
+    } = await (supabase as any).from('assistant_conversations').insert({
+      user_id: user.id,
+      title: 'Nova Conversa'
+    }).select().single();
     if (error) {
       console.error('Error creating conversation:', error);
       toast({
         title: "Erro ao inicializar conversa",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     if (data) {
       console.log('Conversation created:', data.id);
       setConversationId(data.id);
     }
   };
-
   const handleUploadDocument = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setUploading(true);
-
     try {
       const formData = new FormData(e.currentTarget);
       const file = formData.get('document') as File;
       const title = formData.get('title') as string;
-
       if (!file || !title) {
         throw new Error('Arquivo e título são obrigatórios');
       }
-
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: {
+          user
+        }
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
       // Upload file to storage (sanitize filename)
-      const sanitizedFileName = file.name
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
-        .replace(/[^\w\s.-]/g, '_') // Replace special chars with underscore
-        .replace(/\s+/g, '_'); // Replace spaces with underscore
-      
-      const filePath = `${user.id}/${Date.now()}_${sanitizedFileName}`;
-      const { error: uploadError } = await supabase.storage
-        .from('technical-documents')
-        .upload(filePath, file);
+      const sanitizedFileName = file.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+      .replace(/[^\w\s.-]/g, '_') // Replace special chars with underscore
+      .replace(/\s+/g, '_'); // Replace spaces with underscore
 
+      const filePath = `${user.id}/${Date.now()}_${sanitizedFileName}`;
+      const {
+        error: uploadError
+      } = await supabase.storage.from('technical-documents').upload(filePath, file);
       if (uploadError) throw uploadError;
 
       // Create document record
-      const { data: document, error: docError } = await (supabase as any)
-        .from('technical_documents')
-        .insert({
-          title,
-          file_name: file.name,
-          file_path: filePath,
-          file_size: file.size,
-          uploaded_by: user.id,
-          document_type: 'iso_4309',
-        })
-        .select()
-        .single();
-
+      const {
+        data: document,
+        error: docError
+      } = await (supabase as any).from('technical_documents').insert({
+        title,
+        file_name: file.name,
+        file_path: filePath,
+        file_size: file.size,
+        uploaded_by: user.id,
+        document_type: 'iso_4309'
+      }).select().single();
       if (docError) throw docError;
 
       // Process document using Supabase functions invoke
       console.log('📤 Iniciando processamento do documento:', document.id);
-      
       toast({
         title: "Processando documento",
-        description: "Extraindo texto e gerando embeddings... Isso pode levar alguns minutos.",
+        description: "Extraindo texto e gerando embeddings... Isso pode levar alguns minutos."
       });
-
       try {
-        const { data: processData, error: processError } = await supabase.functions.invoke(
-          'process-technical-document',
-          {
-            body: { documentId: document.id }
+        const {
+          data: processData,
+          error: processError
+        } = await supabase.functions.invoke('process-technical-document', {
+          body: {
+            documentId: document.id
           }
-        );
-
+        });
         if (processError) {
           console.error('❌ Erro ao processar documento:', processError);
           toast({
             title: "Erro no processamento",
             description: "O documento foi salvo mas o processamento falhou. Tente novamente.",
-            variant: "destructive",
+            variant: "destructive"
           });
         } else {
           console.log('✅ Documento processado com sucesso:', processData);
           toast({
             title: "Documento processado!",
-            description: `${processData.chunksProcessed} chunks criados (${processData.totalCharacters} caracteres extraídos)`,
+            description: `${processData.chunksProcessed} chunks criados (${processData.totalCharacters} caracteres extraídos)`
           });
         }
       } catch (err) {
@@ -199,23 +182,21 @@ const AssistenteTecnico = () => {
         toast({
           title: "Erro",
           description: "Falha ao processar documento.",
-          variant: "destructive",
+          variant: "destructive"
         });
       }
-
       setUploadDialogOpen(false);
       loadDocuments();
     } catch (error: any) {
       toast({
         title: "Erro ao enviar documento",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setUploading(false);
     }
   };
-
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
@@ -227,7 +208,6 @@ const AssistenteTecnico = () => {
       reader.readAsDataURL(file);
     }
   };
-
   const clearImage = () => {
     setSelectedImage(null);
     setImagePreview(null);
@@ -235,36 +215,30 @@ const AssistenteTecnico = () => {
       fileInputRef.current.value = '';
     }
   };
-
   const handleDocumentSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && (file.type === 'application/pdf' || 
-                 file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-                 file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+    if (file && (file.type === 'application/pdf' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
       setSelectedDocument(file);
     } else {
       toast({
         title: "Formato não suportado",
         description: "Por favor, envie um arquivo PDF, DOCX ou XLSX",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const clearDocument = () => {
     setSelectedDocument(null);
     if (documentInputRef.current) {
       documentInputRef.current.value = '';
     }
   };
-
   const analyzeDocument = async (file: File, scopeType?: string, client?: string) => {
     try {
       setAnalyzingDocument(true);
-      
       let fileBase64: string | undefined;
       let fileContent: string | undefined;
-      
+
       // For PDFs, send as base64 for visual analysis
       if (file.type === 'application/pdf') {
         const reader = new FileReader();
@@ -283,7 +257,9 @@ const AssistenteTecnico = () => {
       else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
         const mammoth = await import('mammoth');
         const arrayBuffer = await file.arrayBuffer();
-        const result = await mammoth.extractRawText({ arrayBuffer });
+        const result = await mammoth.extractRawText({
+          arrayBuffer
+        });
         fileContent = result.value;
         console.log('📄 Extracted text from DOCX:', fileContent.substring(0, 200) + '...');
       }
@@ -291,8 +267,9 @@ const AssistenteTecnico = () => {
       else if (file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
         const XLSX = await import('xlsx');
         const arrayBuffer = await file.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-        
+        const workbook = XLSX.read(arrayBuffer, {
+          type: 'array'
+        });
         let extractedText = '';
         workbook.SheetNames.forEach(sheetName => {
           const worksheet = workbook.Sheets[sheetName];
@@ -302,8 +279,10 @@ const AssistenteTecnico = () => {
         fileContent = extractedText;
         console.log('📊 Extracted text from XLSX:', fileContent.substring(0, 200) + '...');
       }
-
-      const { data, error } = await supabase.functions.invoke('analyze-report', {
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('analyze-report', {
         body: {
           fileBase64,
           fileContent,
@@ -312,7 +291,6 @@ const AssistenteTecnico = () => {
           client: client
         }
       });
-
       if (error) throw error;
       return data;
     } catch (error: any) {
@@ -322,22 +300,23 @@ const AssistenteTecnico = () => {
       setAnalyzingDocument(false);
     }
   };
-
   const formatReportAnalysis = (analysis: any) => {
-    const { quality_score, strengths, improvements, comparison } = analysis;
-    
+    const {
+      quality_score,
+      strengths,
+      improvements,
+      comparison
+    } = analysis;
     let result = `## 📊 Análise de Relatório Completa\n\n`;
     result += `**Score de Qualidade:** ${quality_score}/100 `;
     result += quality_score >= 80 ? '🟢 Excelente' : quality_score >= 60 ? '🟡 Bom' : '🟠 Precisa Melhorar';
     result += `\n\n`;
-    
     if (comparison && comparison.average_score) {
       result += `**Comparação:**\n`;
       result += `- Seu relatório: ${comparison.your_score}/100\n`;
       result += `- Média do escopo: ${comparison.average_score}/100\n`;
       result += `- Total analisados: ${comparison.total_reports_analyzed} relatórios\n\n`;
     }
-    
     if (strengths && strengths.length > 0) {
       result += `### ✅ Pontos Fortes:\n`;
       strengths.forEach((strength: string) => {
@@ -345,23 +324,24 @@ const AssistenteTecnico = () => {
       });
       result += `\n`;
     }
-    
     if (improvements && improvements.length > 0) {
       result += `### ⚠️ Sugestões de Melhoria:\n`;
       improvements.forEach((improvement: string) => {
         result += `- ${improvement}\n`;
       });
     }
-    
     return result;
   };
-
   const analyzeImage = async (imageBase64: string) => {
     try {
-      const { data, error } = await supabase.functions.invoke('analyze-cable-image', {
-        body: { imageBase64 }
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('analyze-cable-image', {
+        body: {
+          imageBase64
+        }
       });
-
       if (error) throw error;
       return data;
     } catch (error: any) {
@@ -369,15 +349,19 @@ const AssistenteTecnico = () => {
       throw error;
     }
   };
-
   const formatAnalysisResult = (analysis: any) => {
-    const { overallSeverity, suggestedAction, damageTypes, recommendations, overallAssessment, confidence } = analysis;
-    
+    const {
+      overallSeverity,
+      suggestedAction,
+      damageTypes,
+      recommendations,
+      overallAssessment,
+      confidence
+    } = analysis;
     let result = `## 📊 Análise de Imagem Completa\n\n`;
     result += `**Severidade Geral:** ${overallSeverity}% - ${overallSeverity < 30 ? 'Leve' : overallSeverity < 60 ? 'Moderada' : 'Severa'}\n`;
     result += `**Ação Sugerida:** ${suggestedAction === 'continue' ? '✅ Continuar em Uso' : suggestedAction === 'monitor' ? '⚠️ Monitorar Regularmente' : '🔴 Substituir Imediatamente'}\n`;
     result += `**Confiança:** ${confidence}%\n\n`;
-    
     if (damageTypes && damageTypes.length > 0) {
       result += `### Danos Detectados:\n`;
       damageTypes.forEach((damage: any) => {
@@ -385,32 +369,36 @@ const AssistenteTecnico = () => {
       });
       result += `\n`;
     }
-    
     if (overallAssessment) {
       result += `### Avaliação:\n${overallAssessment}\n\n`;
     }
-    
     if (recommendations && recommendations.length > 0) {
       result += `### Recomendações:\n`;
       recommendations.forEach((rec: string) => {
         result += `- ${rec}\n`;
       });
     }
-    
     return result;
   };
-
   const sendMessage = async () => {
-    console.log('sendMessage called', { inputMessage, conversationId, hasImage: !!selectedImage, hasDocument: !!selectedDocument });
-    
+    console.log('sendMessage called', {
+      inputMessage,
+      conversationId,
+      hasImage: !!selectedImage,
+      hasDocument: !!selectedDocument
+    });
+
     // Allow sending if there's either a message, an image, or a document
-    if ((!inputMessage.trim() && !selectedImage && !selectedDocument) || !conversationId) {
-      console.log('Validation failed', { hasInput: !!inputMessage.trim(), hasConversation: !!conversationId });
+    if (!inputMessage.trim() && !selectedImage && !selectedDocument || !conversationId) {
+      console.log('Validation failed', {
+        hasInput: !!inputMessage.trim(),
+        hasConversation: !!conversationId
+      });
       if (!conversationId) {
         toast({
           title: "Erro",
           description: "Aguarde a inicialização da conversa...",
-          variant: "destructive",
+          variant: "destructive"
         });
       }
       return;
@@ -420,32 +408,34 @@ const AssistenteTecnico = () => {
     if (selectedDocument && selectedDocument.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
       // Auto-fill message if empty
       const messageContent = inputMessage.trim() || "Analise essa planilha Excel e mostre um preview dos dados para importação.";
-      
-      const documentMessage: Message = { 
-        role: 'user', 
-        content: messageContent 
+      const documentMessage: Message = {
+        role: 'user',
+        content: messageContent
       };
       setMessages(prev => [...prev, documentMessage]);
       setInputMessage("");
       setIsLoading(true);
 
       // Show parsing message
-      const parsingMsg: Message = { role: 'assistant', content: '📊 Analisando planilha Excel...' };
+      const parsingMsg: Message = {
+        role: 'assistant',
+        content: '📊 Analisando planilha Excel...'
+      };
       setMessages(prev => [...prev, parsingMsg]);
-
       try {
         // Parse Excel file
         const XLSX = await import('xlsx');
         const arrayBuffer = await selectedDocument.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-        
+        const workbook = XLSX.read(arrayBuffer, {
+          type: 'array'
+        });
+
         // Get first sheet
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
-        
+
         // Convert to JSON with header row
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
-        
         console.log('📊 Parsed Excel data:', jsonData);
 
         // Save to pending state for subsequent messages
@@ -453,40 +443,35 @@ const AssistenteTecnico = () => {
         setPendingExcelFileName(selectedDocument.name);
 
         // Send to bot with parsed data
-        const messagesWithExcel = [
-          ...messages.filter(m => m.role !== 'assistant' || m.content !== parsingMsg.content),
-          documentMessage,
-        ];
+        const messagesWithExcel = [...messages.filter(m => m.role !== 'assistant' || m.content !== parsingMsg.content), documentMessage];
 
         // Get user session token
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: {
+            session
+          }
+        } = await supabase.auth.getSession();
         const userToken = session?.access_token;
-
         if (!userToken) {
           throw new Error('Usuário não autenticado');
         }
-
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/technical-assistant-chat`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${userToken}`,
-            },
-            body: JSON.stringify({
-              messages: messagesWithExcel,
-              conversationId,
-              excelData: jsonData, // Send parsed data
-              fileName: selectedDocument.name
-            }),
-          }
-        );
-
+        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/technical-assistant-chat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${userToken}`
+          },
+          body: JSON.stringify({
+            messages: messagesWithExcel,
+            conversationId,
+            excelData: jsonData,
+            // Send parsed data
+            fileName: selectedDocument.name
+          })
+        });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-
         const reader = response.body?.getReader();
         const decoder = new TextDecoder();
         let assistantResponse = '';
@@ -494,27 +479,29 @@ const AssistenteTecnico = () => {
         // Remove parsing message, add streaming message
         setMessages(prev => {
           const filtered = prev.filter(m => m.content !== parsingMsg.content);
-          return [...filtered, { role: 'assistant', content: '' }];
+          return [...filtered, {
+            role: 'assistant',
+            content: ''
+          }];
         });
-
         if (reader) {
           while (true) {
-            const { done, value } = await reader.read();
+            const {
+              done,
+              value
+            } = await reader.read();
             if (done) break;
-
             const chunk = decoder.decode(value);
             const lines = chunk.split('\n');
-
             for (const line of lines) {
               if (line.startsWith('data: ')) {
                 const data = line.slice(6);
                 if (data === '[DONE]') continue;
-
                 try {
                   const parsed = JSON.parse(data);
                   const content = parsed.choices[0]?.delta?.content;
                   if (content) {
-                assistantResponse += content;
+                    assistantResponse += content;
                     setMessages(prev => {
                       const newMessages = [...prev];
                       newMessages[newMessages.length - 1] = {
@@ -550,7 +537,7 @@ const AssistenteTecnico = () => {
         toast({
           title: "Erro ao processar Excel",
           description: error.message,
-          variant: "destructive",
+          variant: "destructive"
         });
       } finally {
         setIsLoading(false);
@@ -561,24 +548,25 @@ const AssistenteTecnico = () => {
 
     // Handle document analysis if document is present (PDF/DOCX for report analysis)
     if (selectedDocument) {
-      const documentMessage: Message = { 
-        role: 'user', 
-        content: inputMessage.trim() || `📄 Relatório enviado para análise: ${selectedDocument.name}` 
+      const documentMessage: Message = {
+        role: 'user',
+        content: inputMessage.trim() || `📄 Relatório enviado para análise: ${selectedDocument.name}`
       };
       setMessages(prev => [...prev, documentMessage]);
       setInputMessage("");
       setIsLoading(true);
 
       // Show analyzing message
-      const analyzingMsg: Message = { role: 'assistant', content: '🔍 Analisando relatório...' };
+      const analyzingMsg: Message = {
+        role: 'assistant',
+        content: '🔍 Analisando relatório...'
+      };
       setMessages(prev => [...prev, analyzingMsg]);
-
       try {
         const result = await analyzeDocument(selectedDocument);
-        
         if (result.success && result.analysis) {
           const analysisText = formatReportAnalysis(result.analysis);
-          
+
           // Replace analyzing message with actual analysis
           setMessages(prev => {
             const newMessages = [...prev];
@@ -590,20 +578,21 @@ const AssistenteTecnico = () => {
           });
 
           // Save to database
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: {
+              user
+            }
+          } = await supabase.auth.getUser();
           if (user) {
-            await supabase.from('assistant_messages').insert([
-              {
-                conversation_id: conversationId,
-                role: 'user',
-                content: documentMessage.content,
-              },
-              {
-                conversation_id: conversationId,
-                role: 'assistant',
-                content: analysisText,
-              }
-            ]);
+            await supabase.from('assistant_messages').insert([{
+              conversation_id: conversationId,
+              role: 'user',
+              content: documentMessage.content
+            }, {
+              conversation_id: conversationId,
+              role: 'assistant',
+              content: analysisText
+            }]);
           }
         } else {
           throw new Error('Falha na análise do relatório');
@@ -621,7 +610,7 @@ const AssistenteTecnico = () => {
         toast({
           title: "Erro na análise",
           description: error.message,
-          variant: "destructive",
+          variant: "destructive"
         });
       } finally {
         setIsLoading(false);
@@ -632,36 +621,40 @@ const AssistenteTecnico = () => {
 
     // Handle image analysis if image is present
     if (selectedImage && imagePreview) {
-      const imageMessage: Message = { 
-        role: 'user', 
-        content: inputMessage.trim() || '📷 Imagem enviada para análise' 
+      const imageMessage: Message = {
+        role: 'user',
+        content: inputMessage.trim() || '📷 Imagem enviada para análise'
       };
       setMessages(prev => [...prev, imageMessage]);
       setInputMessage("");
       setIsLoading(true);
       setAnalyzingImage(true);
-
       try {
         // Save user message
         await (supabase as any).from('assistant_messages').insert({
           conversation_id: conversationId,
           role: 'user',
-          content: imageMessage.content,
+          content: imageMessage.content
         });
 
         // Show analyzing message
-        setMessages(prev => [...prev, { role: 'assistant', content: '🔍 Analisando imagem...' }]);
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: '🔍 Analisando imagem...'
+        }]);
 
         // Analyze image
         const analysisResult = await analyzeImage(imagePreview);
-        
         if (analysisResult.success) {
           const formattedResult = formatAnalysisResult(analysisResult.analysis);
-          
+
           // Update last message with analysis result
           setMessages(prev => {
             const newMessages = [...prev];
-            newMessages[newMessages.length - 1] = { role: 'assistant', content: formattedResult };
+            newMessages[newMessages.length - 1] = {
+              role: 'assistant',
+              content: formattedResult
+            };
             return newMessages;
           });
 
@@ -669,12 +662,11 @@ const AssistenteTecnico = () => {
           await (supabase as any).from('assistant_messages').insert({
             conversation_id: conversationId,
             role: 'assistant',
-            content: formattedResult,
+            content: formattedResult
           });
-
           toast({
             title: "Análise Concluída",
-            description: "A imagem foi analisada com sucesso.",
+            description: "A imagem foi analisada com sucesso."
           });
         } else {
           throw new Error(analysisResult.error || 'Erro ao analisar imagem');
@@ -685,7 +677,7 @@ const AssistenteTecnico = () => {
         toast({
           title: "Erro ao analisar imagem",
           description: error.message,
-          variant: "destructive",
+          variant: "destructive"
         });
       } finally {
         setIsLoading(false);
@@ -696,70 +688,68 @@ const AssistenteTecnico = () => {
     }
 
     // Regular text message
-    const userMessage: Message = { role: 'user', content: inputMessage };
+    const userMessage: Message = {
+      role: 'user',
+      content: inputMessage
+    };
     setMessages(prev => [...prev, userMessage]);
     setInputMessage("");
     setIsLoading(true);
-
     try {
       // Salvar mensagem do usuário
       await (supabase as any).from('assistant_messages').insert({
         conversation_id: conversationId,
         role: 'user',
-        content: inputMessage,
+        content: inputMessage
       });
 
       // Get user session token
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: {
+          session
+        }
+      } = await supabase.auth.getSession();
       const userToken = session?.access_token;
-
       if (!userToken) {
         throw new Error('Usuário não autenticado');
       }
-
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/technical-assistant-chat`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${userToken}`,
-          },
-          body: JSON.stringify({
-            messages: [...messages, userMessage],
-            conversationId,
-            // Include pending Excel data if exists
-            excelData: pendingExcelData,
-            fileName: pendingExcelFileName
-          }),
-        }
-      );
-
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/technical-assistant-chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+          conversationId,
+          // Include pending Excel data if exists
+          excelData: pendingExcelData,
+          fileName: pendingExcelFileName
+        })
+      });
       if (!response.ok || !response.body) throw new Error('Failed to start stream');
-
       let assistantContent = "";
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
-
       while (true) {
-        const { done, value } = await reader.read();
+        const {
+          done,
+          value
+        } = await reader.read();
         if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        
+        buffer += decoder.decode(value, {
+          stream: true
+        });
         let newlineIndex: number;
         while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
           let line = buffer.slice(0, newlineIndex);
           buffer = buffer.slice(newlineIndex + 1);
-
           if (line.endsWith("\r")) line = line.slice(0, -1);
           if (line.startsWith(":") || line.trim() === "") continue;
           if (!line.startsWith("data: ")) continue;
-
           const jsonStr = line.slice(6).trim();
           if (jsonStr === "[DONE]") break;
-
           try {
             const parsed = JSON.parse(jsonStr);
             const content = parsed.choices?.[0]?.delta?.content;
@@ -768,11 +758,15 @@ const AssistenteTecnico = () => {
               setMessages(prev => {
                 const last = prev[prev.length - 1];
                 if (last?.role === 'assistant') {
-                  return prev.map((m, i) => 
-                    i === prev.length - 1 ? { ...m, content: assistantContent } : m
-                  );
+                  return prev.map((m, i) => i === prev.length - 1 ? {
+                    ...m,
+                    content: assistantContent
+                  } : m);
                 }
-                return [...prev, { role: 'assistant', content: assistantContent }];
+                return [...prev, {
+                  role: 'assistant',
+                  content: assistantContent
+                }];
               });
             }
           } catch {
@@ -783,13 +777,17 @@ const AssistenteTecnico = () => {
       }
 
       // Save assistant message
-      console.log('Saving assistant message:', { conversationId, contentLength: assistantContent.length });
-      const { error: saveError } = await (supabase as any).from('assistant_messages').insert({
+      console.log('Saving assistant message:', {
+        conversationId,
+        contentLength: assistantContent.length
+      });
+      const {
+        error: saveError
+      } = await (supabase as any).from('assistant_messages').insert({
         conversation_id: conversationId,
         role: 'assistant',
-        content: assistantContent,
+        content: assistantContent
       });
-
       if (saveError) {
         console.error('Error saving assistant message:', saveError);
       } else {
@@ -801,29 +799,29 @@ const AssistenteTecnico = () => {
         setPendingExcelData(null);
         setPendingExcelFileName(null);
       }
-
     } catch (error: any) {
       toast({
         title: "Erro ao enviar mensagem",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
     }
   };
-
   const getDocumentStatusIcon = (status: string) => {
     switch (status) {
-      case 'ready': return <CheckCircle2 className="h-4 w-4 text-green-500" />;
-      case 'processing': return <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />;
-      case 'error': return <AlertCircle className="h-4 w-4 text-red-500" />;
-      default: return <Clock className="h-4 w-4 text-yellow-500" />;
+      case 'ready':
+        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+      case 'processing':
+        return <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />;
+      case 'error':
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
+      default:
+        return <Clock className="h-4 w-4 text-yellow-500" />;
     }
   };
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <Header />
       
       <main className="container mx-auto px-4 py-8">
@@ -839,12 +837,11 @@ const AssistenteTecnico = () => {
               </p>
             </div>
             
-            {isAdmin && (
-              <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+            {isAdmin && <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
                 <DialogTrigger asChild>
                   <Button>
                     <Upload className="h-4 w-4 mr-2" />
-                    Upload ISO 4309
+                    Upload Machine Learning 
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
@@ -869,8 +866,7 @@ const AssistenteTecnico = () => {
                     </Button>
                   </form>
                 </DialogContent>
-              </Dialog>
-            )}
+              </Dialog>}
           </div>
         </div>
 
@@ -892,50 +888,32 @@ const AssistenteTecnico = () => {
               <CardContent className="flex-1 flex flex-col p-0">
                 <ScrollArea className="flex-1 p-4">
                   <div className="space-y-4">
-                    {messages.length === 0 && (
-                      <div className="text-center text-muted-foreground py-12">
+                    {messages.length === 0 && <div className="text-center text-muted-foreground py-12">
                         <Bot className="h-12 w-12 mx-auto mb-4 opacity-50" />
                         <p>Inicie uma conversa com o Assistente Técnico</p>
                         <p className="text-sm mt-2">
                           Exemplos: "Quais são os critérios de descarte da ISO 4309?" ou "Quantos itens no almoxarifado?"
                         </p>
-                      </div>
-                    )}
+                      </div>}
                     
-                    {messages.map((msg, idx) => (
-                      <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[80%] rounded-lg p-3 ${
-                          msg.role === 'user' 
-                            ? 'bg-primary text-primary-foreground' 
-                            : 'bg-muted'
-                        }`}>
+                    {messages.map((msg, idx) => <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[80%] rounded-lg p-3 ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                           <p className="whitespace-pre-wrap">{msg.content}</p>
-                          {msg.sources && msg.sources.length > 0 && (
-                            <div className="mt-2 pt-2 border-t border-border/20">
+                          {msg.sources && msg.sources.length > 0 && <div className="mt-2 pt-2 border-t border-border/20">
                               <div className="flex gap-2 flex-wrap">
-                                {msg.sources.map((source, i) => (
-                                  <Badge key={i} variant="outline" className="text-xs">
-                                    {source.type === 'iso_4309' ? (
-                                      <><FileText className="h-3 w-3 mr-1" /> ISO 4309</>
-                                    ) : (
-                                      <><Database className="h-3 w-3 mr-1" /> Dados Internos</>
-                                    )}
-                                  </Badge>
-                                ))}
+                                {msg.sources.map((source, i) => <Badge key={i} variant="outline" className="text-xs">
+                                    {source.type === 'iso_4309' ? <><FileText className="h-3 w-3 mr-1" /> ISO 4309</> : <><Database className="h-3 w-3 mr-1" /> Dados Internos</>}
+                                  </Badge>)}
                               </div>
-                            </div>
-                          )}
+                            </div>}
                         </div>
-                      </div>
-                    ))}
+                      </div>)}
                     
-                    {isLoading && (
-                      <div className="flex justify-start">
+                    {isLoading && <div className="flex justify-start">
                         <div className="bg-muted rounded-lg p-3">
                           <Loader2 className="h-4 w-4 animate-spin" />
                         </div>
-                      </div>
-                    )}
+                      </div>}
                     
                     <div ref={messagesEndRef} />
                   </div>
@@ -944,15 +922,11 @@ const AssistenteTecnico = () => {
                 <Separator />
                 
                 <div className="p-4">
-                  {!conversationId ? (
-                    <div className="text-center text-muted-foreground py-4">
+                  {!conversationId ? <div className="text-center text-muted-foreground py-4">
                       <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />
                       <p className="text-sm">Inicializando conversa...</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {imagePreview && (
-                        <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                    </div> : <div className="space-y-2">
+                      {imagePreview && <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
                           <div className="relative w-16 h-16 rounded overflow-hidden">
                             <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                           </div>
@@ -962,19 +936,11 @@ const AssistenteTecnico = () => {
                               {selectedImage ? (selectedImage.size / 1024 / 1024).toFixed(2) : '0'} MB
                             </p>
                           </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={clearImage}
-                            disabled={isLoading}
-                          >
+                          <Button type="button" variant="ghost" size="icon" onClick={clearImage} disabled={isLoading}>
                             <X className="h-4 w-4" />
                           </Button>
-                        </div>
-                      )}
-                      {selectedDocument && (
-                        <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                        </div>}
+                      {selectedDocument && <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
                           <FileText className="h-8 w-8 text-muted-foreground" />
                           <div className="flex-1">
                             <p className="text-sm font-medium">{selectedDocument.name}</p>
@@ -982,72 +948,28 @@ const AssistenteTecnico = () => {
                               {(selectedDocument.size / 1024 / 1024).toFixed(2)} MB
                             </p>
                           </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={clearDocument}
-                            disabled={isLoading}
-                          >
+                          <Button type="button" variant="ghost" size="icon" onClick={clearDocument} disabled={isLoading}>
                             <X className="h-4 w-4" />
                           </Button>
-                        </div>
-                      )}
-                      <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageSelect}
-                          className="hidden"
-                        />
-                        <input
-                          ref={documentInputRef}
-                          type="file"
-                          accept=".pdf,.docx,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                          onChange={handleDocumentSelect}
-                          className="hidden"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={isLoading || !!selectedImage || !!selectedDocument}
-                          title="Enviar imagem"
-                        >
+                        </div>}
+                      <form onSubmit={e => {
+                    e.preventDefault();
+                    sendMessage();
+                  }} className="flex gap-2">
+                        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+                        <input ref={documentInputRef} type="file" accept=".pdf,.docx,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={handleDocumentSelect} className="hidden" />
+                        <Button type="button" variant="outline" size="icon" onClick={() => fileInputRef.current?.click()} disabled={isLoading || !!selectedImage || !!selectedDocument} title="Enviar imagem">
                           <Camera className="h-4 w-4" />
                         </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => documentInputRef.current?.click()}
-                          disabled={isLoading || !!selectedImage || !!selectedDocument}
-                          title="Enviar relatório (PDF, DOCX, XLSX)"
-                        >
+                        <Button type="button" variant="outline" size="icon" onClick={() => documentInputRef.current?.click()} disabled={isLoading || !!selectedImage || !!selectedDocument} title="Enviar relatório (PDF, DOCX, XLSX)">
                           <Upload className="h-4 w-4" />
                         </Button>
-                        <Input
-                          value={inputMessage}
-                          onChange={(e) => setInputMessage(e.target.value)}
-                          placeholder={
-                            selectedImage ? "Adicione um comentário (opcional)..." : 
-                            selectedDocument ? "Adicione contexto sobre o relatório (opcional)..." :
-                            "Digite sua pergunta, envie uma imagem ou relatório..."
-                          }
-                          disabled={isLoading}
-                          className="flex-1"
-                        />
-                        <Button 
-                          type="submit" 
-                          disabled={isLoading || (!inputMessage.trim() && !selectedImage && !selectedDocument)}
-                        >
-                          {(analyzingImage || analyzingDocument) ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                        <Input value={inputMessage} onChange={e => setInputMessage(e.target.value)} placeholder={selectedImage ? "Adicione um comentário (opcional)..." : selectedDocument ? "Adicione contexto sobre o relatório (opcional)..." : "Digite sua pergunta, envie uma imagem ou relatório..."} disabled={isLoading} className="flex-1" />
+                        <Button type="submit" disabled={isLoading || !inputMessage.trim() && !selectedImage && !selectedDocument}>
+                          {analyzingImage || analyzingDocument ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                         </Button>
                       </form>
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </CardContent>
             </Card>
@@ -1060,15 +982,11 @@ const AssistenteTecnico = () => {
                 <CardDescription>Documentos disponíveis para consulta</CardDescription>
               </CardHeader>
               <CardContent>
-                {documents.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-8">
+                {documents.length === 0 ? <div className="text-center text-muted-foreground py-8">
                     <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>Nenhum documento enviado ainda</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {documents.map((doc) => (
-                      <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  </div> : <div className="space-y-2">
+                    {documents.map(doc => <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
                         <div className="flex items-center gap-3">
                           {getDocumentStatusIcon(doc.status)}
                           <div>
@@ -1077,21 +995,15 @@ const AssistenteTecnico = () => {
                           </div>
                         </div>
                         <Badge variant={doc.status === 'ready' ? 'default' : 'secondary'}>
-                          {doc.status === 'ready' ? 'Pronto' : 
-                           doc.status === 'processing' ? 'Processando' : 
-                           doc.status === 'error' ? 'Erro' : 'Pendente'}
+                          {doc.status === 'ready' ? 'Pronto' : doc.status === 'processing' ? 'Processando' : doc.status === 'error' ? 'Erro' : 'Pendente'}
                         </Badge>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      </div>)}
+                  </div>}
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </main>
-    </div>
-  );
+    </div>;
 };
-
 export default AssistenteTecnico;
