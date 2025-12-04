@@ -8,6 +8,7 @@ import EquipmentCheckout from "@/components/equipment/EquipmentCheckout";
 import EquipmentCheckin from "@/components/equipment/EquipmentCheckin";
 import EquipmentDetails from "@/components/equipment/EquipmentDetails";
 import EquipmentUtilizationDashboard from "@/components/equipment/EquipmentUtilizationDashboard";
+import EquipmentAlerts from "@/components/equipment/EquipmentAlerts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Package, BarChart3 } from "lucide-react";
 import {
@@ -120,6 +121,8 @@ const Equipamentos = () => {
           </div>
 
           <EquipmentDashboard stats={stats} />
+
+          <EquipmentAlerts />
 
           <Tabs defaultValue="equipment" className="w-full">
             <TabsList className="grid w-full max-w-md grid-cols-2">
