@@ -7,6 +7,9 @@ import EquipmentForm from "@/components/equipment/EquipmentForm";
 import EquipmentCheckout from "@/components/equipment/EquipmentCheckout";
 import EquipmentCheckin from "@/components/equipment/EquipmentCheckin";
 import EquipmentDetails from "@/components/equipment/EquipmentDetails";
+import EquipmentUtilizationDashboard from "@/components/equipment/EquipmentUtilizationDashboard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Package, BarChart3 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -118,22 +121,41 @@ const Equipamentos = () => {
 
           <EquipmentDashboard stats={stats} />
 
-          {loading ? (
-            <div className="text-center py-12 text-muted-foreground">
-              Carregando equipamentos...
-            </div>
-          ) : (
-            <EquipmentList
-              equipment={equipment}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onCheckout={handleCheckout}
-              onCheckin={handleCheckin}
-              onViewDetails={handleViewDetails}
-              onAdd={handleAdd}
-              canManage={canManage}
-            />
-          )}
+          <Tabs defaultValue="equipment" className="w-full">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="equipment" className="flex items-center gap-2">
+                <Package className="h-4 w-4" />
+                Equipamentos
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Análise de Utilização
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="equipment" className="mt-6">
+              {loading ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  Carregando equipamentos...
+                </div>
+              ) : (
+                <EquipmentList
+                  equipment={equipment}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onCheckout={handleCheckout}
+                  onCheckin={handleCheckin}
+                  onViewDetails={handleViewDetails}
+                  onAdd={handleAdd}
+                  canManage={canManage}
+                />
+              )}
+            </TabsContent>
+
+            <TabsContent value="analytics" className="mt-6">
+              <EquipmentUtilizationDashboard />
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
 
