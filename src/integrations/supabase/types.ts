@@ -167,6 +167,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           id: string
+          is_template: boolean | null
           name: string
           service_tag: string | null
           updated_at: string | null
@@ -177,6 +178,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          is_template?: boolean | null
           name: string
           service_tag?: string | null
           updated_at?: string | null
@@ -187,6 +189,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          is_template?: boolean | null
           name?: string
           service_tag?: string | null
           updated_at?: string | null
