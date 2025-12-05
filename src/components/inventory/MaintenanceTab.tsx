@@ -281,7 +281,7 @@ export default function MaintenanceTab({ equipmentItems, canManage }: Maintenanc
   const getStatusBadge = (status: string) => {
     const config: Record<string, { icon: any; label: string; className: string }> = {
       pendente: { icon: Clock, label: "Pendente", className: "bg-yellow-500/10 text-yellow-600" },
-      em_andamento: { icon: Wrench, label: "Em Andamento", className: "bg-blue-500/10 text-blue-600" },
+      em_andamento: { icon: Wrench, label: "Em Andamento", className: "bg-blue-500 text-white" },
       concluida: { icon: CheckCircle, label: "Concluída", className: "bg-green-500/10 text-green-600" },
       cancelada: { icon: AlertTriangle, label: "Cancelada", className: "bg-red-500/10 text-red-600" },
     };
