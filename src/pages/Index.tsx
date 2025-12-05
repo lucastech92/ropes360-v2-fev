@@ -42,7 +42,7 @@ const Index = () => {
       color: "primary"
     }, {
       title: t('modules.duvidasFrequentes'),
-      description: "Perguntas mais comuns dos inspetores e suas respostas, além de dicas práticas do dia a dia.",
+      description: "Treinamentos, Drake, etc...",
       icon: HelpCircle,
       href: "/duvidas-frequentes",
       color: "primary"
