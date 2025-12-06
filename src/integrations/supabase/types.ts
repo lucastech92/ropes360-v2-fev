@@ -1015,6 +1015,74 @@ export type Database = {
         }
         Relationships: []
       }
+      service_checklists: {
+        Row: {
+          checklist_id: string
+          created_at: string | null
+          id: string
+          service_id: string
+        }
+        Insert: {
+          checklist_id: string
+          created_at?: string | null
+          id?: string
+          service_id: string
+        }
+        Update: {
+          checklist_id?: string
+          created_at?: string | null
+          id?: string
+          service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_checklists_checklist_id_fkey"
+            columns: ["checklist_id"]
+            isOneToOne: false
+            referencedRelation: "checklists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_checklists_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_collaborators: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: string | null
+          service_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role?: string | null
+          service_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: string | null
+          service_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_collaborators_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           aplicacao: string | null
@@ -1027,6 +1095,7 @@ export type Database = {
           equipamentos: string | null
           escopo: string[] | null
           id: string
+          local: string | null
           outros_escopo: string | null
           updated_at: string | null
         }
@@ -1041,6 +1110,7 @@ export type Database = {
           equipamentos?: string | null
           escopo?: string[] | null
           id?: string
+          local?: string | null
           outros_escopo?: string | null
           updated_at?: string | null
         }
@@ -1055,6 +1125,7 @@ export type Database = {
           equipamentos?: string | null
           escopo?: string[] | null
           id?: string
+          local?: string | null
           outros_escopo?: string | null
           updated_at?: string | null
         }

@@ -8,7 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/EmptyState";
 import { Input } from "@/components/ui/input";
-import { Plus, Pencil, ClipboardList, Download, Search } from "lucide-react";
+import { Plus, Pencil, ClipboardList, Download, Search, Users, MapPin } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { exportToExcel } from "@/utils/exportUtils";
@@ -18,12 +19,15 @@ interface Service {
   id: string;
   codigo_jbr: string;
   cliente: string;
+  local: string | null;
   escopo: string[] | null;
   outros_escopo: string | null;
   aplicacao: string | null;
   equipamentos: string | null;
   data_inicio: string | null;
   data_termino: string | null;
+  collaborators_count?: number;
+  checklists_count?: number;
 }
 
 const Servicos = () => {
@@ -43,7 +47,24 @@ const Servicos = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setServices(data || []);
+
+      // Fetch counts for collaborators and checklists
+      const servicesWithCounts = await Promise.all(
+        (data || []).map(async (service) => {
+          const [collabResult, checklistResult] = await Promise.all([
+            supabase.from("service_collaborators").select("id", { count: 'exact', head: true }).eq("service_id", service.id),
+            supabase.from("service_checklists").select("id", { count: 'exact', head: true }).eq("service_id", service.id),
+          ]);
+
+          return {
+            ...service,
+            collaborators_count: collabResult.count || 0,
+            checklists_count: checklistResult.count || 0,
+          };
+        })
+      );
+
+      setServices(servicesWithCounts);
     } catch (error) {
       console.error("Error fetching services:", error);
       toast({
@@ -64,6 +85,7 @@ const Servicos = () => {
     const filtered = services.filter(service =>
       service.codigo_jbr.toLowerCase().includes(searchTerm.toLowerCase()) ||
       service.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      service.local?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       service.aplicacao?.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredServices(filtered);
@@ -73,12 +95,15 @@ const Servicos = () => {
     const exportData = filteredServices.map(s => ({
       'Código JBR': s.codigo_jbr,
       'Cliente': s.cliente,
+      'Local': s.local || '',
       'Escopo': s.escopo?.join(', ') || '',
       'Outros Escopo': s.outros_escopo || '',
       'Aplicação': s.aplicacao || '',
       'Equipamentos': s.equipamentos || '',
       'Data Início': s.data_inicio || '',
       'Data Término': s.data_termino || '',
+      'Colaboradores': s.collaborators_count || 0,
+      'Checklists': s.checklists_count || 0,
     }));
     exportToExcel(exportData, `servicos_${new Date().toISOString().split('T')[0]}`, 'Serviços');
     toast({ title: "Exportado com sucesso", description: `${exportData.length} serviços exportados` });
@@ -166,9 +191,9 @@ const Servicos = () => {
                   <TableRow>
                     <TableHead>{t('services.serviceCode')}</TableHead>
                     <TableHead>{t('services.client')}</TableHead>
+                    <TableHead>Local</TableHead>
                     <TableHead>{t('services.scope')}</TableHead>
-                    <TableHead>{t('services.application')}</TableHead>
-                    <TableHead>{t('services.equipment')}</TableHead>
+                    <TableHead>Vínculos</TableHead>
                     <TableHead>{t('services.startDate')}</TableHead>
                     <TableHead>{t('services.endDate')}</TableHead>
                     <TableHead>{t('common.actions')}</TableHead>
@@ -184,9 +209,17 @@ const Servicos = () => {
                       <TableCell className="font-medium">{service.codigo_jbr}</TableCell>
                       <TableCell>{service.cliente}</TableCell>
                       <TableCell>
+                        {service.local ? (
+                          <div className="flex items-center gap-1 text-sm">
+                            <MapPin className="h-3 w-3 text-muted-foreground" />
+                            <span className="truncate max-w-32">{service.local}</span>
+                          </div>
+                        ) : "-"}
+                      </TableCell>
+                      <TableCell>
                         {service.escopo && service.escopo.length > 0 ? (
                           <div className="space-y-1">
-                            {service.escopo.map((esc, idx) => (
+                            {service.escopo.slice(0, 2).map((esc, idx) => (
                               <div key={idx} className="text-sm">
                                 {esc}
                                 {esc === "Outros" && service.outros_escopo && (
@@ -196,16 +229,32 @@ const Servicos = () => {
                                 )}
                               </div>
                             ))}
+                            {service.escopo.length > 2 && (
+                              <Badge variant="secondary" className="text-xs">
+                                +{service.escopo.length - 2} mais
+                              </Badge>
+                            )}
                           </div>
                         ) : (
                           "-"
                         )}
                       </TableCell>
-                      <TableCell className="max-w-xs truncate">
-                        {service.aplicacao || "-"}
-                      </TableCell>
-                      <TableCell className="max-w-xs truncate">
-                        {service.equipamentos || "-"}
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          {(service.collaborators_count || 0) > 0 && (
+                            <Badge variant="outline" className="text-xs flex items-center gap-1 w-fit">
+                              <Users className="h-3 w-3" />
+                              {service.collaborators_count}
+                            </Badge>
+                          )}
+                          {(service.checklists_count || 0) > 0 && (
+                            <Badge variant="outline" className="text-xs flex items-center gap-1 w-fit">
+                              <ClipboardList className="h-3 w-3" />
+                              {service.checklists_count}
+                            </Badge>
+                          )}
+                          {!service.collaborators_count && !service.checklists_count && "-"}
+                        </div>
                       </TableCell>
                       <TableCell>
                         {service.data_inicio
