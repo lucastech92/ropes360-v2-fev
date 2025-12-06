@@ -22,6 +22,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { EquipmentSuggestions } from "@/components/equipment/EquipmentSuggestions";
+import { ServiceCollaboratorsSelect } from "@/components/service/ServiceCollaboratorsSelect";
+import { ServiceChecklistsSelect } from "@/components/service/ServiceChecklistsSelect";
 
 const ESCOPO_OPTIONS = [
   "MRT - Eletromagnético",
@@ -39,9 +41,12 @@ const NovoServico = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>([]);
+  const [selectedChecklists, setSelectedChecklists] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     codigo_jbr: "",
     cliente: "",
+    local: "",
     escopo: [] as string[],
     outros_escopo: "",
     aplicacao: "",
@@ -70,6 +75,7 @@ const NovoServico = () => {
         setFormData({
           codigo_jbr: data.codigo_jbr || "",
           cliente: data.cliente || "",
+          local: data.local || "",
           escopo: data.escopo || [],
           outros_escopo: data.outros_escopo || "",
           aplicacao: data.aplicacao || "",
@@ -77,6 +83,26 @@ const NovoServico = () => {
           data_inicio: data.data_inicio || "",
           data_termino: data.data_termino || "",
         });
+
+        // Fetch existing collaborators
+        const { data: collabData } = await supabase
+          .from("service_collaborators")
+          .select("user_id")
+          .eq("service_id", id);
+        
+        if (collabData) {
+          setSelectedCollaborators(collabData.map(c => c.user_id));
+        }
+
+        // Fetch existing linked checklists
+        const { data: checklistData } = await supabase
+          .from("service_checklists")
+          .select("checklist_id")
+          .eq("service_id", id);
+        
+        if (checklistData) {
+          setSelectedChecklists(checklistData.map(c => c.checklist_id));
+        }
       }
     } catch (error) {
       console.error("Error fetching service:", error);
@@ -86,6 +112,62 @@ const NovoServico = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const cloneChecklistTemplate = async (templateId: string, serviceId: string, serviceTag: string, userId: string) => {
+    // Fetch template
+    const { data: template, error: templateError } = await supabase
+      .from("checklists")
+      .select("*")
+      .eq("id", templateId)
+      .single();
+
+    if (templateError || !template) return null;
+
+    // Create cloned checklist
+    const { data: newChecklist, error: checklistError } = await supabase
+      .from("checklists")
+      .insert({
+        name: template.name,
+        description: template.description,
+        service_tag: serviceTag,
+        checklist_type: template.checklist_type,
+        is_template: false,
+        created_by: userId,
+      })
+      .select()
+      .single();
+
+    if (checklistError || !newChecklist) return null;
+
+    // Fetch and clone template items
+    const { data: templateItems } = await supabase
+      .from("checklist_items")
+      .select("*")
+      .eq("checklist_id", templateId)
+      .order("order_index");
+
+    if (templateItems && templateItems.length > 0) {
+      const clonedItems = templateItems.map(item => ({
+        checklist_id: newChecklist.id,
+        item_text: item.item_text,
+        order_index: item.order_index,
+        target_quantity: item.target_quantity,
+        current_quantity: 0,
+        is_checked: false,
+        inventory_item_id: item.inventory_item_id,
+      }));
+
+      await supabase.from("checklist_items").insert(clonedItems);
+    }
+
+    // Link cloned checklist to service
+    await supabase.from("service_checklists").insert({
+      service_id: serviceId,
+      checklist_id: newChecklist.id,
+    });
+
+    return newChecklist;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -102,6 +184,7 @@ const NovoServico = () => {
       const serviceData = {
         codigo_jbr: formData.codigo_jbr,
         cliente: formData.cliente,
+        local: formData.local || null,
         escopo: formData.escopo.length > 0 ? formData.escopo : null,
         outros_escopo: formData.outros_escopo || null,
         aplicacao: formData.aplicacao || null,
@@ -110,6 +193,8 @@ const NovoServico = () => {
         data_termino: formData.data_termino || null,
       };
 
+      let serviceId = id;
+
       if (id) {
         const { error } = await supabase
           .from("services")
@@ -117,24 +202,69 @@ const NovoServico = () => {
           .eq("id", id);
 
         if (error) throw error;
-
-        toast({
-          title: "Serviço atualizado com sucesso!",
-          description: `O serviço ${formData.codigo_jbr} foi atualizado.`,
-        });
       } else {
-        const { error } = await supabase.from("services").insert({
-          ...serviceData,
-          created_by: user.id,
-        });
+        const { data: newService, error } = await supabase
+          .from("services")
+          .insert({
+            ...serviceData,
+            created_by: user.id,
+          })
+          .select()
+          .single();
 
         if (error) throw error;
-
-        toast({
-          title: "Serviço criado com sucesso!",
-          description: `O serviço ${formData.codigo_jbr} foi registrado.`,
-        });
+        serviceId = newService.id;
       }
+
+      if (serviceId) {
+        // Handle collaborators
+        // First, delete existing collaborators for this service
+        await supabase
+          .from("service_collaborators")
+          .delete()
+          .eq("service_id", serviceId);
+
+        // Insert new collaborators
+        if (selectedCollaborators.length > 0) {
+          const collabInserts = selectedCollaborators.map(userId => ({
+            service_id: serviceId,
+            user_id: userId,
+            role: 'inspector',
+          }));
+
+          await supabase.from("service_collaborators").insert(collabInserts);
+        }
+
+        // Handle checklists
+        if (!id) {
+          // For new services, clone selected templates
+          for (const templateId of selectedChecklists) {
+            await cloneChecklistTemplate(templateId, serviceId, formData.codigo_jbr, user.id);
+          }
+        } else {
+          // For existing services, update linked checklists
+          await supabase
+            .from("service_checklists")
+            .delete()
+            .eq("service_id", serviceId);
+
+          if (selectedChecklists.length > 0) {
+            const checklistInserts = selectedChecklists.map(checklistId => ({
+              service_id: serviceId,
+              checklist_id: checklistId,
+            }));
+
+            await supabase.from("service_checklists").insert(checklistInserts);
+          }
+        }
+      }
+
+      toast({
+        title: id ? "Serviço atualizado com sucesso!" : "Serviço criado com sucesso!",
+        description: id 
+          ? `O serviço ${formData.codigo_jbr} foi atualizado.`
+          : `O serviço ${formData.codigo_jbr} foi registrado${selectedChecklists.length > 0 ? ` com ${selectedChecklists.length} checklist(s) clonado(s)` : ''}.`,
+      });
 
       navigate("/servicos");
     } catch (error) {
@@ -225,6 +355,18 @@ const NovoServico = () => {
                   }
                   placeholder={t('services.clientName')}
                   required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="local">Local</Label>
+                <Input
+                  id="local"
+                  value={formData.local}
+                  onChange={(e) =>
+                    setFormData({ ...formData, local: e.target.value })
+                  }
+                  placeholder="Ex: Plataforma Petrobras P-66, Base Rio de Janeiro"
                 />
               </div>
 
@@ -325,6 +467,21 @@ const NovoServico = () => {
                     }
                   />
                 </div>
+              </div>
+
+              <div className="border-t pt-6 space-y-6">
+                <h3 className="text-lg font-semibold">Vinculações</h3>
+                
+                <ServiceCollaboratorsSelect
+                  selectedUserIds={selectedCollaborators}
+                  onChange={setSelectedCollaborators}
+                />
+
+                <ServiceChecklistsSelect
+                  selectedChecklistIds={selectedChecklists}
+                  onChange={setSelectedChecklists}
+                  mode={id ? 'all' : 'templates'}
+                />
               </div>
 
               <div className="flex justify-between gap-4">

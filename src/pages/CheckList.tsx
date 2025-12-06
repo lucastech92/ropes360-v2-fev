@@ -5,10 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ClipboardList, Plus, Trash2, Edit, MinusCircle, PlusCircle, PackagePlus, PackageMinus, Copy, FileText, FolderOpen } from "lucide-react";
+import { ClipboardList, Plus, Trash2, Edit, MinusCircle, PlusCircle, PackagePlus, PackageMinus, Copy, FileText, FolderOpen, Briefcase } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ServiceLinkSelect } from "@/components/service/ServiceLinkSelect";
 import {
   Select,
   SelectContent,
@@ -85,6 +86,7 @@ const CheckList = () => {
   const [cloneName, setCloneName] = useState("");
   const [templateToClone, setTemplateToClone] = useState<Checklist | null>(null);
   const [activeTab, setActiveTab] = useState<string>("servicos");
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -270,6 +272,14 @@ const CheckList = () => {
       return;
     }
 
+    // If a service was selected, link the checklist to it
+    if (selectedServiceId && !newChecklistIsTemplate) {
+      await supabase.from("service_checklists").insert({
+        service_id: selectedServiceId,
+        checklist_id: data.id,
+      });
+    }
+
     setChecklists([data as Checklist, ...checklists]);
     setSelectedChecklist(data.id);
     resetFormFields();
@@ -278,7 +288,9 @@ const CheckList = () => {
       title: newChecklistIsTemplate ? "Template criado" : "Checklist criado",
       description: newChecklistIsTemplate 
         ? "Novo template criado. Adicione itens e use-o para clonar novos checklists."
-        : "Novo checklist criado com sucesso",
+        : selectedServiceId 
+          ? "Novo checklist criado e vinculado ao serviço."
+          : "Novo checklist criado com sucesso",
     });
   };
 
@@ -427,6 +439,7 @@ const CheckList = () => {
     setNewChecklistServiceTag("");
     setNewChecklistType('saida');
     setNewChecklistIsTemplate(false);
+    setSelectedServiceId(null);
   };
 
   const currentChecklist = checklists.find(c => c.id === selectedChecklist);
@@ -684,6 +697,12 @@ const CheckList = () => {
                               placeholder="Ex: JBR-2024-001"
                             />
                           </div>
+                          {!newChecklistIsTemplate && (
+                            <ServiceLinkSelect
+                              selectedServiceId={selectedServiceId}
+                              onChange={setSelectedServiceId}
+                            />
+                          )}
                           <div className="flex items-center space-x-2">
                             <Checkbox
                               id="is_template"
