@@ -83,15 +83,19 @@ export const ServiceCollaboratorsSelect = ({
           <p className="text-sm text-muted-foreground">Nenhum colaborador disponível</p>
         ) : (
           users.map((user) => (
-            <label
+            <div
               key={user.user_id}
-              className="flex items-center space-x-2 p-2 rounded hover:bg-muted/50 cursor-pointer"
+              className="flex items-center space-x-2 p-2 rounded hover:bg-muted/50"
             >
               <Checkbox
+                id={`user-${user.user_id}`}
                 checked={selectedUserIds.includes(user.user_id)}
                 onCheckedChange={() => toggleUser(user.user_id)}
               />
-              <div className="flex-1 min-w-0">
+              <label 
+                htmlFor={`user-${user.user_id}`}
+                className="flex-1 min-w-0 cursor-pointer"
+              >
                 <p className="text-sm font-medium truncate">
                   {user.full_name || user.email || "Usuário"}
                 </p>
@@ -101,8 +105,8 @@ export const ServiceCollaboratorsSelect = ({
                     {user.company && ` • ${user.company}`}
                   </p>
                 )}
-              </div>
-            </label>
+              </label>
+            </div>
           ))
         )}
       </div>
