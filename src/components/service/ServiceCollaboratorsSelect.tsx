@@ -91,6 +91,7 @@ export const ServiceCollaboratorsSelect = ({
               <Checkbox
                 checked={selectedUserIds.includes(user.user_id)}
                 onCheckedChange={() => toggleUser(user.user_id)}
+                onClick={(e) => e.stopPropagation()}
               />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">
