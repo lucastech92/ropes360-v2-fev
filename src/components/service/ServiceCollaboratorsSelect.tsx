@@ -83,15 +83,13 @@ export const ServiceCollaboratorsSelect = ({
           <p className="text-sm text-muted-foreground">Nenhum colaborador disponível</p>
         ) : (
           users.map((user) => (
-            <div
+            <label
               key={user.user_id}
               className="flex items-center space-x-2 p-2 rounded hover:bg-muted/50 cursor-pointer"
-              onClick={() => toggleUser(user.user_id)}
             >
               <Checkbox
                 checked={selectedUserIds.includes(user.user_id)}
                 onCheckedChange={() => toggleUser(user.user_id)}
-                onClick={(e) => e.stopPropagation()}
               />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">
@@ -104,7 +102,7 @@ export const ServiceCollaboratorsSelect = ({
                   </p>
                 )}
               </div>
-            </div>
+            </label>
           ))
         )}
       </div>
