@@ -96,14 +96,17 @@ export const ServiceChecklistsSelect = ({
           checklists.map((checklist) => (
             <div
               key={checklist.id}
-              className="flex items-center space-x-2 p-2 rounded hover:bg-muted/50 cursor-pointer"
-              onClick={() => toggleChecklist(checklist.id)}
+              className="flex items-center space-x-2 p-2 rounded hover:bg-muted/50"
             >
               <Checkbox
+                id={`checklist-${checklist.id}`}
                 checked={selectedChecklistIds.includes(checklist.id)}
                 onCheckedChange={() => toggleChecklist(checklist.id)}
               />
-              <div className="flex-1 min-w-0 flex items-center gap-2">
+              <label 
+                htmlFor={`checklist-${checklist.id}`}
+                className="flex-1 min-w-0 flex items-center gap-2 cursor-pointer"
+              >
                 {checklist.is_template ? (
                   <FileText className="h-4 w-4 text-primary shrink-0" />
                 ) : (
@@ -132,7 +135,7 @@ export const ServiceChecklistsSelect = ({
                   )}
                   {checklist.checklist_type === 'entrada' ? 'Entrada' : 'Saída'}
                 </Badge>
-              </div>
+              </label>
             </div>
           ))
         )}
