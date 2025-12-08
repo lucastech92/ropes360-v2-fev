@@ -782,6 +782,98 @@ export type Database = {
           },
         ]
       }
+      inventory_consumption_history: {
+        Row: {
+          change_type: string
+          created_at: string
+          created_by: string | null
+          id: string
+          inventory_item_id: string
+          new_quantity: number
+          notes: string | null
+          previous_quantity: number
+          quantity_change: number
+          service_id: string | null
+        }
+        Insert: {
+          change_type: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          inventory_item_id: string
+          new_quantity: number
+          notes?: string | null
+          previous_quantity: number
+          quantity_change: number
+          service_id?: string | null
+        }
+        Update: {
+          change_type?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          inventory_item_id?: string
+          new_quantity?: number
+          notes?: string | null
+          previous_quantity?: number
+          quantity_change?: number
+          service_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_consumption_history_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_consumption_history_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_predictions: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          id: string
+          inventory_item_id: string
+          predicted_value: Json
+          prediction_type: string
+          valid_until: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          inventory_item_id: string
+          predicted_value: Json
+          prediction_type: string
+          valid_until?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          inventory_item_id?: string
+          predicted_value?: Json
+          prediction_type?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_predictions_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenance_records: {
         Row: {
           actions_taken: string | null

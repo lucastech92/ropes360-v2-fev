@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useUnifiedInventory, UnifiedInventoryItem } from "@/hooks/useUnifiedInventory";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, Wrench, BarChart3 } from "lucide-react";
+import { Package, Wrench, BarChart3, Sparkles } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +19,7 @@ import InventoryItemList from "@/components/inventory/InventoryItemList";
 import InventoryItemForm from "@/components/inventory/InventoryItemForm";
 import MaintenanceTab from "@/components/inventory/MaintenanceTab";
 import UtilizationTab from "@/components/inventory/UtilizationTab";
+import { InventoryTrendsAI } from "@/components/inventory/InventoryTrendsAI";
 
 const Inventario = () => {
   const {
@@ -107,7 +108,7 @@ const Inventario = () => {
           <InventoryDashboard stats={stats} />
 
           <Tabs defaultValue="items" className="w-full">
-            <TabsList className="grid w-full max-w-lg grid-cols-3">
+            <TabsList className="grid w-full max-w-2xl grid-cols-4">
               <TabsTrigger value="items" className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
                 Itens
@@ -119,6 +120,10 @@ const Inventario = () => {
               <TabsTrigger value="utilization" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
                 Utilização
+              </TabsTrigger>
+              <TabsTrigger value="trends" className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                Tendências IA
               </TabsTrigger>
             </TabsList>
 
@@ -144,6 +149,10 @@ const Inventario = () => {
 
             <TabsContent value="utilization" className="mt-6">
               <UtilizationTab items={items} />
+            </TabsContent>
+
+            <TabsContent value="trends" className="mt-6">
+              <InventoryTrendsAI />
             </TabsContent>
           </Tabs>
         </div>
