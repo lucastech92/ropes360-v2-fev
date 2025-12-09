@@ -36,7 +36,7 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY não configurada");
     }
 
-    console.log('Enviando imagem para análise...');
+    console.log('Enviando imagem para análise com tool calling...');
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -70,43 +70,16 @@ CRITÉRIOS ISO 4309 PARA ARAMES ROMPIDOS:
 - 6+ arames rompidos em 6d (6x diâmetro): severidade 90-100%, ação "replace" IMEDIATA
 - Múltiplos arames rompidos concentrados: severidade 85-100%, ação "replace"
 
-IMPORTANTE: Retorne APENAS um objeto JSON válido, sem texto adicional antes ou depois.
-O JSON deve ter exatamente esta estrutura:
-{
-  "damageTypes": [
-    {
-      "type": "Nome do dano (ex: Corrosão, Arames rompidos, Abrasão, Deformação, Gaiola de passarinho)",
-      "severity": número de 0 a 100,
-      "location": "Externa/Interna, posição aproximada",
-      "description": "Descrição detalhada do dano observado - conte arames rompidos se houver"
-    }
-  ],
-  "overallSeverity": número de 0 a 100,
-  "overallAssessment": "Avaliação geral em uma frase",
-  "recommendations": ["Recomendação 1", "Recomendação 2"],
-  "suggestedAction": "continue" ou "monitor" ou "replace",
-  "confidence": número de 0 a 100
-}
+IMPORTANTE: SEJA CONSERVADOR - se houver QUALQUER dúvida sobre arames rompidos, assuma que existem. É preferível um falso positivo a ignorar um dano real que pode causar acidentes.
 
-Critérios de avaliação:
-- 0-30: Danos leves, operação normal
-- 31-60: Danos moderados, monitoramento necessário
-- 61-100: Danos severos, substituição recomendada
-
-Tipos comuns de danos:
-- Arames rompidos (PRIORIDADE MÁXIMA)
-- Corrosão (interna/externa)
-- Abrasão/desgaste
-- Deformação (gaiola de passarinho, amassamento)
-- Fadiga
-- Redução de diâmetro`
+Use a função report_cable_analysis para retornar sua análise.`
           },
           {
             role: "user",
             content: [
               {
                 type: "text",
-                text: "Analise esta imagem de cabo de aço com MÁXIMA ATENÇÃO aos arames rompidos. SEJA CONSERVADOR: se houver QUALQUER dúvida sobre arames rompidos, assuma que existem e conte-os. É preferível um falso positivo a ignorar um dano real que pode causar acidentes. Examine cada parte visível do cabo procurando por pontas salientes, fios soltos, gaps ou qualquer irregularidade. Retorne APENAS o JSON, sem texto adicional."
+                text: "Analise esta imagem de cabo de aço com MÁXIMA ATENÇÃO aos arames rompidos. Examine cada parte visível do cabo procurando por pontas salientes, fios soltos, gaps ou qualquer irregularidade. Use a função report_cable_analysis para retornar sua análise completa."
               },
               {
                 type: "image_url",
@@ -117,7 +90,73 @@ Tipos comuns de danos:
             ]
           }
         ],
-        max_tokens: 2000
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "report_cable_analysis",
+              description: "Reporta a análise completa de danos do cabo de aço inspecionado",
+              parameters: {
+                type: "object",
+                properties: {
+                  damageTypes: {
+                    type: "array",
+                    description: "Lista de tipos de danos identificados no cabo",
+                    items: {
+                      type: "object",
+                      properties: {
+                        type: { 
+                          type: "string", 
+                          description: "Tipo do dano (ex: Arames rompidos, Corrosão, Abrasão, Deformação, Gaiola de passarinho)" 
+                        },
+                        severity: { 
+                          type: "number", 
+                          description: "Severidade de 0 a 100 (0-30 leve, 31-60 moderado, 61-100 severo)" 
+                        },
+                        location: { 
+                          type: "string", 
+                          description: "Localização do dano (Externa/Interna, posição aproximada)" 
+                        },
+                        description: { 
+                          type: "string", 
+                          description: "Descrição detalhada do dano observado, incluindo contagem de arames se aplicável" 
+                        }
+                      },
+                      required: ["type", "severity", "location", "description"],
+                      additionalProperties: false
+                    }
+                  },
+                  overallSeverity: { 
+                    type: "number", 
+                    description: "Severidade geral do cabo de 0 a 100" 
+                  },
+                  overallAssessment: { 
+                    type: "string", 
+                    description: "Avaliação geral resumida em uma frase" 
+                  },
+                  recommendations: {
+                    type: "array",
+                    description: "Lista de recomendações técnicas",
+                    items: { type: "string" }
+                  },
+                  suggestedAction: { 
+                    type: "string", 
+                    enum: ["continue", "monitor", "replace"],
+                    description: "Ação sugerida: continue (operação normal), monitor (acompanhamento), replace (substituição)" 
+                  },
+                  confidence: { 
+                    type: "number", 
+                    description: "Nível de confiança da análise de 0 a 100" 
+                  }
+                },
+                required: ["damageTypes", "overallSeverity", "overallAssessment", "recommendations", "suggestedAction", "confidence"],
+                additionalProperties: false
+              }
+            }
+          }
+        ],
+        tool_choice: { type: "function", function: { name: "report_cable_analysis" } },
+        max_tokens: 4000
       }),
     });
 
@@ -137,39 +176,56 @@ Tipos comuns de danos:
 
     const data = await response.json();
     console.log('Resposta da API recebida');
-    console.log('Resposta completa da IA:', JSON.stringify(data, null, 2));
+    console.log('Finish reason:', data.choices?.[0]?.finish_reason);
     
-    const content = data.choices?.[0]?.message?.content;
-    if (!content) {
-      throw new Error('Resposta vazia da API');
+    // Check if response was truncated
+    if (data.choices?.[0]?.finish_reason === 'length') {
+      console.error('Resposta truncada por limite de tokens');
+      throw new Error('Resposta da IA foi truncada. Tente novamente.');
     }
 
-    console.log('Conteúdo extraído:', content);
-
-    // Extract JSON from the response, handling potential markdown code blocks
-    let jsonContent = content.trim();
-    
-    // Remove markdown code blocks if present
-    if (jsonContent.startsWith('```json')) {
-      jsonContent = jsonContent.replace(/```json\n?/g, '').replace(/```\n?$/g, '').trim();
-    } else if (jsonContent.startsWith('```')) {
-      jsonContent = jsonContent.replace(/```\n?/g, '').trim();
+    // Extract tool call arguments
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    if (!toolCall || toolCall.function?.name !== 'report_cable_analysis') {
+      console.error('Tool call não encontrado na resposta:', JSON.stringify(data, null, 2));
+      
+      // Fallback: try to parse content if tool call not present
+      const content = data.choices?.[0]?.message?.content;
+      if (content) {
+        console.log('Tentando fallback com content:', content);
+        throw new Error('IA não usou a função esperada. Tente novamente.');
+      }
+      
+      throw new Error('Resposta inválida da IA');
     }
 
-    // Try to parse the JSON
+    console.log('Tool call recebido:', toolCall.function.name);
+    console.log('Argumentos:', toolCall.function.arguments);
+
     let analysis: AnalysisResult;
     try {
-      analysis = JSON.parse(jsonContent);
+      analysis = JSON.parse(toolCall.function.arguments);
     } catch (parseError) {
-      console.error('Erro ao fazer parse do JSON:', parseError);
-      console.error('Conteúdo recebido:', content);
+      console.error('Erro ao fazer parse dos argumentos:', parseError);
+      console.error('Argumentos recebidos:', toolCall.function.arguments);
       throw new Error('Formato de resposta inválido da IA');
     }
 
     // Validate the structure
     if (!analysis.damageTypes || !Array.isArray(analysis.damageTypes)) {
+      console.error('Estrutura inválida:', analysis);
       throw new Error('Estrutura de análise inválida');
     }
+
+    // Ensure all required fields have defaults if missing
+    analysis = {
+      damageTypes: analysis.damageTypes || [],
+      overallSeverity: analysis.overallSeverity ?? 0,
+      overallAssessment: analysis.overallAssessment || 'Análise não disponível',
+      recommendations: analysis.recommendations || [],
+      suggestedAction: analysis.suggestedAction || 'monitor',
+      confidence: analysis.confidence ?? 50
+    };
 
     console.log('Análise concluída com sucesso');
     console.log('Análise detalhada:', JSON.stringify(analysis, null, 2));
