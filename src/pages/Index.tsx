@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import ModuleCard from "@/components/ModuleCard";
@@ -193,9 +194,9 @@ const Index = () => {
         <div className="mt-12 rounded-lg border bg-card p-6 text-center">
           <p className="text-sm text-muted-foreground">
             Precisa de ajuda? Entre em contato com a equipe técnica ou consulte a seção de{" "}
-            <a href="/duvidas-frequentes" className="text-primary hover:underline">
+            <Link to="/duvidas-frequentes" className="text-primary hover:underline">
               Dúvidas Frequentes
-            </a>
+            </Link>
           </p>
         </div>
       </main>
