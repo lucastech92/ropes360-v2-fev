@@ -41,30 +41,12 @@ const Servicos = () => {
 
   const fetchServices = async () => {
     try {
-      const { data, error } = await supabase
-        .from("services")
-        .select("*")
-        .order("created_at", { ascending: false });
+      // Use RPC function to get services with counts in a single query (optimized, no N+1)
+      const { data, error } = await supabase.rpc("get_services_with_counts");
 
       if (error) throw error;
 
-      // Fetch counts for collaborators and checklists
-      const servicesWithCounts = await Promise.all(
-        (data || []).map(async (service) => {
-          const [collabResult, checklistResult] = await Promise.all([
-            supabase.from("service_collaborators").select("id", { count: 'exact', head: true }).eq("service_id", service.id),
-            supabase.from("service_checklists").select("id", { count: 'exact', head: true }).eq("service_id", service.id),
-          ]);
-
-          return {
-            ...service,
-            collaborators_count: collabResult.count || 0,
-            checklists_count: checklistResult.count || 0,
-          };
-        })
-      );
-
-      setServices(servicesWithCounts);
+      setServices((data || []) as Service[]);
     } catch (error) {
       console.error("Error fetching services:", error);
       toast({

@@ -1424,6 +1424,24 @@ export type Database = {
         }
         Returns: string
       }
+      get_services_with_counts: {
+        Args: never
+        Returns: {
+          aplicacao: string
+          checklists_count: number
+          cliente: string
+          codigo_jbr: string
+          collaborators_count: number
+          created_at: string
+          data_inicio: string
+          data_termino: string
+          equipamentos: string
+          escopo: string[]
+          id: string
+          local: string
+          outros_escopo: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
