@@ -8,14 +8,18 @@ export const usePWAUpdate = () => {
     needRefresh: [swNeedRefresh, setSwNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
+    immediate: true,
     onRegisteredSW(swUrl, registration) {
       console.log("Service Worker registered:", swUrl);
       
-      // Check for updates every 60 seconds
+      // Force immediate update check
       if (registration) {
+        registration.update();
+        
+        // Check for updates every 30 seconds
         setInterval(() => {
           registration.update();
-        }, 60 * 1000);
+        }, 30 * 1000);
       }
     },
     onRegisterError(error) {
@@ -25,12 +29,22 @@ export const usePWAUpdate = () => {
 
   useEffect(() => {
     setNeedRefresh(swNeedRefresh);
+    
+    // Auto-update if refresh is needed (force update)
+    if (swNeedRefresh) {
+      console.log("New version detected, prompting update...");
+    }
   }, [swNeedRefresh]);
 
   const updateApp = useCallback(async () => {
     try {
+      // Clear all caches before updating
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+      }
+      
       await updateServiceWorker(true);
-      // Force reload after update
       window.location.reload();
     } catch (error) {
       console.error("Error updating app:", error);
