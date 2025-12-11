@@ -52,15 +52,15 @@ export const DashboardMetrics = () => {
 
   if (isLoading || !metrics) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-3 md:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
         {[1, 2, 3, 4, 5].map((i) => (
           <Card key={i} className="overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div className="h-4 w-24 bg-muted rounded shimmer" />
-              <div className="h-4 w-4 bg-muted rounded shimmer" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 md:p-4 pb-2">
+              <div className="h-3 md:h-4 w-16 md:w-24 bg-muted rounded shimmer" />
+              <div className="h-3 md:h-4 w-3 md:w-4 bg-muted rounded shimmer" />
             </CardHeader>
-            <CardContent>
-              <div className="h-8 w-16 bg-muted rounded shimmer" />
+            <CardContent className="p-3 md:p-4 pt-0">
+              <div className="h-6 md:h-8 w-12 md:w-16 bg-muted rounded shimmer" />
             </CardContent>
           </Card>
         ))}
@@ -107,21 +107,21 @@ export const DashboardMetrics = () => {
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 animate-fade-in">
+    <div className="grid gap-3 md:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 animate-fade-in">
       {metricCards.map((metric, index) => {
         const Icon = metric.icon;
         return (
           <Link key={metric.title} to={metric.href} style={{ animationDelay: `${index * 100}ms` }}>
-            <Card className="card-hover group relative overflow-hidden">
+            <Card className="card-hover group relative overflow-hidden h-full">
               <div className="absolute inset-0 bg-gradient-mesh opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle className="text-sm font-medium transition-colors group-hover:text-primary">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 md:p-4 pb-1 md:pb-2 relative z-10">
+                <CardTitle className="text-xs md:text-sm font-medium transition-colors group-hover:text-primary line-clamp-1">
                   {metric.title}
                 </CardTitle>
-                <Icon className={`h-4 w-4 ${metric.color} transition-transform group-hover:scale-110`} />
+                <Icon className={`h-3 w-3 md:h-4 md:w-4 shrink-0 ${metric.color} transition-transform group-hover:scale-110`} />
               </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="text-2xl font-bold transition-all group-hover:scale-105">{metric.value}</div>
+              <CardContent className="p-3 md:p-4 pt-0 relative z-10">
+                <div className="text-xl md:text-2xl font-bold transition-all group-hover:scale-105">{metric.value}</div>
               </CardContent>
             </Card>
           </Link>
