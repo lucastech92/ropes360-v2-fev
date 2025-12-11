@@ -149,22 +149,22 @@ export function HomeSearch() {
   };
 
   return (
-    <div ref={searchRef} className="relative w-full max-w-2xl">
+    <div ref={searchRef} className="relative w-full max-w-2xl px-2 sm:px-0">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 md:h-5 md:w-5 -translate-y-1/2 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Buscar documentos, serviços, inventário, manutenção..."
+          placeholder="Buscar..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => query.length >= 2 && setShowResults(true)}
-          className="pl-10 h-12 text-base shadow-sm"
+          className="pl-9 md:pl-10 h-10 md:h-12 text-sm md:text-base shadow-sm"
         />
       </div>
 
       {showResults && results.length > 0 && (
-        <Card className="absolute top-full mt-2 w-full max-h-96 overflow-y-auto shadow-lg z-50 animate-in fade-in slide-in-from-top-2">
-          <div className="p-2">
+        <Card className="absolute top-full mt-2 w-full max-h-80 md:max-h-96 overflow-y-auto shadow-lg z-50 animate-in fade-in slide-in-from-top-2">
+          <div className="p-1.5 md:p-2">
             {results.map((result) => {
               const config = categoryConfig[result.category];
               const Icon = config.icon;
@@ -173,17 +173,17 @@ export function HomeSearch() {
                 <button
                   key={result.id}
                   onClick={() => handleSelect(result)}
-                  className="w-full flex items-start gap-3 p-3 rounded-md hover:bg-accent transition-colors text-left"
+                  className="w-full flex items-start gap-2 md:gap-3 p-2 md:p-3 rounded-md hover:bg-accent active:bg-accent transition-colors text-left"
                 >
-                  <Icon className={`h-5 w-5 mt-0.5 ${config.color} flex-shrink-0`} />
+                  <Icon className={`h-4 w-4 md:h-5 md:w-5 mt-0.5 ${config.color} flex-shrink-0`} />
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium truncate">{result.title}</div>
+                    <div className="font-medium truncate text-sm md:text-base">{result.title}</div>
                     {result.subtitle && (
-                      <div className="text-sm text-muted-foreground truncate">
+                      <div className="text-xs md:text-sm text-muted-foreground truncate">
                         {result.subtitle}
                       </div>
                     )}
-                    <div className="text-xs text-muted-foreground mt-1">
+                    <div className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">
                       {config.label}
                     </div>
                   </div>
@@ -196,7 +196,7 @@ export function HomeSearch() {
 
       {showResults && query.length >= 2 && results.length === 0 && (
         <Card className="absolute top-full mt-2 w-full shadow-lg z-50 animate-in fade-in slide-in-from-top-2">
-          <div className="p-6 text-center text-muted-foreground">
+          <div className="p-4 md:p-6 text-center text-muted-foreground text-sm">
             Nenhum resultado encontrado
           </div>
         </Card>

@@ -112,52 +112,52 @@ const Index = () => {
   return <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container py-8 space-y-8">
-        <div className="mb-8 space-y-6 text-center">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            Centro de Inteligência - Ropes 360      
+      <main className="container py-4 md:py-8 space-y-6 md:space-y-8 px-4">
+        <div className="mb-4 md:mb-8 space-y-4 md:space-y-6 text-center">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+            Centro de Inteligência - Ropes 360      
           </h1>
-          <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Portal completo de conhecimento técnico para inspetores de campo da Bridon Bekaert. Acesse procedimentos, normas, treinamentos e ferramentas essenciais para suas atividades.
+          <p className="mx-auto max-w-2xl text-sm md:text-lg text-muted-foreground px-2">
+            Portal completo de conhecimento técnico para inspetores de campo da Bridon Bekaert.
           </p>
           
-          <div className="flex justify-center">
+          <div className="flex justify-center px-2">
             <HomeSearch />
           </div>
         </div>
 
         <DashboardMetrics />
 
-        <div className="space-y-8">
+        <div className="space-y-6 md:space-y-8">
           <div>
-            <h2 className="text-2xl font-semibold mb-4">{t('modules.knowledge')}</h2>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <h2 className="text-lg md:text-2xl font-semibold mb-3 md:mb-4">{t('modules.knowledge')}</h2>
+            <div className="grid gap-3 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {modulesByCategory.knowledge.map(module => <ModuleCard key={module.href} {...module} />)}
             </div>
           </div>
 
           <div>
-            <h2 className="text-2xl font-semibold mb-4">{t('modules.operations')}</h2>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <h2 className="text-lg md:text-2xl font-semibold mb-3 md:mb-4">{t('modules.operations')}</h2>
+            <div className="grid gap-3 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {modulesByCategory.operations.map(module => <ModuleCard key={module.href} {...module} />)}
             </div>
           </div>
 
           <div>
-            <h2 className="text-2xl font-semibold mb-4">{t('modules.management')}</h2>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <h2 className="text-lg md:text-2xl font-semibold mb-3 md:mb-4">{t('modules.management')}</h2>
+            <div className="grid gap-3 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {modulesByCategory.management.map(module => <ModuleCard key={module.href} {...module} />)}
             </div>
           </div>
         </div>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-3 md:pb-6">
             <div className="flex items-center gap-2">
-              <FolderOpen className="h-6 w-6" />
-              <CardTitle>Minhas Pastas</CardTitle>
+              <FolderOpen className="h-5 w-5 md:h-6 md:w-6" />
+              <CardTitle className="text-base md:text-lg">Minhas Pastas</CardTitle>
             </div>
-            <CardDescription>
+            <CardDescription className="text-xs md:text-sm">
               Crie e gerencie suas próprias pastas e documentos
             </CardDescription>
           </CardHeader>
@@ -167,32 +167,32 @@ const Index = () => {
         </Card>
 
         {selectedFolderId && <Card>
-            <CardHeader>
-              <CardTitle>Pasta: {selectedFolderName}</CardTitle>
-              <CardDescription>
+            <CardHeader className="pb-3 md:pb-6">
+              <CardTitle className="text-base md:text-lg">Pasta: {selectedFolderName}</CardTitle>
+              <CardDescription className="text-xs md:text-sm">
                 Gerencie documentos e subpastas
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="documents">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="documents">Documentos</TabsTrigger>
-                  <TabsTrigger value="upload">Upload</TabsTrigger>
+                  <TabsTrigger value="documents" className="text-xs md:text-sm">Documentos</TabsTrigger>
+                  <TabsTrigger value="upload" className="text-xs md:text-sm">Upload</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="documents" className="mt-6">
+                <TabsContent value="documents" className="mt-4 md:mt-6">
                   <DocumentListWithTags folderId={selectedFolderId} category="home" refreshTrigger={refreshTrigger} />
                 </TabsContent>
                 
-                <TabsContent value="upload" className="mt-6">
+                <TabsContent value="upload" className="mt-4 md:mt-6">
                   <DocumentUploadWithTags folderId={selectedFolderId} category="home" onUploadComplete={() => setRefreshTrigger(prev => prev + 1)} />
                 </TabsContent>
               </Tabs>
             </CardContent>
           </Card>}
 
-        <div className="mt-12 rounded-lg border bg-card p-6 text-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="mt-8 md:mt-12 rounded-lg border bg-card p-4 md:p-6 text-center">
+          <p className="text-xs md:text-sm text-muted-foreground">
             Precisa de ajuda? Entre em contato com a equipe técnica ou consulte a seção de{" "}
             <Link to="/duvidas-frequentes" className="text-primary hover:underline">
               Dúvidas Frequentes
