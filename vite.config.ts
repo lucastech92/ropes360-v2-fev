@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt",
       includeAssets: ["favicon.ico", "apple-touch-icon-180x180.png", "pwa-192x192.png", "pwa-512x512.png"],
       manifest: {
         name: "Ropes 360 - Centro de Inteligência",
@@ -52,8 +52,11 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB limit
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -62,7 +65,7 @@ export default defineConfig(({ mode }) => ({
               cacheName: "google-fonts-cache",
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+                maxAgeSeconds: 60 * 60 * 24 * 365,
               },
               cacheableResponse: {
                 statuses: [0, 200],
@@ -76,7 +79,7 @@ export default defineConfig(({ mode }) => ({
               cacheName: "gstatic-fonts-cache",
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+                maxAgeSeconds: 60 * 60 * 24 * 365,
               },
               cacheableResponse: {
                 statuses: [0, 200],
@@ -90,12 +93,12 @@ export default defineConfig(({ mode }) => ({
               cacheName: "supabase-api-cache",
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24, // 24 hours
+                maxAgeSeconds: 60 * 60,
               },
               cacheableResponse: {
                 statuses: [0, 200],
               },
-              networkTimeoutSeconds: 10,
+              networkTimeoutSeconds: 5,
             },
           },
         ],

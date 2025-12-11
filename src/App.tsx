@@ -31,6 +31,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import { NotificationPermissionPrompt } from "./components/NotificationPermissionPrompt";
+import { PWAUpdatePrompt } from "./components/PWAUpdatePrompt";
 
 const queryClient = new QueryClient();
 
@@ -42,9 +43,10 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-      <OfflineIndicator />
-      <PWAInstallPrompt />
-      <NotificationPermissionPrompt />
+        <OfflineIndicator />
+        <PWAInstallPrompt />
+        <NotificationPermissionPrompt />
+        <PWAUpdatePrompt />
         <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<Auth />} />
