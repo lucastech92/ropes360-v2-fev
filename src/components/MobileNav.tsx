@@ -55,10 +55,10 @@ export const MobileNav = () => {
 
   const navItems: { section: string; items: NavItem[] }[] = [
     {
-      section: "Principal",
+      section: "Home",
       items: [
-        { label: t('header.dashboard'), href: "/", icon: LayoutDashboard },
-        { label: t('header.documents'), href: "/documentos", icon: FileText },
+        { label: "Home", href: "/", icon: LayoutDashboard },
+        { label: t('header.dashboard'), href: "/dashboard", icon: LayoutDashboard },
       ]
     },
     {
