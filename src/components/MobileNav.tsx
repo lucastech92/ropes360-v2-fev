@@ -12,7 +12,8 @@ import {
   Wrench,
   GraduationCap,
   HelpCircle,
-  AlertTriangle
+  AlertTriangle,
+  CloudOff
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -59,6 +60,7 @@ export const MobileNav = () => {
       items: [
         { label: "Home", href: "/", icon: LayoutDashboard },
         { label: t('header.dashboard'), href: "/dashboard", icon: LayoutDashboard },
+        { label: "Meus Downloads", href: "/meus-downloads", icon: CloudOff },
       ]
     },
     {

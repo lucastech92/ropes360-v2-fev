@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { Download, Trash2, FileText, Calendar, FolderOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { logActivity } from "@/utils/activityLogger";
+import { OfflineDocumentButton } from "@/components/OfflineDocumentButton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -264,6 +265,19 @@ export const DocumentListWithTags = ({
               </div>
             </div>
             <div className="flex gap-2">
+              <OfflineDocumentButton
+                document={{
+                  id: doc.id,
+                  title: doc.title,
+                  description: doc.description,
+                  file_name: doc.file_name,
+                  file_path: doc.file_path,
+                  file_size: doc.file_size,
+                  file_type: doc.file_type,
+                  category: category || "geral",
+                }}
+                size="sm"
+              />
               <Button
                 variant="outline"
                 size="sm"
