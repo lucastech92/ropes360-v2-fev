@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { logActivity } from "@/utils/activityLogger";
+import { OfflineDocumentButton } from "@/components/OfflineDocumentButton";
 
 type DocumentCategory = 
   | "procedimentos_oficiais"
@@ -189,6 +190,18 @@ export const DocumentList = ({ category, employeeFolder, refreshTrigger }: Docum
             </div>
           </div>
           <div className="flex gap-2 ml-4">
+            <OfflineDocumentButton
+              document={{
+                id: doc.id,
+                title: doc.title,
+                description: doc.description,
+                file_name: doc.file_name,
+                file_path: doc.file_path,
+                file_size: doc.file_size,
+                file_type: doc.file_type,
+                category,
+              }}
+            />
             <Button
               variant="outline"
               size="icon"

@@ -27,6 +27,7 @@ import AssistenteTecnico from "./pages/AssistenteTecnico";
 import Install from "./pages/Install";
 import FolhaPonto from "./pages/FolhaPonto";
 import Equipamentos from "./pages/Equipamentos";
+import MeusDownloads from "./pages/MeusDownloads";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
@@ -72,6 +73,7 @@ const App = () => {
             <Route path="/assistente-tecnico" element={<ProtectedRoute><AssistenteTecnico /></ProtectedRoute>} />
             <Route path="/folha-ponto" element={<ProtectedRoute><FolhaPonto /></ProtectedRoute>} />
             <Route path="/equipamentos" element={<ProtectedRoute><Equipamentos /></ProtectedRoute>} />
+            <Route path="/meus-downloads" element={<ProtectedRoute><MeusDownloads /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
