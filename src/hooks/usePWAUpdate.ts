@@ -16,10 +16,10 @@ export const usePWAUpdate = () => {
       if (registration) {
         registration.update();
         
-        // Check for updates every 30 seconds
+        // Check for updates every 15 seconds (more aggressive)
         setInterval(() => {
           registration.update();
-        }, 30 * 1000);
+        }, 15 * 1000);
       }
     },
     onRegisterError(error) {
@@ -30,11 +30,28 @@ export const usePWAUpdate = () => {
   useEffect(() => {
     setNeedRefresh(swNeedRefresh);
     
-    // Auto-update if refresh is needed (force update)
     if (swNeedRefresh) {
       console.log("New version detected, prompting update...");
     }
   }, [swNeedRefresh]);
+
+  // Force clear all caches on page load in development
+  useEffect(() => {
+    const clearOldCaches = async () => {
+      if ('caches' in window) {
+        try {
+          const cacheNames = await caches.keys();
+          const oldCaches = cacheNames.filter(name => 
+            name.includes('workbox') || name.includes('precache')
+          );
+          await Promise.all(oldCaches.map(name => caches.delete(name)));
+        } catch (error) {
+          console.error("Error clearing old caches:", error);
+        }
+      }
+    };
+    clearOldCaches();
+  }, []);
 
   const updateApp = useCallback(async () => {
     try {
@@ -45,7 +62,9 @@ export const usePWAUpdate = () => {
       }
       
       await updateServiceWorker(true);
-      window.location.reload();
+      
+      // Force hard reload
+      window.location.href = window.location.href;
     } catch (error) {
       console.error("Error updating app:", error);
       window.location.reload();
