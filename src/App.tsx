@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import ProcedimentosOficiais from "./pages/ProcedimentosOficiais";
 import ProcedimentosTecnicos from "./pages/ProcedimentosTecnicos";
 import Treinamento from "./pages/Treinamento";
+import TreinamentoISO4309 from "./pages/TreinamentoISO4309";
 import ModelosRelatorios from "./pages/ModelosRelatorios";
 import ResolucaoProblemas from "./pages/ResolucaoProblemas";
 import DuvidasFrequentes from "./pages/DuvidasFrequentes";
@@ -74,6 +75,7 @@ const App = () => {
             <Route path="/folha-ponto" element={<ProtectedRoute><FolhaPonto /></ProtectedRoute>} />
             <Route path="/equipamentos" element={<ProtectedRoute><Equipamentos /></ProtectedRoute>} />
             <Route path="/meus-downloads" element={<ProtectedRoute><MeusDownloads /></ProtectedRoute>} />
+            <Route path="/treinamento-iso4309" element={<ProtectedRoute><TreinamentoISO4309 /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

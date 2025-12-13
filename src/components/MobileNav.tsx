@@ -13,7 +13,8 @@ import {
   GraduationCap,
   HelpCircle,
   AlertTriangle,
-  CloudOff
+  CloudOff,
+  Gamepad2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -69,6 +70,7 @@ export const MobileNav = () => {
         { label: t('modules.procedimentosOficiais'), href: "/procedimentos-oficiais", icon: FileText },
         { label: t('modules.manuaisBridon'), href: "/procedimentos-tecnicos", icon: Wrench },
         { label: t('modules.treinamento'), href: "/treinamento", icon: GraduationCap },
+        { label: "Treinamento ISO 4309", href: "/treinamento-iso4309", icon: Gamepad2 },
         { label: "Resolução de Problemas", href: "/resolucao-problemas", icon: AlertTriangle },
         { label: t('modules.duvidasFrequentes'), href: "/duvidas-frequentes", icon: HelpCircle },
       ]
