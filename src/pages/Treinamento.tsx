@@ -1,6 +1,8 @@
 import Header from "@/components/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, BookOpen } from "lucide-react";
+import { GraduationCap, BookOpen, Gamepad2, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const Treinamento = () => {
   const treinamentos = [
@@ -45,6 +47,31 @@ const Treinamento = () => {
             Materiais educativos e glossário técnico para desenvolvimento profissional.
           </p>
         </div>
+
+        {/* Game Card */}
+        <Card className="mb-12 border-2 border-primary/30 bg-gradient-to-r from-primary/5 to-primary/10">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/20">
+                  <Gamepad2 className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Jogo Interativo ISO 4309</CardTitle>
+                  <CardDescription className="text-base">
+                    Pratique a identificação de defeitos em cabos de aço com cenários reais
+                  </CardDescription>
+                </div>
+              </div>
+              <Link to="/treinamento-iso4309">
+                <Button className="gap-2">
+                  Jogar Agora
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </CardHeader>
+        </Card>
 
         <div className="mb-12 space-y-6">
           <h2 className="text-2xl font-semibold">Treinamentos Disponíveis</h2>
