@@ -35,22 +35,29 @@ export const usePWAUpdate = () => {
     }
   }, [swNeedRefresh]);
 
-  // Force clear all caches on page load in development
+  // Force clear ALL caches on every page load to ensure fresh content
   useEffect(() => {
-    const clearOldCaches = async () => {
+    const forceRefreshCaches = async () => {
       if ('caches' in window) {
         try {
           const cacheNames = await caches.keys();
-          const oldCaches = cacheNames.filter(name => 
-            name.includes('workbox') || name.includes('precache')
-          );
-          await Promise.all(oldCaches.map(name => caches.delete(name)));
+          // Clear ALL caches, not just workbox ones
+          await Promise.all(cacheNames.map(name => caches.delete(name)));
+          console.log("All caches cleared for fresh content");
         } catch (error) {
-          console.error("Error clearing old caches:", error);
+          console.error("Error clearing caches:", error);
+        }
+      }
+      
+      // Also unregister old service workers and re-register
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          await registration.update();
         }
       }
     };
-    clearOldCaches();
+    forceRefreshCaches();
   }, []);
 
   const updateApp = useCallback(async () => {

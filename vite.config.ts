@@ -58,6 +58,9 @@ export default defineConfig(({ mode }) => ({
         clientsClaim: true,
         cleanupOutdatedCaches: true,
         navigateFallback: null,
+        // Force new service worker to take over immediately
+        sourcemap: false,
+        disableDevLogs: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

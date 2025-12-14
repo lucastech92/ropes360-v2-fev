@@ -1,9 +1,20 @@
+import { useEffect } from "react";
 import { usePWAUpdate } from "@/hooks/usePWAUpdate";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, X } from "lucide-react";
 
 export const PWAUpdatePrompt = () => {
   const { needRefresh, updateApp, dismissUpdate } = usePWAUpdate();
+
+  // Auto-update after 3 seconds if user doesn't interact
+  useEffect(() => {
+    if (needRefresh) {
+      const timer = setTimeout(() => {
+        updateApp();
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [needRefresh, updateApp]);
 
   if (!needRefresh) return null;
 
