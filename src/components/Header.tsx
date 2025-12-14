@@ -7,32 +7,34 @@ import { useTranslation } from "react-i18next";
 import { NotificationBell } from "./NotificationBell";
 import { LanguageSelector } from "./LanguageSelector";
 import { MobileNav } from "./MobileNav";
-
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { t } = useTranslation();
-  
+  const {
+    toast
+  } = useToast();
+  const {
+    t
+  } = useTranslation();
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
+    const {
+      error
+    } = await supabase.auth.signOut();
     if (error) {
       toast({
         title: "Erro ao sair",
         description: error.message,
-        variant: "destructive",
+        variant: "destructive"
       });
     } else {
       toast({
         title: "Logout realizado",
-        description: "Até logo!",
+        description: "Até logo!"
       });
       navigate("/auth");
     }
   };
-  
-  return (
-    <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
+  return <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
       <div className="container flex h-14 md:h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <MobileNav />
@@ -50,30 +52,21 @@ const Header = () => {
         <nav className="flex items-center gap-1 md:gap-2">
           {/* Desktop navigation */}
           <div className="hidden md:flex items-center gap-2">
-            {location.pathname !== "/" && (
-              <Button variant="ghost" size="sm" asChild>
+            {location.pathname !== "/" && <Button variant="ghost" size="sm" asChild>
                 <Link to="/">
                   <Home className="mr-2 h-4 w-4" />
                   Principal
                 </Link>
-              </Button>
-            )}
-            {location.pathname !== "/dashboard" && (
-              <Button variant="ghost" size="sm" asChild>
+              </Button>}
+            {location.pathname !== "/dashboard" && <Button variant="ghost" size="sm" asChild>
                 <Link to="/dashboard">
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   {t('header.dashboard')}
                 </Link>
-              </Button>
-            )}
-            {location.pathname !== "/procedimentos-oficiais" && (
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/procedimentos-oficiais">
-                  <FileText className="mr-2 h-4 w-4" />
-                  {t('header.documents')}
-                </Link>
-              </Button>
-            )}
+              </Button>}
+            {location.pathname !== "/procedimentos-oficiais" && <Button variant="ghost" size="sm" asChild>
+                
+              </Button>}
           </div>
           
           <LanguageSelector />
@@ -86,8 +79,6 @@ const Header = () => {
           </Button>
         </nav>
       </div>
-    </header>
-  );
+    </header>;
 };
-
 export default Header;
