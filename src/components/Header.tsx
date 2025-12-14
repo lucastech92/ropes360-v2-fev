@@ -58,9 +58,9 @@ const Header = () => {
                 </Link>
               </Button>
             )}
-            {location.pathname !== "/documentos" && (
+            {location.pathname !== "/procedimentos-oficiais" && (
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/documentos">
+                <Link to="/procedimentos-oficiais">
                   <FileText className="mr-2 h-4 w-4" />
                   {t('header.documents')}
                 </Link>
