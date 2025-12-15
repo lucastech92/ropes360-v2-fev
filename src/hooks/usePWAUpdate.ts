@@ -11,16 +11,25 @@ export const usePWAUpdate = () => {
     immediate: true,
     onRegisteredSW(swUrl, registration) {
       console.log("Service Worker registered:", swUrl);
-      
+
+      if (!registration) return;
+
       // Force immediate update check
-      if (registration) {
+      registration.update();
+
+      // Check for updates every 60 seconds
+      const intervalId = window.setInterval(() => {
         registration.update();
-        
-        // Check for updates every 15 seconds (more aggressive)
-        setInterval(() => {
-          registration.update();
-        }, 15 * 1000);
-      }
+      }, 60 * 1000);
+
+      // Best-effort cleanup on page unload
+      window.addEventListener(
+        "beforeunload",
+        () => {
+          window.clearInterval(intervalId);
+        },
+        { once: true }
+      );
     },
     onRegisterError(error) {
       console.error("SW registration error:", error);
@@ -35,30 +44,6 @@ export const usePWAUpdate = () => {
     }
   }, [swNeedRefresh]);
 
-  // Force clear ALL caches on every page load to ensure fresh content
-  useEffect(() => {
-    const forceRefreshCaches = async () => {
-      if ('caches' in window) {
-        try {
-          const cacheNames = await caches.keys();
-          // Clear ALL caches, not just workbox ones
-          await Promise.all(cacheNames.map(name => caches.delete(name)));
-          console.log("All caches cleared for fresh content");
-        } catch (error) {
-          console.error("Error clearing caches:", error);
-        }
-      }
-      
-      // Also unregister old service workers and re-register
-      if ('serviceWorker' in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        for (const registration of registrations) {
-          await registration.update();
-        }
-      }
-    };
-    forceRefreshCaches();
-  }, []);
 
   const updateApp = useCallback(async () => {
     try {
@@ -69,9 +54,9 @@ export const usePWAUpdate = () => {
       }
       
       await updateServiceWorker(true);
-      
-      // Force hard reload
-      window.location.href = window.location.href;
+
+      // Force reload
+      window.location.reload();
     } catch (error) {
       console.error("Error updating app:", error);
       window.location.reload();
