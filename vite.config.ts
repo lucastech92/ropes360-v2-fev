@@ -15,11 +15,20 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "prompt",
-      includeAssets: ["favicon.ico", "apple-touch-icon-180x180.png", "pwa-192x192.png", "pwa-512x512.png"],
+      strategies: "injectManifest",
+      srcDir: "src",
+      filename: "sw.ts",
+      includeAssets: [
+        "favicon.ico",
+        "apple-touch-icon-180x180.png",
+        "pwa-192x192.png",
+        "pwa-512x512.png",
+      ],
       manifest: {
         name: "Ropes 360 - Centro de Inteligência",
         short_name: "Ropes 360",
-        description: "Hub de Inspetores - Centro de Inteligência para Inspetores de Campo Bridon-Bekaert",
+        description:
+          "Hub de Inspetores - Centro de Inteligência para Inspetores de Campo Bridon-Bekaert",
         theme_color: "#1e3a5f",
         background_color: "#0f172a",
         display: "standalone",
@@ -51,50 +60,9 @@ export default defineConfig(({ mode }) => ({
           },
         ],
       },
-      workbox: {
+      injectManifest: {
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-        skipWaiting: true,
-        clientsClaim: true,
-        cleanupOutdatedCaches: true,
-        navigateFallback: null,
-        // Force new service worker to take over immediately
-        sourcemap: false,
-        disableDevLogs: true,
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: "StaleWhileRevalidate",
-            options: {
-              cacheName: "google-fonts-cache",
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 30,
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "gstatic-fonts-cache",
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365,
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
-            handler: "NetworkOnly",
-          },
-        ],
       },
     }),
   ].filter(Boolean),
