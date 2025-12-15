@@ -34,6 +34,7 @@ import { OfflineIndicator } from "./components/OfflineIndicator";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import { NotificationPermissionPrompt } from "./components/NotificationPermissionPrompt";
 import { PWAUpdatePrompt } from "./components/PWAUpdatePrompt";
+import { VersionIndicator } from "./components/VersionIndicator";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => {
         <PWAInstallPrompt />
         <NotificationPermissionPrompt />
         <PWAUpdatePrompt />
+        <VersionIndicator />
         <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<Auth />} />
