@@ -1,11 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useEffect } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 
 export const usePWAUpdate = () => {
-  const [needRefresh, setNeedRefresh] = useState(false);
-
   const {
-    needRefresh: [swNeedRefresh, setSwNeedRefresh],
+    offlineReady: [offlineReady],
+    needRefresh: [needRefresh],
     updateServiceWorker,
   } = useRegisterSW({
     immediate: true,
@@ -14,20 +13,14 @@ export const usePWAUpdate = () => {
 
       if (!registration) return;
 
-      // Force immediate update check
-      registration.update();
-
       // Check for updates every 60 seconds
       const intervalId = window.setInterval(() => {
         registration.update();
       }, 60 * 1000);
 
-      // Best-effort cleanup on page unload
       window.addEventListener(
         "beforeunload",
-        () => {
-          window.clearInterval(intervalId);
-        },
+        () => window.clearInterval(intervalId),
         { once: true }
       );
     },
@@ -36,41 +29,16 @@ export const usePWAUpdate = () => {
     },
   });
 
+  // Auto-update silently when new version is detected
   useEffect(() => {
-    setNeedRefresh(swNeedRefresh);
-    
-    if (swNeedRefresh) {
-      console.log("New version detected, prompting update...");
+    if (needRefresh) {
+      console.log("New version available, updating silently...");
+      updateServiceWorker(true);
     }
-  }, [swNeedRefresh]);
-
-
-  const updateApp = useCallback(async () => {
-    try {
-      // Clear all caches before updating
-      if ('caches' in window) {
-        const cacheNames = await caches.keys();
-        await Promise.all(cacheNames.map(name => caches.delete(name)));
-      }
-      
-      await updateServiceWorker(true);
-
-      // Force reload
-      window.location.reload();
-    } catch (error) {
-      console.error("Error updating app:", error);
-      window.location.reload();
-    }
-  }, [updateServiceWorker]);
-
-  const dismissUpdate = useCallback(() => {
-    setSwNeedRefresh(false);
-    setNeedRefresh(false);
-  }, [setSwNeedRefresh]);
+  }, [needRefresh, updateServiceWorker]);
 
   return {
+    offlineReady,
     needRefresh,
-    updateApp,
-    dismissUpdate,
   };
 };
