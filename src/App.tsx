@@ -29,7 +29,7 @@ import Install from "./pages/Install";
 import FolhaPonto from "./pages/FolhaPonto";
 import Equipamentos from "./pages/Equipamentos";
 import MeusDownloads from "./pages/MeusDownloads";
-import { ProtectedRoute } from "./components/ProtectedRoute";
+// import { ProtectedRoute } from "./components/ProtectedRoute"; // Temporarily disabled
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import { NotificationPermissionPrompt } from "./components/NotificationPermissionPrompt";
@@ -55,29 +55,29 @@ const App = () => {
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/install" element={<Install />} />
-            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/procedimentos-oficiais" element={<ProtectedRoute><ProcedimentosOficiais /></ProtectedRoute>} />
-            <Route path="/procedimentos-tecnicos" element={<ProtectedRoute><ProcedimentosTecnicos /></ProtectedRoute>} />
-            <Route path="/treinamento" element={<ProtectedRoute><Treinamento /></ProtectedRoute>} />
-            <Route path="/modelos-relatorios" element={<ProtectedRoute><ModelosRelatorios /></ProtectedRoute>} />
-            <Route path="/wire-rope-inspection" element={<ProtectedRoute><WireRopeInspection /></ProtectedRoute>} />
-            <Route path="/saved-reports" element={<ProtectedRoute><SavedReports /></ProtectedRoute>} />
-            <Route path="/resolucao-problemas" element={<ProtectedRoute><ResolucaoProblemas /></ProtectedRoute>} />
-            <Route path="/duvidas-frequentes" element={<ProtectedRoute><DuvidasFrequentes /></ProtectedRoute>} />
-            <Route path="/historico" element={<ProtectedRoute><Historico /></ProtectedRoute>} />
-            <Route path="/checklist" element={<ProtectedRoute><CheckList /></ProtectedRoute>} />
-            <Route path="/inventario" element={<ProtectedRoute><Inventario /></ProtectedRoute>} />
-            <Route path="/manutencao" element={<ProtectedRoute><Manutencao /></ProtectedRoute>} />
-            <Route path="/gerenciar-usuarios" element={<ProtectedRoute><GerenciarUsuarios /></ProtectedRoute>} />
-            <Route path="/servicos" element={<ProtectedRoute><Servicos /></ProtectedRoute>} />
-            <Route path="/novo-servico" element={<ProtectedRoute><NovoServico /></ProtectedRoute>} />
-            <Route path="/editar-servico/:id" element={<ProtectedRoute><NovoServico /></ProtectedRoute>} />
-            <Route path="/assistente-tecnico" element={<ProtectedRoute><AssistenteTecnico /></ProtectedRoute>} />
-            <Route path="/folha-ponto" element={<ProtectedRoute><FolhaPonto /></ProtectedRoute>} />
-            <Route path="/equipamentos" element={<ProtectedRoute><Equipamentos /></ProtectedRoute>} />
-            <Route path="/meus-downloads" element={<ProtectedRoute><MeusDownloads /></ProtectedRoute>} />
-            <Route path="/treinamento-iso4309" element={<ProtectedRoute><TreinamentoISO4309 /></ProtectedRoute>} />
+            <Route path="/" element={<Index />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/procedimentos-oficiais" element={<ProcedimentosOficiais />} />
+            <Route path="/procedimentos-tecnicos" element={<ProcedimentosTecnicos />} />
+            <Route path="/treinamento" element={<Treinamento />} />
+            <Route path="/modelos-relatorios" element={<ModelosRelatorios />} />
+            <Route path="/wire-rope-inspection" element={<WireRopeInspection />} />
+            <Route path="/saved-reports" element={<SavedReports />} />
+            <Route path="/resolucao-problemas" element={<ResolucaoProblemas />} />
+            <Route path="/duvidas-frequentes" element={<DuvidasFrequentes />} />
+            <Route path="/historico" element={<Historico />} />
+            <Route path="/checklist" element={<CheckList />} />
+            <Route path="/inventario" element={<Inventario />} />
+            <Route path="/manutencao" element={<Manutencao />} />
+            <Route path="/gerenciar-usuarios" element={<GerenciarUsuarios />} />
+            <Route path="/servicos" element={<Servicos />} />
+            <Route path="/novo-servico" element={<NovoServico />} />
+            <Route path="/editar-servico/:id" element={<NovoServico />} />
+            <Route path="/assistente-tecnico" element={<AssistenteTecnico />} />
+            <Route path="/folha-ponto" element={<FolhaPonto />} />
+            <Route path="/equipamentos" element={<Equipamentos />} />
+            <Route path="/meus-downloads" element={<MeusDownloads />} />
+            <Route path="/treinamento-iso4309" element={<TreinamentoISO4309 />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
