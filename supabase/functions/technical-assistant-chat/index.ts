@@ -155,21 +155,27 @@ serve(async (req) => {
 4. Mostre o preview dos dados mapeados e aguarde confirmação antes de importar definitivamente\n`
       : '';
 
-    const systemPrompt = `Você é o Assistente Técnico do Hub Ropes360, especializado em cabos de aço e gestão operacional.
+    const systemPrompt = `Você é o Assistente Técnico do Hub Ropes360, com ACESSO COMPLETO a toda a plataforma.
 
-SUAS CAPACIDADES:
-1. Consultar documentos técnicos (manuais Wirelock, normas como ISO 4309)
-2. Acessar dados internos do inventário/almoxarife  
-3. Consultar informações de serviços e clientes
-4. Verificar registros de manutenção
-5. Importar dados de planilhas Excel para o sistema
+SUAS CAPACIDADES - ACESSO TOTAL À PLATAFORMA:
+1. 📄 Documentos técnicos (manuais Wirelock, normas ISO 4309, procedimentos)
+2. 📦 Inventário/Almoxarifado (consumíveis e equipamentos)
+3. 🔧 Serviços/JBRs (projetos, clientes, escopos, status, datas)
+4. 🔨 Manutenção (registros, calibrações, preventivas)
+5. ✅ Checklists (templates, itens, quantidades)
+6. 🚚 Alocações de equipamentos (checkout/checkin, destinos)
+7. 📁 Documentos da empresa (procedimentos, treinamentos)
+8. 👥 Usuários e colaboradores (equipe, perfis, funções)
+9. 📅 Folha de ponto (registros de presença, tipos de trabalho)
+10. 📊 Padrões de relatórios (melhores práticas aprendidas)
+11. 📥 Importação de Excel para o sistema
 
 REGRAS CRÍTICAS:
-1. **USE O CONTEXTO**: Se encontrou chunks relevantes abaixo, USE-OS para responder. Não diga "não tenho informação" se há contexto disponível.
-2. **NUNCA INVENTE**: Só cite valores/especificações que estejam LITERALMENTE no contexto fornecido.
-3. **CITE A FONTE**: Sempre mencione de onde veio a informação (ex: "Segundo o manual Wirelock...").
-4. **FERRAMENTAS**: Para dados internos (inventário, serviços, manutenção), use as ferramentas disponíveis.
-5. **SEM CONTEXTO**: Só diga "não disponível" se realmente NÃO houver contexto relevante abaixo.
+1. **USE AS FERRAMENTAS**: Para dados da plataforma, SEMPRE use as ferramentas disponíveis. Não diga "não tenho acesso" - você TEM acesso!
+2. **CONTEXTO DE DOCUMENTOS**: Se encontrou chunks relevantes abaixo, USE-OS para responder.
+3. **NUNCA INVENTE**: Só cite valores que estejam LITERALMENTE nos dados retornados.
+4. **CITE A FONTE**: Sempre mencione de onde veio a informação.
+5. **PERGUNTE SE PRECISAR**: Se a ferramenta precisa de parâmetros, pergunte ao usuário.
 ${excelContext}${isoContext}
 
 ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnicos acima. Analise-os cuidadosamente antes de responder. Se a resposta estiver lá, USE-A!' : ''}`;
@@ -200,13 +206,22 @@ ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnic
         type: "function",
         function: {
           name: "buscar_servicos",
-          description: "Busca informações sobre serviços, JBRs e clientes.",
+          description: "Busca informações sobre serviços/JBRs, incluindo serviços ativos, em andamento, finalizados, clientes, escopos. Use para perguntas sobre 'serviços em andamento', 'quantos serviços', 'quais clientes', etc.",
           parameters: {
             type: "object",
             properties: {
               cliente_filter: {
                 type: "string",
                 description: "Nome do cliente para filtrar (opcional)"
+              },
+              status_filter: {
+                type: "string",
+                enum: ["todos", "ativos", "finalizados", "futuros"],
+                description: "Filtrar por status: 'ativos' (em andamento agora), 'finalizados' (já concluídos), 'futuros' (ainda não iniciados), 'todos' (padrão)"
+              },
+              list_all: {
+                type: "boolean",
+                description: "Se true, lista todos os serviços com detalhes completos"
               }
             }
           }
@@ -266,6 +281,105 @@ ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnic
             required: ["target_table"]
           }
         }
+      },
+      {
+        type: "function",
+        function: {
+          name: "buscar_checklists",
+          description: "Busca checklists e seus itens. Use para perguntas sobre checklists de entrada/saída, templates, itens de checklist, quantidades.",
+          parameters: {
+            type: "object",
+            properties: {
+              service_tag: {
+                type: "string",
+                description: "Código JBR do serviço para filtrar checklists (opcional)"
+              },
+              tipo: {
+                type: "string",
+                enum: ["todos", "entrada", "saida", "templates"],
+                description: "Tipo de checklist: 'entrada', 'saida', 'templates' (apenas templates), ou 'todos'"
+              }
+            }
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
+          name: "buscar_alocacoes",
+          description: "Busca alocações de equipamentos - quais equipamentos estão emprestados, onde estão, quem retirou. Use para 'equipamentos em uso', 'quem está com tal equipamento', 'equipamentos fora da base'.",
+          parameters: {
+            type: "object",
+            properties: {
+              apenas_ativos: {
+                type: "boolean",
+                description: "Se true, mostra apenas equipamentos ainda não devolvidos"
+              },
+              service_id: {
+                type: "string",
+                description: "ID do serviço para filtrar alocações (opcional)"
+              }
+            }
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
+          name: "buscar_documentos",
+          description: "Busca documentos armazenados no sistema (procedimentos, treinamentos, relatórios). Use para perguntas sobre documentos da empresa, arquivos disponíveis.",
+          parameters: {
+            type: "object",
+            properties: {
+              categoria: {
+                type: "string",
+                description: "Categoria do documento (procedimentos_oficiais, treinamento, modelos_relatorios, etc.)"
+              },
+              titulo_filter: {
+                type: "string",
+                description: "Filtrar por título ou parte do título"
+              }
+            }
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
+          name: "buscar_usuarios",
+          description: "Busca informações sobre usuários e colaboradores da plataforma. Use para perguntas sobre equipe, funcionários, quem trabalha em qual serviço.",
+          parameters: {
+            type: "object",
+            properties: {
+              incluir_perfis: {
+                type: "boolean",
+                description: "Se true, inclui informações detalhadas dos perfis (empresa, cargo)"
+              }
+            }
+          }
+        }
+      },
+      {
+        type: "function",
+        function: {
+          name: "buscar_folha_ponto",
+          description: "Busca registros de folha de ponto/timesheet. Use para perguntas sobre presença, quem está offshore, home office, viagem, férias, etc.",
+          parameters: {
+            type: "object",
+            properties: {
+              periodo: {
+                type: "string",
+                enum: ["hoje", "semana", "mes"],
+                description: "Período para buscar: 'hoje', 'semana' (últimos 7 dias), 'mes' (último mês)"
+              },
+              tipo_checkin: {
+                type: "string",
+                enum: ["home_office", "offshore", "travel", "base", "day_off", "vacation"],
+                description: "Filtrar por tipo de check-in"
+              }
+            }
+          }
+        }
       }
     ];
 
@@ -317,13 +431,23 @@ ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnic
         if (toolCall.function.name === 'buscar_inventario') {
           result = await executarBuscaInventario(supabaseAdmin, args.item_filter, args.list_all);
         } else if (toolCall.function.name === 'buscar_servicos') {
-          result = await executarBuscaServicos(supabaseAdmin, args.cliente_filter);
+          result = await executarBuscaServicos(supabaseAdmin, args.cliente_filter, args.status_filter, args.list_all);
         } else if (toolCall.function.name === 'buscar_manutencao') {
           result = await executarBuscaManutencao(supabaseAdmin);
         } else if (toolCall.function.name === 'buscar_padroes_relatorios') {
           result = await executarBuscaPadroesRelatorios(supabaseAdmin, args.scope_type, args.pattern_type);
         } else if (toolCall.function.name === 'importar_excel') {
           result = await executarImportacaoExcel(supabaseAdmin, args.target_table, excelData || [], args.preview_only ?? true, userId);
+        } else if (toolCall.function.name === 'buscar_checklists') {
+          result = await executarBuscaChecklists(supabaseAdmin, args.service_tag, args.tipo);
+        } else if (toolCall.function.name === 'buscar_alocacoes') {
+          result = await executarBuscaAlocacoes(supabaseAdmin, args.apenas_ativos, args.service_id);
+        } else if (toolCall.function.name === 'buscar_documentos') {
+          result = await executarBuscaDocumentos(supabaseAdmin, args.categoria, args.titulo_filter);
+        } else if (toolCall.function.name === 'buscar_usuarios') {
+          result = await executarBuscaUsuarios(supabaseAdmin, args.incluir_perfis);
+        } else if (toolCall.function.name === 'buscar_folha_ponto') {
+          result = await executarBuscaFolhaPonto(supabaseAdmin, args.periodo, args.tipo_checkin);
         }
 
         console.log('📊 Tool result:', result.substring(0, 100) + '...');
@@ -713,7 +837,9 @@ async function executarImportacaoExcel(
   return `✅ ${inserted.length} registros importados com sucesso para ${tableName}!`;
 }
 
-async function executarBuscaServicos(supabase: any, clienteFilter?: string): Promise<string> {
+async function executarBuscaServicos(supabase: any, clienteFilter?: string, statusFilter?: string, listAll?: boolean): Promise<string> {
+  console.log('🔧 Fetching services, cliente:', clienteFilter, 'status:', statusFilter, 'listAll:', listAll);
+  
   let query = supabase.from('services').select('*');
   if (clienteFilter) query = query.ilike('cliente', `%${clienteFilter}%`);
   
@@ -724,21 +850,44 @@ async function executarBuscaServicos(supabase: any, clienteFilter?: string): Pro
       : 'Sem serviços cadastrados';
   }
 
-  const active = services.filter((s: any) => !s.data_termino || new Date(s.data_termino) > new Date());
+  const now = new Date();
+  const active = services.filter((s: any) => {
+    const inicio = s.data_inicio ? new Date(s.data_inicio) : null;
+    const termino = s.data_termino ? new Date(s.data_termino) : null;
+    return (!inicio || inicio <= now) && (!termino || termino >= now);
+  });
+  const finished = services.filter((s: any) => s.data_termino && new Date(s.data_termino) < now);
+  const future = services.filter((s: any) => s.data_inicio && new Date(s.data_inicio) > now);
   const clients = new Set(services.map((s: any) => s.cliente)).size;
+  
+  // Filter by status
+  let filtered = services;
+  if (statusFilter === 'ativos') filtered = active;
+  else if (statusFilter === 'finalizados') filtered = finished;
+  else if (statusFilter === 'futuros') filtered = future;
   
   let result = `🔧 SERVIÇOS:\n\n`;
   result += `Total: ${services.length}\n`;
-  result += `Ativos: ${active.length}\n`;
-  result += `Clientes: ${clients}\n`;
+  result += `Em andamento (ativos): ${active.length}\n`;
+  result += `Finalizados: ${finished.length}\n`;
+  result += `Futuros (não iniciados): ${future.length}\n`;
+  result += `Clientes únicos: ${clients}\n`;
 
-  if (clienteFilter && services.length > 0) {
-    result += `\n📋 "${clienteFilter}":\n`;
-    services.forEach((s: any) => {
-      result += `\n• JBR: ${s.codigo_jbr}\n`;
-      if (s.escopo?.length) result += `  Escopo: ${s.escopo.join(', ')}\n`;
-      if (s.data_inicio) result += `  Início: ${new Date(s.data_inicio).toLocaleDateString('pt-BR')}\n`;
+  if (listAll || statusFilter || clienteFilter) {
+    const displayList = filtered.slice(0, listAll ? 50 : 15);
+    result += `\n📋 ${statusFilter ? statusFilter.toUpperCase() : 'SERVIÇOS'} (${filtered.length}):\n`;
+    displayList.forEach((s: any) => {
+      const statusEmoji = active.includes(s) ? '🟢' : finished.includes(s) ? '✅' : '📅';
+      result += `\n${statusEmoji} JBR: ${s.codigo_jbr}\n`;
+      result += `   Cliente: ${s.cliente}\n`;
+      if (s.local) result += `   Local: ${s.local}\n`;
+      if (s.escopo?.length) result += `   Escopo: ${s.escopo.join(', ')}\n`;
+      if (s.data_inicio) result += `   Início: ${new Date(s.data_inicio).toLocaleDateString('pt-BR')}\n`;
+      if (s.data_termino) result += `   Término: ${new Date(s.data_termino).toLocaleDateString('pt-BR')}\n`;
     });
+    if (filtered.length > displayList.length) {
+      result += `\n... e mais ${filtered.length - displayList.length} serviços.\n`;
+    }
   }
 
   return result;
@@ -842,6 +991,251 @@ async function executarBuscaPadroesRelatorios(supabase: any, scopeType: string, 
       result += `  Baseado em: ${p.frequency} casos\n`;
     });
   }
+
+  return result;
+}
+
+// ================== NOVAS FUNÇÕES DE ACESSO À PLATAFORMA ==================
+
+async function executarBuscaChecklists(supabase: any, serviceTag?: string, tipo?: string): Promise<string> {
+  console.log('✅ Fetching checklists, service:', serviceTag, 'tipo:', tipo);
+  
+  let query = supabase.from('checklists').select(`
+    *,
+    checklist_items (*)
+  `);
+  
+  if (serviceTag) query = query.ilike('service_tag', `%${serviceTag}%`);
+  if (tipo === 'templates') query = query.eq('is_template', true);
+  else if (tipo === 'entrada') query = query.eq('checklist_type', 'entrada');
+  else if (tipo === 'saida') query = query.eq('checklist_type', 'saida');
+  
+  const { data: checklists, error } = await query;
+  
+  if (error || !checklists || checklists.length === 0) {
+    return serviceTag 
+      ? `Nenhum checklist encontrado para "${serviceTag}"`
+      : 'Sem checklists cadastrados';
+  }
+
+  const templates = checklists.filter((c: any) => c.is_template);
+  const entrada = checklists.filter((c: any) => c.checklist_type === 'entrada');
+  const saida = checklists.filter((c: any) => c.checklist_type === 'saida');
+  
+  let result = `✅ CHECKLISTS:\n\n`;
+  result += `Total: ${checklists.length}\n`;
+  result += `Templates: ${templates.length}\n`;
+  result += `Entrada: ${entrada.length}\n`;
+  result += `Saída: ${saida.length}\n`;
+
+  checklists.slice(0, 15).forEach((c: any) => {
+    const tipoEmoji = c.is_template ? '📋' : c.checklist_type === 'entrada' ? '📥' : '📤';
+    result += `\n${tipoEmoji} ${c.name}\n`;
+    if (c.service_tag) result += `   JBR: ${c.service_tag}\n`;
+    if (c.description) result += `   Descrição: ${c.description}\n`;
+    result += `   Itens: ${c.checklist_items?.length || 0}\n`;
+  });
+
+  return result;
+}
+
+async function executarBuscaAlocacoes(supabase: any, apenasAtivos?: boolean, serviceId?: string): Promise<string> {
+  console.log('🚚 Fetching allocations, ativos:', apenasAtivos, 'service:', serviceId);
+  
+  let query = supabase.from('inventory_allocations').select(`
+    *,
+    inventory:inventory_item_id (item_name, code),
+    services:service_id (codigo_jbr, cliente)
+  `);
+  
+  if (apenasAtivos) query = query.is('checkin_date', null);
+  if (serviceId) query = query.eq('service_id', serviceId);
+  
+  const { data: allocations, error } = await query.order('checkout_date', { ascending: false });
+  
+  if (error || !allocations || allocations.length === 0) {
+    return 'Sem alocações de equipamentos registradas';
+  }
+
+  const active = allocations.filter((a: any) => !a.checkin_date);
+  const returned = allocations.filter((a: any) => a.checkin_date);
+  
+  let result = `🚚 ALOCAÇÕES DE EQUIPAMENTOS:\n\n`;
+  result += `Total: ${allocations.length}\n`;
+  result += `Em uso (não devolvidos): ${active.length}\n`;
+  result += `Devolvidos: ${returned.length}\n`;
+
+  if (active.length > 0) {
+    result += `\n⚠️ EQUIPAMENTOS EM USO:\n`;
+    active.slice(0, 20).forEach((a: any) => {
+      result += `\n• ${a.inventory?.item_name || 'Item desconhecido'}\n`;
+      if (a.destination) result += `   Destino: ${a.destination}\n`;
+      if (a.services?.codigo_jbr) result += `   JBR: ${a.services.codigo_jbr} (${a.services.cliente})\n`;
+      result += `   Saída: ${new Date(a.checkout_date).toLocaleDateString('pt-BR')}\n`;
+      result += `   Condição: ${a.condition_on_checkout}\n`;
+    });
+  }
+
+  return result;
+}
+
+async function executarBuscaDocumentos(supabase: any, categoria?: string, tituloFilter?: string): Promise<string> {
+  console.log('📁 Fetching documents, categoria:', categoria, 'titulo:', tituloFilter);
+  
+  let query = supabase.from('documents').select('*');
+  
+  if (categoria) query = query.eq('category', categoria);
+  if (tituloFilter) query = query.ilike('title', `%${tituloFilter}%`);
+  
+  const { data: documents, error } = await query.order('uploaded_at', { ascending: false });
+  
+  if (error || !documents || documents.length === 0) {
+    return categoria 
+      ? `Nenhum documento na categoria "${categoria}"`
+      : 'Sem documentos cadastrados';
+  }
+
+  // Group by category
+  const byCategory: { [key: string]: any[] } = {};
+  documents.forEach((d: any) => {
+    if (!byCategory[d.category]) byCategory[d.category] = [];
+    byCategory[d.category].push(d);
+  });
+  
+  let result = `📁 DOCUMENTOS:\n\n`;
+  result += `Total: ${documents.length}\n`;
+  result += `Categorias: ${Object.keys(byCategory).length}\n\n`;
+
+  Object.entries(byCategory).forEach(([cat, docs]) => {
+    result += `📂 ${cat.replace(/_/g, ' ').toUpperCase()} (${docs.length}):\n`;
+    docs.slice(0, 5).forEach((d: any) => {
+      result += `  • ${d.title}\n`;
+      if (d.expiry_date) {
+        const expiry = new Date(d.expiry_date);
+        const daysLeft = Math.ceil((expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+        if (daysLeft <= 30) result += `    ⚠️ Expira em ${daysLeft} dias\n`;
+      }
+    });
+    if (docs.length > 5) result += `  ... e mais ${docs.length - 5}\n`;
+    result += `\n`;
+  });
+
+  return result;
+}
+
+async function executarBuscaUsuarios(supabase: any, incluirPerfis?: boolean): Promise<string> {
+  console.log('👥 Fetching users, perfis:', incluirPerfis);
+  
+  const { data: roles, error: rolesError } = await supabase
+    .from('user_roles')
+    .select('*');
+  
+  if (rolesError || !roles || roles.length === 0) {
+    return 'Sem usuários cadastrados';
+  }
+
+  let profiles: any[] = [];
+  if (incluirPerfis) {
+    const { data } = await supabase.from('user_profiles').select('*');
+    profiles = data || [];
+  }
+
+  const admins = roles.filter((r: any) => r.role === 'admin');
+  const moderators = roles.filter((r: any) => r.role === 'moderator');
+  const inspectors = roles.filter((r: any) => r.role === 'inspector');
+  const approved = roles.filter((r: any) => r.approved);
+  const pending = roles.filter((r: any) => !r.approved);
+  
+  let result = `👥 USUÁRIOS:\n\n`;
+  result += `Total: ${roles.length}\n`;
+  result += `Aprovados: ${approved.length}\n`;
+  result += `Pendentes: ${pending.length}\n`;
+  result += `\nPor função:\n`;
+  result += `  Admins: ${admins.length}\n`;
+  result += `  Moderadores: ${moderators.length}\n`;
+  result += `  Inspetores: ${inspectors.length}\n`;
+
+  if (incluirPerfis && profiles.length > 0) {
+    result += `\n📋 PERFIS DETALHADOS:\n`;
+    profiles.slice(0, 20).forEach((p: any) => {
+      const userRole = roles.find((r: any) => r.user_id === p.user_id);
+      result += `\n• ${p.full_name || 'Sem nome'}\n`;
+      if (p.email) result += `   Email: ${p.email}\n`;
+      if (p.company) result += `   Empresa: ${p.company}\n`;
+      if (p.position) result += `   Cargo: ${p.position}\n`;
+      if (userRole) result += `   Função: ${userRole.role} ${userRole.approved ? '✅' : '⏳'}\n`;
+    });
+  }
+
+  return result;
+}
+
+async function executarBuscaFolhaPonto(supabase: any, periodo?: string, tipoCheckin?: string): Promise<string> {
+  console.log('📅 Fetching time entries, periodo:', periodo, 'tipo:', tipoCheckin);
+  
+  let query = supabase.from('time_entries').select('*');
+  
+  const now = new Date();
+  if (periodo === 'hoje') {
+    const today = now.toISOString().split('T')[0];
+    query = query.eq('entry_date', today);
+  } else if (periodo === 'semana') {
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    query = query.gte('entry_date', weekAgo);
+  } else if (periodo === 'mes') {
+    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    query = query.gte('entry_date', monthAgo);
+  }
+  
+  if (tipoCheckin) query = query.eq('check_in_type', tipoCheckin);
+  
+  const { data: entries, error } = await query.order('entry_date', { ascending: false });
+  
+  if (error || !entries || entries.length === 0) {
+    return 'Sem registros de folha de ponto encontrados';
+  }
+
+  // Get user profiles for names
+  const userIds = [...new Set(entries.map((e: any) => e.user_id))];
+  const { data: profiles } = await supabase
+    .from('user_profiles')
+    .select('user_id, full_name')
+    .in('user_id', userIds);
+  
+  const profileMap: { [key: string]: string } = {};
+  profiles?.forEach((p: any) => {
+    profileMap[p.user_id] = p.full_name || 'Sem nome';
+  });
+
+  // Count by type
+  const byType: { [key: string]: number } = {};
+  entries.forEach((e: any) => {
+    byType[e.check_in_type] = (byType[e.check_in_type] || 0) + 1;
+  });
+  
+  const typeLabels: { [key: string]: string } = {
+    home_office: '🏠 Home Office',
+    offshore: '🚢 Offshore',
+    travel: '✈️ Viagem',
+    base: '🏢 Base',
+    day_off: '🌴 Folga',
+    vacation: '🏖️ Férias'
+  };
+  
+  let result = `📅 FOLHA DE PONTO${periodo ? ` (${periodo})` : ''}:\n\n`;
+  result += `Total de registros: ${entries.length}\n\n`;
+  result += `Por tipo:\n`;
+  Object.entries(byType).forEach(([type, count]) => {
+    result += `  ${typeLabels[type] || type}: ${count}\n`;
+  });
+
+  result += `\n📋 ÚLTIMOS REGISTROS:\n`;
+  entries.slice(0, 15).forEach((e: any) => {
+    const userName = profileMap[e.user_id] || 'Usuário';
+    result += `\n• ${new Date(e.entry_date).toLocaleDateString('pt-BR')} - ${userName}\n`;
+    result += `   ${typeLabels[e.check_in_type] || e.check_in_type}\n`;
+    if (e.notes) result += `   Obs: ${e.notes}\n`;
+  });
 
   return result;
 }
