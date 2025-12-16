@@ -29,7 +29,31 @@ export const usePWAUpdate = () => {
     },
   });
 
-  // Auto-update silently when new version is detected
+  // When a new Service Worker takes control, reload once to guarantee the newest assets are used.
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+
+    const hadController = !!navigator.serviceWorker.controller;
+
+    const onControllerChange = () => {
+      if (!hadController) return;
+
+      const key = "pwa:reloaded";
+      if (sessionStorage.getItem(key)) return;
+
+      sessionStorage.setItem(key, "1");
+      window.location.reload();
+    };
+
+    navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
+    return () =>
+      navigator.serviceWorker.removeEventListener(
+        "controllerchange",
+        onControllerChange
+      );
+  }, []);
+
+  // Auto-update silently when new version is detected (waiting state)
   useEffect(() => {
     if (needRefresh) {
       console.log("New version available, updating silently...");

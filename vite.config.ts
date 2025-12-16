@@ -20,10 +20,12 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
+      injectRegister: null,
       strategies: "injectManifest",
       srcDir: "src",
       filename: "sw.ts",
       includeAssets: [
+
         "favicon.ico",
         "apple-touch-icon-180x180.png",
         "pwa-192x192.png",
