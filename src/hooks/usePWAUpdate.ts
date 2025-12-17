@@ -30,6 +30,7 @@ export const usePWAUpdate = () => {
   });
 
   // When a new Service Worker takes control, reload once to guarantee the newest assets are used.
+  // Important: don't block future updates in the same session (use a time-based guard, not a boolean).
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
 
@@ -38,11 +39,26 @@ export const usePWAUpdate = () => {
     const onControllerChange = () => {
       if (!hadController) return;
 
-      const key = "pwa:reloaded";
-      if (sessionStorage.getItem(key)) return;
+      const key = "pwa:last_sw_reload_at";
+      const now = Date.now();
+      const last = Number(sessionStorage.getItem(key) || "0");
 
-      sessionStorage.setItem(key, "1");
-      window.location.reload();
+      // Prevent reload loops (e.g., multiple controllerchange events in quick succession)
+      if (now - last < 15_000) return;
+
+      sessionStorage.setItem(key, String(now));
+
+      // Clear runtime caches before reloading to avoid serving stale assets
+      void (async () => {
+        try {
+          if ("caches" in window) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map((k) => caches.delete(k)));
+          }
+        } finally {
+          window.location.reload();
+        }
+      })();
     };
 
     navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
