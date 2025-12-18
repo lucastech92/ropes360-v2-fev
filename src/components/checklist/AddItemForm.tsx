@@ -29,15 +29,15 @@ export const AddItemForm = ({ inventoryItems, onAddItem }: AddItemFormProps) => 
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 pt-4 border-t">
       <Select value={selectedInventoryItem} onValueChange={setSelectedInventoryItem}>
         <SelectTrigger className="flex-1">
-          <SelectValue placeholder="Selecione um item do inventário" />
+          <SelectValue placeholder="Selecionar item do inventário" />
         </SelectTrigger>
         <SelectContent>
           {inventoryItems.map((item) => (
             <SelectItem key={item.id} value={item.id}>
-              {item.item_name} ({item.quantity} {item.unit || 'un'} disponíveis)
+              {item.item_name} - Disponível: {item.quantity} {item.unit || 'un'}
             </SelectItem>
           ))}
         </SelectContent>
@@ -51,7 +51,8 @@ export const AddItemForm = ({ inventoryItems, onAddItem }: AddItemFormProps) => 
         placeholder="Qtd"
       />
       <Button onClick={handleAdd}>
-        <Plus className="h-4 w-4" />
+        <Plus className="h-4 w-4 mr-2" />
+        Adicionar
       </Button>
     </div>
   );
