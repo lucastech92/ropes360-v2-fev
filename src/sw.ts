@@ -11,6 +11,10 @@ declare let self: ServiceWorkerGlobalScope & {
   __WB_MANIFEST: Array<{ url: string; revision?: string }>;
 };
 
+// FORCE NEW VERSION - Change this value to invalidate old SW
+const SW_VERSION = "v2024-12-18-001";
+console.log(`[SW] Activating Service Worker ${SW_VERSION}`);
+
 self.skipWaiting();
 clientsClaim();
 cleanupOutdatedCaches();
