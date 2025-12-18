@@ -24,8 +24,10 @@ export default defineConfig(({ mode }) => ({
       strategies: "injectManifest",
       srcDir: "src",
       filename: "sw.ts",
+      devOptions: {
+        enabled: false,
+      },
       includeAssets: [
-
         "favicon.ico",
         "apple-touch-icon-180x180.png",
         "pwa-192x192.png",
