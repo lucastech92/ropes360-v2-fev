@@ -14,17 +14,20 @@ import {
   HelpCircle,
   AlertTriangle,
   CloudOff,
-  Gamepad2
+  Gamepad2,
+  Sparkles,
+  Cog,
+  Menu
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface NavItem {
   label: string;
@@ -57,10 +60,11 @@ export const MobileNav = () => {
 
   const navItems: { section: string; items: NavItem[] }[] = [
     {
-      section: "Home",
+      section: "Principal",
       items: [
         { label: "Home", href: "/", icon: LayoutDashboard },
         { label: t('header.dashboard'), href: "/dashboard", icon: LayoutDashboard },
+        { label: "Assistente IA", href: "/assistente-tecnico", icon: Sparkles },
         { label: "Meus Downloads", href: "/meus-downloads", icon: CloudOff },
       ]
     },
@@ -81,6 +85,7 @@ export const MobileNav = () => {
         { label: t('modules.servicos'), href: "/servicos", icon: ClipboardList },
         { label: t('modules.checkLists'), href: "/checklist", icon: ClipboardList },
         { label: t('modules.inventario'), href: "/inventario", icon: Package },
+        { label: "Equipamentos", href: "/equipamentos", icon: Cog },
         { label: t('modules.modelosRelatorios'), href: "/modelos-relatorios", icon: FileText },
       ]
     },
@@ -103,24 +108,27 @@ export const MobileNav = () => {
           <span className="sr-only">Menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-[280px] p-0">
-        <SheetHeader className="p-4 border-b">
-          <SheetTitle className="text-left flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <FileText className="h-4 w-4 text-primary-foreground" />
+      <SheetContent side="left" className="w-[300px] p-0">
+        <SheetHeader className="p-4 border-b bg-gradient-to-r from-primary/5 to-transparent">
+          <SheetTitle className="text-left flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20">
+              <FileText className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-bold">Ropes 360</span>
+            <div>
+              <span className="font-bold block">Ropes 360</span>
+              <span className="text-xs text-muted-foreground font-normal">Centro de Inteligência</span>
+            </div>
           </SheetTitle>
         </SheetHeader>
         
-        <ScrollArea className="h-[calc(100vh-140px)]">
+        <ScrollArea className="h-[calc(100vh-180px)]">
           <div className="p-4 space-y-4">
-            {navItems.map((section) => (
+            {navItems.map((section, idx) => (
               <div key={section.section}>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-2">
                   {section.section}
                 </p>
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   {section.items.map((item) => {
                     const Icon = item.icon;
                     const isActive = location.pathname === item.href;
@@ -129,10 +137,10 @@ export const MobileNav = () => {
                         key={item.href}
                         to={item.href}
                         onClick={() => setOpen(false)}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                           isActive 
-                            ? "bg-primary text-primary-foreground" 
-                            : "hover:bg-muted"
+                            ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" 
+                            : "hover:bg-muted text-muted-foreground hover:text-foreground"
                         }`}
                       >
                         <Icon className="h-4 w-4 shrink-0" />
@@ -141,19 +149,25 @@ export const MobileNav = () => {
                     );
                   })}
                 </div>
-                <Separator className="my-3" />
+                {idx < navItems.length - 1 && <Separator className="my-3" />}
               </div>
             ))}
           </div>
         </ScrollArea>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-background">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-background/95 backdrop-blur space-y-3">
+          {/* Theme Toggle */}
+          <div className="flex items-center justify-between px-1">
+            <span className="text-sm text-muted-foreground">Tema</span>
+            <ThemeToggle variant="full" />
+          </div>
+          
           <Button 
             variant="outline" 
-            className="w-full justify-start" 
+            className="w-full justify-start gap-2" 
             onClick={handleLogout}
           >
-            <LogOut className="mr-2 h-4 w-4" />
+            <LogOut className="h-4 w-4" />
             {t('header.logout')}
           </Button>
         </div>

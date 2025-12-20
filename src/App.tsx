@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useLanguagePreference } from "./hooks/useLanguagePreference";
+import { ThemeProvider } from "./components/ThemeProvider";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
@@ -42,48 +43,50 @@ const App = () => {
   useLanguagePreference();
   
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <OfflineIndicator />
-        <PWAInstallPrompt />
-        <NotificationPermissionPrompt />
-        <PWAUpdatePrompt />
-        <VersionIndicator />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/install" element={<Install />} />
-            <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/procedimentos-oficiais" element={<ProcedimentosOficiais />} />
-            <Route path="/procedimentos-tecnicos" element={<ProcedimentosTecnicos />} />
-            <Route path="/treinamento" element={<Treinamento />} />
-            <Route path="/modelos-relatorios" element={<ModelosRelatorios />} />
-            <Route path="/wire-rope-inspection" element={<WireRopeInspection />} />
-            <Route path="/saved-reports" element={<SavedReports />} />
-            <Route path="/resolucao-problemas" element={<ResolucaoProblemas />} />
-            <Route path="/duvidas-frequentes" element={<DuvidasFrequentes />} />
-            <Route path="/historico" element={<Historico />} />
-            <Route path="/checklist" element={<CheckList />} />
-            <Route path="/inventario" element={<Inventario />} />
-            <Route path="/manutencao" element={<Manutencao />} />
-            <Route path="/gerenciar-usuarios" element={<GerenciarUsuarios />} />
-            <Route path="/servicos" element={<Servicos />} />
-            <Route path="/novo-servico" element={<NovoServico />} />
-            <Route path="/editar-servico/:id" element={<NovoServico />} />
-            <Route path="/assistente-tecnico" element={<AssistenteTecnico />} />
-            <Route path="/folha-ponto" element={<FolhaPonto />} />
-            <Route path="/equipamentos" element={<Equipamentos />} />
-            <Route path="/meus-downloads" element={<MeusDownloads />} />
-            <Route path="/treinamento-iso4309" element={<TreinamentoISO4309 />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ThemeProvider defaultTheme="system" storageKey="ropes360-theme">
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <OfflineIndicator />
+          <PWAInstallPrompt />
+          <NotificationPermissionPrompt />
+          <PWAUpdatePrompt />
+          <VersionIndicator />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/install" element={<Install />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/procedimentos-oficiais" element={<ProcedimentosOficiais />} />
+              <Route path="/procedimentos-tecnicos" element={<ProcedimentosTecnicos />} />
+              <Route path="/treinamento" element={<Treinamento />} />
+              <Route path="/modelos-relatorios" element={<ModelosRelatorios />} />
+              <Route path="/wire-rope-inspection" element={<WireRopeInspection />} />
+              <Route path="/saved-reports" element={<SavedReports />} />
+              <Route path="/resolucao-problemas" element={<ResolucaoProblemas />} />
+              <Route path="/duvidas-frequentes" element={<DuvidasFrequentes />} />
+              <Route path="/historico" element={<Historico />} />
+              <Route path="/checklist" element={<CheckList />} />
+              <Route path="/inventario" element={<Inventario />} />
+              <Route path="/manutencao" element={<Manutencao />} />
+              <Route path="/gerenciar-usuarios" element={<GerenciarUsuarios />} />
+              <Route path="/servicos" element={<Servicos />} />
+              <Route path="/novo-servico" element={<NovoServico />} />
+              <Route path="/editar-servico/:id" element={<NovoServico />} />
+              <Route path="/assistente-tecnico" element={<AssistenteTecnico />} />
+              <Route path="/folha-ponto" element={<FolhaPonto />} />
+              <Route path="/equipamentos" element={<Equipamentos />} />
+              <Route path="/meus-downloads" element={<MeusDownloads />} />
+              <Route path="/treinamento-iso4309" element={<TreinamentoISO4309 />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 };
 
