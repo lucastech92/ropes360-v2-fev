@@ -36,6 +36,9 @@ export function ThemeProvider({
   useEffect(() => {
     const root = window.document.documentElement;
 
+    // Add transitioning class for smooth animation
+    root.classList.add("theme-transitioning");
+
     root.classList.remove("light", "dark");
 
     let effectiveTheme: "dark" | "light";
@@ -50,6 +53,13 @@ export function ThemeProvider({
 
     root.classList.add(effectiveTheme);
     setResolvedTheme(effectiveTheme);
+
+    // Remove transitioning class after animation completes
+    const timeout = setTimeout(() => {
+      root.classList.remove("theme-transitioning");
+    }, 300);
+
+    return () => clearTimeout(timeout);
   }, [theme]);
 
   // Listen for system theme changes
