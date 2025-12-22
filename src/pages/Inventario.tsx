@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useUnifiedInventory, UnifiedInventoryItem } from "@/hooks/useUnifiedInventory";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, Wrench, BarChart3, Sparkles } from "lucide-react";
+import { Package, Wrench, BarChart3, Sparkles, History } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +20,7 @@ import InventoryItemForm from "@/components/inventory/InventoryItemForm";
 import MaintenanceTab from "@/components/inventory/MaintenanceTab";
 import UtilizationTab from "@/components/inventory/UtilizationTab";
 import { InventoryTrendsAI } from "@/components/inventory/InventoryTrendsAI";
+import { InventoryAuditTrail } from "@/components/inventory/InventoryAuditTrail";
 
 const Inventario = () => {
   const {
@@ -108,7 +109,7 @@ const Inventario = () => {
           <InventoryDashboard stats={stats} />
 
           <Tabs defaultValue="items" className="w-full">
-            <TabsList className="grid w-full max-w-2xl grid-cols-4">
+            <TabsList className="grid w-full max-w-3xl grid-cols-5">
               <TabsTrigger value="items" className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
                 Itens
@@ -120,6 +121,10 @@ const Inventario = () => {
               <TabsTrigger value="utilization" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
                 Utilização
+              </TabsTrigger>
+              <TabsTrigger value="history" className="flex items-center gap-2">
+                <History className="h-4 w-4" />
+                Histórico
               </TabsTrigger>
               <TabsTrigger value="trends" className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4" />
@@ -149,6 +154,10 @@ const Inventario = () => {
 
             <TabsContent value="utilization" className="mt-6">
               <UtilizationTab items={items} />
+            </TabsContent>
+
+            <TabsContent value="history" className="mt-6">
+              <InventoryAuditTrail />
             </TabsContent>
 
             <TabsContent value="trends" className="mt-6">

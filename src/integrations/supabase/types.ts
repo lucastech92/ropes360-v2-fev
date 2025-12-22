@@ -784,11 +784,14 @@ export type Database = {
       }
       inventory_consumption_history: {
         Row: {
+          action_source: string | null
           change_type: string
+          checklist_id: string | null
           created_at: string
           created_by: string | null
           id: string
           inventory_item_id: string
+          item_name: string | null
           new_quantity: number
           notes: string | null
           previous_quantity: number
@@ -796,11 +799,14 @@ export type Database = {
           service_id: string | null
         }
         Insert: {
+          action_source?: string | null
           change_type: string
+          checklist_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           inventory_item_id: string
+          item_name?: string | null
           new_quantity: number
           notes?: string | null
           previous_quantity: number
@@ -808,11 +814,14 @@ export type Database = {
           service_id?: string | null
         }
         Update: {
+          action_source?: string | null
           change_type?: string
+          checklist_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           inventory_item_id?: string
+          item_name?: string | null
           new_quantity?: number
           notes?: string | null
           previous_quantity?: number
@@ -820,6 +829,13 @@ export type Database = {
           service_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "inventory_consumption_history_checklist_id_fkey"
+            columns: ["checklist_id"]
+            isOneToOne: false
+            referencedRelation: "checklists"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "inventory_consumption_history_inventory_item_id_fkey"
             columns: ["inventory_item_id"]
