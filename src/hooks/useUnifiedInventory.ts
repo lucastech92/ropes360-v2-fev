@@ -123,6 +123,7 @@ export const useUnifiedInventory = () => {
       const insertData = {
         ...item,
         updated_by: user.id,
+        code: item.code && item.code.trim() !== "" ? item.code.trim() : null,
         acquisition_date: item.acquisition_date || null,
         last_calibration: item.last_calibration || null,
         next_calibration: item.next_calibration || null,
@@ -140,9 +141,15 @@ export const useUnifiedInventory = () => {
       await fetchItems();
       return true;
     } catch (error: any) {
+      const friendlyMessage =
+        error?.code === "23505" &&
+        String(error?.message || "").includes("inventory_code_unique")
+          ? "Já existe um item com este código. Informe um código diferente ou deixe o campo em branco."
+          : error?.message;
+
       toast({
         title: "Erro ao criar item",
-        description: error.message,
+        description: friendlyMessage,
         variant: "destructive",
       });
       return false;
@@ -153,7 +160,7 @@ export const useUnifiedInventory = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
-      const updateData = {
+      const updateData: any = {
         ...item,
         updated_by: user?.id,
         last_updated: new Date().toISOString(),
@@ -161,6 +168,10 @@ export const useUnifiedInventory = () => {
         last_calibration: item.last_calibration || null,
         next_calibration: item.next_calibration || null,
       };
+
+      if (typeof item.code === "string") {
+        updateData.code = item.code.trim() !== "" ? item.code.trim() : null;
+      }
 
       const { error } = await supabase
         .from("inventory")
@@ -177,9 +188,15 @@ export const useUnifiedInventory = () => {
       await fetchItems();
       return true;
     } catch (error: any) {
+      const friendlyMessage =
+        error?.code === "23505" &&
+        String(error?.message || "").includes("inventory_code_unique")
+          ? "Já existe um item com este código. Informe um código diferente ou deixe o campo em branco."
+          : error?.message;
+
       toast({
         title: "Erro ao atualizar item",
-        description: error.message,
+        description: friendlyMessage,
         variant: "destructive",
       });
       return false;
