@@ -46,8 +46,7 @@ export function useInventoryAuditTrail(filters?: AuditFilters) {
           *,
           inventory:inventory_item_id (item_name),
           services:service_id (codigo_jbr),
-          checklists:checklist_id (name),
-          profiles:created_by (full_name)
+          checklists:checklist_id (name)
         `)
         .order("created_at", { ascending: false });
 
@@ -90,7 +89,7 @@ export function useInventoryAuditTrail(filters?: AuditFilters) {
         created_at: entry.created_at,
         notes: entry.notes,
         action_source: entry.action_source || "manual",
-        user_name: entry.profiles?.full_name,
+        user_name: null, // User name not available without foreign key
         service_code: entry.services?.codigo_jbr,
         checklist_name: entry.checklists?.name,
       }));
