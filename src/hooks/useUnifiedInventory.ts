@@ -75,6 +75,14 @@ export const useUnifiedInventory = () => {
   const fetchItems = async () => {
     setLoading(true);
     try {
+      // Ensure user is authenticated before fetching
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setItems([]);
+        calculateStats([]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("inventory")
         .select("*")
@@ -351,7 +359,23 @@ export const useUnifiedInventory = () => {
   };
 
   useEffect(() => {
+    // Subscribe to auth state changes and fetch items when authenticated
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        fetchItems();
+      } else {
+        setItems([]);
+        calculateStats([]);
+        setLoading(false);
+      }
+    });
+
+    // Initial fetch
     fetchItems();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   return {
