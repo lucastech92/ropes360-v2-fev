@@ -30,6 +30,7 @@ import Install from "./pages/Install";
 import FolhaPonto from "./pages/FolhaPonto";
 import Equipamentos from "./pages/Equipamentos";
 import MeusDownloads from "./pages/MeusDownloads";
+import Calendario from "./pages/Calendario";
 // import { ProtectedRoute } from "./components/ProtectedRoute"; // Temporarily disabled
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
@@ -80,6 +81,7 @@ const App = () => {
               <Route path="/equipamentos" element={<Equipamentos />} />
               <Route path="/meus-downloads" element={<MeusDownloads />} />
               <Route path="/treinamento-iso4309" element={<TreinamentoISO4309 />} />
+              <Route path="/calendario" element={<Calendario />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -18,7 +18,8 @@ import {
   FolderOpen, 
   Settings, 
   Shield, 
-  Calendar, 
+  Calendar,
+  CalendarDays,
   Cog,
   Sparkles,
   ArrowRight,
@@ -115,6 +116,13 @@ const Index = () => {
       }
     ],
     management: [
+      {
+        title: "Calendário Integrado",
+        description: "Visualização unificada de serviços, manutenções, calibrações e folha de ponto.",
+        icon: CalendarDays,
+        href: "/calendario",
+        color: "accent"
+      },
       {
         title: t('modules.historico'),
         description: "Registros de inspeções anteriores, rastreabilidade e acompanhamento de manutenções.",
