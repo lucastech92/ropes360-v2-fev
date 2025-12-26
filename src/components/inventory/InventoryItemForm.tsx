@@ -134,11 +134,6 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
   }, [item, form]);
 
   const handleSubmit = async (data: FormData) => {
-    // Set quantity to 1 for equipment
-    if (data.item_type === "equipamento") {
-      data.quantity = 1;
-    }
-
     const success = await onSave(data);
     if (success) {
       onOpenChange(false);
@@ -220,51 +215,53 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
                   />
                 </div>
 
-                {itemType === "consumivel" && (
-                  <div className="grid grid-cols-3 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="quantity"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Quantidade</FormLabel>
-                          <FormControl>
-                            <Input {...field} type="number" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                <div className="grid grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="quantity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Quantidade {itemType === "consumivel" ? "" : "Inicial"}</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="number" min={0} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                    <FormField
-                      control={form.control}
-                      name="unit"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Unidade</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="un, kg, m..." />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  {itemType === "consumivel" && (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="unit"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Unidade</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="un, kg, m..." />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    <FormField
-                      control={form.control}
-                      name="min_quantity"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Qtd. Mínima</FormLabel>
-                          <FormControl>
-                            <Input {...field} type="number" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                )}
+                      <FormField
+                        control={form.control}
+                        name="min_quantity"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Qtd. Mínima</FormLabel>
+                            <FormControl>
+                              <Input {...field} type="number" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </>
+                  )}
+                </div>
 
                 <FormField
                   control={form.control}
