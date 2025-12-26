@@ -9,6 +9,7 @@ import { LanguageSelector } from "./LanguageSelector";
 import { MobileNav } from "./MobileNav";
 import { ThemeToggle } from "./ThemeToggle";
 import { NavigationBreadcrumb } from "./NavigationBreadcrumb";
+import { ForceUpdateButton } from "./ForceUpdateButton";
 import {
   Tooltip,
   TooltipContent,
@@ -117,6 +118,7 @@ const Header = () => {
             
             {/* Actions */}
             <div className="flex items-center gap-0.5 md:gap-1">
+              <ForceUpdateButton />
               <ThemeToggle />
               <LanguageSelector />
               <NotificationBell />
