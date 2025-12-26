@@ -7,6 +7,8 @@ export interface InventoryItem {
   item_name: string;
   quantity: number;
   unit: string | null;
+  status: string | null;
+  next_calibration: string | null;
 }
 
 export interface ChecklistItem {
@@ -65,7 +67,7 @@ export const useChecklistData = () => {
   const fetchInventoryItems = async () => {
     const { data, error } = await supabase
       .from("inventory")
-      .select("id, item_name, quantity, unit")
+      .select("id, item_name, quantity, unit, status, next_calibration")
       .order("item_name");
 
     if (!error && data) {
