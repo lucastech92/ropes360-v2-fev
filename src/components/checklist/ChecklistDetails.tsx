@@ -11,6 +11,8 @@ interface InventoryItem {
   item_name: string;
   quantity: number;
   unit: string | null;
+  status: string | null;
+  next_calibration: string | null;
 }
 
 interface ChecklistDetailsProps {
