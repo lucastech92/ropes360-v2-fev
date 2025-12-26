@@ -3,13 +3,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, FileText, Package, Settings, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 export const DashboardMetrics = () => {
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUserId(session?.user?.id || null);
+    };
+    
+    checkUser();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      setUserId(session?.user?.id || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const { data: metrics, isLoading } = useQuery({
-    queryKey: ["dashboard-metrics"],
+    queryKey: ["dashboard-metrics", userId],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+      if (!userId) return null;
 
       // Documents count
       const { count: docsCount } = await supabase
@@ -37,7 +54,7 @@ export const DashboardMetrics = () => {
       const { count: activityCount } = await supabase
         .from("activity_log")
         .select("*", { count: "exact", head: true })
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
 
       return {
@@ -48,6 +65,7 @@ export const DashboardMetrics = () => {
         weeklyActivity: activityCount || 0,
       };
     },
+    enabled: !!userId,
   });
 
   if (isLoading || !metrics) {
