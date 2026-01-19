@@ -53,6 +53,7 @@ interface MaintenanceFormDialogProps {
   equipmentItems: UnifiedInventoryItem[];
   editingRecord: MaintenanceRecord | null;
   onSuccess: () => void;
+  preselectedItem?: UnifiedInventoryItem | null;
 }
 
 const initialFormData = {
@@ -79,6 +80,7 @@ export default function MaintenanceFormDialog({
   equipmentItems,
   editingRecord,
   onSuccess,
+  preselectedItem,
 }: MaintenanceFormDialogProps) {
   const [formData, setFormData] = useState(initialFormData);
   const [selectedItem, setSelectedItem] = useState<UnifiedInventoryItem | null>(null);
@@ -108,11 +110,20 @@ export default function MaintenanceFormDialog({
         const item = equipmentItems.find(i => i.id === editingRecord.inventory_item_id);
         setSelectedItem(item || null);
       }
+    } else if (preselectedItem) {
+      // Handle preselection from item details
+      setSelectedItem(preselectedItem);
+      setFormData({
+        ...initialFormData,
+        inventory_item_id: preselectedItem.id,
+        equipment_name: preselectedItem.item_name,
+        equipment_code: preselectedItem.code || "",
+      });
     } else {
       setFormData(initialFormData);
       setSelectedItem(null);
     }
-  }, [editingRecord, equipmentItems, open]);
+  }, [editingRecord, equipmentItems, open, preselectedItem]);
 
   const handleSelectEquipment = (itemId: string) => {
     const item = equipmentItems.find((i) => i.id === itemId);

@@ -49,9 +49,16 @@ interface MaintenanceRecord {
 interface MaintenanceTabProps {
   equipmentItems: UnifiedInventoryItem[];
   canManage: boolean;
+  preSelectedItemId?: string | null;
+  onClearPreselection?: () => void;
 }
 
-export default function MaintenanceTab({ equipmentItems, canManage }: MaintenanceTabProps) {
+export default function MaintenanceTab({ 
+  equipmentItems, 
+  canManage, 
+  preSelectedItemId, 
+  onClearPreselection 
+}: MaintenanceTabProps) {
   const [records, setRecords] = useState<MaintenanceRecord[]>([]);
   const [filteredRecords, setFilteredRecords] = useState<MaintenanceRecord[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -59,11 +66,24 @@ export default function MaintenanceTab({ equipmentItems, canManage }: Maintenanc
   const [filterType, setFilterType] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<MaintenanceRecord | null>(null);
+  const [preselectedItem, setPreselectedItem] = useState<UnifiedInventoryItem | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchRecords();
   }, []);
+
+  // Handle preselection from item details
+  useEffect(() => {
+    if (preSelectedItemId && equipmentItems.length > 0) {
+      const item = equipmentItems.find(i => i.id === preSelectedItemId);
+      if (item) {
+        setPreselectedItem(item);
+        setIsDialogOpen(true);
+        onClearPreselection?.();
+      }
+    }
+  }, [preSelectedItemId, equipmentItems]);
 
   useEffect(() => {
     applyFilters();
@@ -335,10 +355,16 @@ export default function MaintenanceTab({ equipmentItems, canManage }: Maintenanc
       {/* Form Dialog */}
       <MaintenanceFormDialog
         open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
+        onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) {
+            setPreselectedItem(null);
+          }
+        }}
         equipmentItems={equipmentItems}
         editingRecord={editingRecord}
         onSuccess={fetchRecords}
+        preselectedItem={preselectedItem}
       />
     </div>
   );

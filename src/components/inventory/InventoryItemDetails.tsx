@@ -11,19 +11,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   Package,
   Wrench,
   MapPin,
   Calendar,
-  User,
   AlertTriangle,
   LogOut,
   LogIn,
@@ -37,8 +28,10 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
+  Plus,
+  CalendarClock,
 } from "lucide-react";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import type { UnifiedInventoryItem, EquipmentStatus, EquipmentCondition, InventoryAllocation } from "@/hooks/useUnifiedInventory";
@@ -51,6 +44,8 @@ interface InventoryItemDetailsProps {
   onCheckout?: (item: UnifiedInventoryItem) => void;
   onCheckin?: (item: UnifiedInventoryItem) => void;
   canManage: boolean;
+  onNewMaintenance?: (item: UnifiedInventoryItem) => void;
+  onNewCalibration?: (item: UnifiedInventoryItem) => void;
 }
 
 const statusConfig: Record<EquipmentStatus, { label: string; className: string }> = {
@@ -80,6 +75,13 @@ interface MaintenanceRecord {
   description: string;
 }
 
+interface CalibrationHistory {
+  id: string;
+  last_calibration: string | null;
+  next_calibration: string | null;
+  calibration_interval_months: number | null;
+}
+
 export default function InventoryItemDetails({
   item,
   open,
@@ -88,6 +90,8 @@ export default function InventoryItemDetails({
   onCheckout,
   onCheckin,
   canManage,
+  onNewMaintenance,
+  onNewCalibration,
 }: InventoryItemDetailsProps) {
   const [allocations, setAllocations] = useState<InventoryAllocation[]>([]);
   const [maintenanceRecords, setMaintenanceRecords] = useState<MaintenanceRecord[]>([]);
@@ -172,31 +176,33 @@ export default function InventoryItemDetails({
             )}
             <div className="flex-1">
               <SheetTitle className="text-xl">{item.item_name}</SheetTitle>
-              <SheetDescription className="flex items-center gap-2 mt-1">
-                {item.code && <span className="font-mono text-xs">{item.code}</span>}
-                {isEquipment && item.status && (
-                  <Badge className={statusConfig[item.status].className}>
-                    {statusConfig[item.status].label}
-                  </Badge>
-                )}
-                {isLowStock && (
-                  <Badge variant="destructive" className="gap-1">
-                    <AlertTriangle className="h-3 w-3" />
-                    Estoque Baixo
-                  </Badge>
-                )}
-                {isCalibrationOverdue && (
-                  <Badge variant="destructive" className="gap-1">
-                    <AlertTriangle className="h-3 w-3" />
-                    Calibração Vencida
-                  </Badge>
-                )}
-                {isCalibrationUrgent && !isCalibrationOverdue && (
-                  <Badge variant="outline" className="gap-1 bg-orange-500/10 text-orange-600 border-orange-500/20">
-                    <Calendar className="h-3 w-3" />
-                    Calibração Próxima
-                  </Badge>
-                )}
+              <SheetDescription asChild>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  {item.code && <span className="font-mono text-xs">{item.code}</span>}
+                  {isEquipment && item.status && (
+                    <Badge className={statusConfig[item.status].className}>
+                      {statusConfig[item.status].label}
+                    </Badge>
+                  )}
+                  {isLowStock && (
+                    <Badge variant="destructive" className="gap-1">
+                      <AlertTriangle className="h-3 w-3" />
+                      Estoque Baixo
+                    </Badge>
+                  )}
+                  {isCalibrationOverdue && (
+                    <Badge variant="destructive" className="gap-1">
+                      <AlertTriangle className="h-3 w-3" />
+                      Calibração Vencida
+                    </Badge>
+                  )}
+                  {isCalibrationUrgent && !isCalibrationOverdue && (
+                    <Badge variant="outline" className="gap-1 bg-orange-500/10 text-orange-600 border-orange-500/20">
+                      <Calendar className="h-3 w-3" />
+                      Calibração Próxima
+                    </Badge>
+                  )}
+                </div>
               </SheetDescription>
             </div>
           </div>
@@ -226,20 +232,24 @@ export default function InventoryItemDetails({
           </div>
 
           <Tabs defaultValue="info" className="w-full">
-            <TabsList className={`grid w-full ${isEquipment ? "grid-cols-3" : "grid-cols-1"}`}>
+            <TabsList className={`grid w-full ${isEquipment ? "grid-cols-4" : "grid-cols-1"}`}>
               <TabsTrigger value="info" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                Informações
+                <span className="hidden sm:inline">Informações</span>
               </TabsTrigger>
               {isEquipment && (
                 <>
                   <TabsTrigger value="allocations" className="flex items-center gap-2">
                     <History className="h-4 w-4" />
-                    Alocações
+                    <span className="hidden sm:inline">Alocações</span>
                   </TabsTrigger>
                   <TabsTrigger value="maintenance" className="flex items-center gap-2">
                     <Wrench className="h-4 w-4" />
-                    Manutenções
+                    <span className="hidden sm:inline">Manutenções</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="calibrations" className="flex items-center gap-2">
+                    <Gauge className="h-4 w-4" />
+                    <span className="hidden sm:inline">Calibrações</span>
                   </TabsTrigger>
                 </>
               )}
@@ -486,6 +496,22 @@ export default function InventoryItemDetails({
 
                 <TabsContent value="maintenance" className="mt-4">
                   <ScrollArea className="h-[calc(100vh-320px)]">
+                    {/* Add Maintenance Button */}
+                    {canManage && onNewMaintenance && (
+                      <div className="mb-4">
+                        <Button 
+                          onClick={() => {
+                            onOpenChange(false);
+                            onNewMaintenance(item);
+                          }}
+                          className="w-full gap-2"
+                        >
+                          <Plus className="h-4 w-4" />
+                          Nova Manutenção
+                        </Button>
+                      </div>
+                    )}
+                    
                     {maintenanceRecords.length === 0 ? (
                       <div className="text-center py-8 text-muted-foreground">
                         <Wrench className="h-12 w-12 mx-auto mb-2 opacity-50" />
@@ -532,6 +558,104 @@ export default function InventoryItemDetails({
                         ))}
                       </div>
                     )}
+                  </ScrollArea>
+                </TabsContent>
+
+                {/* Calibrations Tab */}
+                <TabsContent value="calibrations" className="mt-4">
+                  <ScrollArea className="h-[calc(100vh-320px)]">
+                    {/* Add Calibration Button */}
+                    {canManage && onNewCalibration && (
+                      <div className="mb-4">
+                        <Button 
+                          onClick={() => {
+                            onOpenChange(false);
+                            onNewCalibration(item);
+                          }}
+                          className="w-full gap-2"
+                        >
+                          <CalendarClock className="h-4 w-4" />
+                          Nova Calibração
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Calibration Status Card */}
+                    <div className="space-y-4">
+                      <div className={`p-4 rounded-lg border ${
+                        isCalibrationOverdue ? "bg-destructive/10 border-destructive/30" :
+                        isCalibrationUrgent ? "bg-orange-500/10 border-orange-500/30" :
+                        "bg-green-500/10 border-green-500/30"
+                      }`}>
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className={`p-2 rounded-full ${
+                            isCalibrationOverdue ? "bg-destructive/20" :
+                            isCalibrationUrgent ? "bg-orange-500/20" :
+                            "bg-green-500/20"
+                          }`}>
+                            <Gauge className={`h-5 w-5 ${
+                              isCalibrationOverdue ? "text-destructive" :
+                              isCalibrationUrgent ? "text-orange-600" :
+                              "text-green-600"
+                            }`} />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold">Status da Calibração</h4>
+                            <p className={`text-sm ${
+                              isCalibrationOverdue ? "text-destructive" :
+                              isCalibrationUrgent ? "text-orange-600" :
+                              "text-green-600"
+                            }`}>
+                              {isCalibrationOverdue ? "⚠️ Calibração Vencida" :
+                               isCalibrationUrgent ? "⏰ Calibração Próxima do Vencimento" :
+                               calibrationDue ? "✓ Calibração em Dia" : "Sem data definida"}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="p-3 rounded-lg bg-background/50">
+                            <p className="text-xs text-muted-foreground">Última Calibração</p>
+                            <p className="font-medium">
+                              {item.last_calibration
+                                ? format(new Date(item.last_calibration), "dd/MM/yyyy", { locale: ptBR })
+                                : "-"}
+                            </p>
+                          </div>
+                          <div className="p-3 rounded-lg bg-background/50">
+                            <p className="text-xs text-muted-foreground">Próxima Calibração</p>
+                            <p className={`font-medium ${
+                              isCalibrationOverdue ? "text-destructive" :
+                              isCalibrationUrgent ? "text-orange-600" : ""
+                            }`}>
+                              {item.next_calibration
+                                ? format(new Date(item.next_calibration), "dd/MM/yyyy", { locale: ptBR })
+                                : "-"}
+                            </p>
+                          </div>
+                          {item.calibration_interval_months && (
+                            <div className="p-3 rounded-lg bg-background/50 col-span-2">
+                              <p className="text-xs text-muted-foreground">Intervalo de Calibração</p>
+                              <p className="font-medium">{item.calibration_interval_months} meses</p>
+                            </div>
+                          )}
+                          {calibrationDue && (
+                            <div className="p-3 rounded-lg bg-background/50 col-span-2">
+                              <p className="text-xs text-muted-foreground">Dias até Vencimento</p>
+                              <p className={`font-medium ${
+                                isCalibrationOverdue ? "text-destructive" :
+                                isCalibrationUrgent ? "text-orange-600" : ""
+                              }`}>
+                                {isCalibrationOverdue 
+                                  ? `${Math.abs(differenceInDays(calibrationDue, new Date()))} dias atrasado`
+                                  : `${differenceInDays(calibrationDue, new Date())} dias restantes`
+                                }
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </ScrollArea>
                 </TabsContent>
               </>

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,8 @@ import type { UnifiedInventoryItem } from "@/hooks/useUnifiedInventory";
 interface CalibrationTabProps {
   items: UnifiedInventoryItem[];
   onRefresh: () => void;
+  preSelectedItemId?: string | null;
+  onClearPreselection?: () => void;
 }
 
 type CalibrationStatus = "overdue" | "urgent" | "warning" | "ok" | "no_date";
@@ -60,7 +62,7 @@ interface CalibrationItem extends UnifiedInventoryItem {
   daysUntil: number | null;
 }
 
-export default function CalibrationTab({ items, onRefresh }: CalibrationTabProps) {
+export default function CalibrationTab({ items, onRefresh, preSelectedItemId, onClearPreselection }: CalibrationTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
@@ -95,6 +97,17 @@ export default function CalibrationTab({ items, onRefresh }: CalibrationTabProps
       return { ...item, calibrationStatus, daysUntil };
     });
   }, [items]);
+
+  // Handle preselected item from details view
+  useEffect(() => {
+    if (preSelectedItemId && calibrationItems.length > 0) {
+      const item = calibrationItems.find(i => i.id === preSelectedItemId);
+      if (item) {
+        handleScheduleCalibration(item);
+        onClearPreselection?.();
+      }
+    }
+  }, [preSelectedItemId, calibrationItems]);
 
   // Filter items
   const filteredItems = useMemo(() => {
@@ -301,7 +314,7 @@ export default function CalibrationTab({ items, onRefresh }: CalibrationTabProps
         </Card>
       )}
 
-      {/* Filters */}
+      {/* Filters and Actions */}
       <div className="flex flex-wrap gap-4 items-center">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -351,6 +364,15 @@ export default function CalibrationTab({ items, onRefresh }: CalibrationTabProps
             </SelectItem>
           </SelectContent>
         </Select>
+
+        <Button onClick={() => {
+          setSelectedItem(null);
+          setNewCalibrationDate("");
+          setScheduleDialogOpen(true);
+        }} className="gap-2">
+          <CalendarClock className="h-4 w-4" />
+          Nova Calibração
+        </Button>
       </div>
 
       {/* Calibration Table */}
