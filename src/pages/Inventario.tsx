@@ -54,6 +54,9 @@ const Inventario = () => {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [checkinOpen, setCheckinOpen] = useState(false);
   const [checkItem, setCheckItem] = useState<UnifiedInventoryItem | null>(null);
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const [preselectedMaintenanceItem, setPreselectedMaintenanceItem] = useState<string | null>(null);
+  const [preselectedCalibrationItem, setPreselectedCalibrationItem] = useState<string | null>(null);
 
   useEffect(() => {
     const checkRole = async () => {
@@ -152,6 +155,17 @@ const Inventario = () => {
     setCheckItem(null);
   };
 
+  // Handlers for new maintenance/calibration from item details
+  const handleNewMaintenanceFromDetails = (item: UnifiedInventoryItem) => {
+    setPreselectedMaintenanceItem(item.id);
+    setActiveTab("maintenance");
+  };
+
+  const handleNewCalibrationFromDetails = (item: UnifiedInventoryItem) => {
+    setPreselectedCalibrationItem(item.id);
+    setActiveTab("calibration");
+  };
+
   const equipmentItems = items.filter((i) => i.item_type === "equipamento");
 
   return (
@@ -171,7 +185,7 @@ const Inventario = () => {
 
           <InventoryDashboard stats={stats} />
 
-          <Tabs defaultValue={initialTab} className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full max-w-4xl grid-cols-6">
               <TabsTrigger value="items" className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
@@ -219,11 +233,21 @@ const Inventario = () => {
             </TabsContent>
 
             <TabsContent value="calibration" className="mt-6">
-              <CalibrationTab items={items} onRefresh={fetchItems} />
+              <CalibrationTab 
+                items={items} 
+                onRefresh={fetchItems}
+                preSelectedItemId={preselectedCalibrationItem}
+                onClearPreselection={() => setPreselectedCalibrationItem(null)}
+              />
             </TabsContent>
 
             <TabsContent value="maintenance" className="mt-6">
-              <MaintenanceTab equipmentItems={equipmentItems} canManage={canManage} />
+              <MaintenanceTab 
+                equipmentItems={equipmentItems} 
+                canManage={canManage}
+                preSelectedItemId={preselectedMaintenanceItem}
+                onClearPreselection={() => setPreselectedMaintenanceItem(null)}
+              />
             </TabsContent>
 
             <TabsContent value="utilization" className="mt-6">
@@ -259,6 +283,8 @@ const Inventario = () => {
         onCheckout={handleCheckout}
         onCheckin={handleCheckin}
         canManage={canManage}
+        onNewMaintenance={handleNewMaintenanceFromDetails}
+        onNewCalibration={handleNewCalibrationFromDetails}
       />
 
       {checkItem && (
