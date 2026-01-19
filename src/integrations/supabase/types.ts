@@ -1428,7 +1428,9 @@ export type Database = {
       }
     }
     Functions: {
+      check_expiring_calibrations: { Args: never; Returns: undefined }
       check_expiring_documents: { Args: never; Returns: undefined }
+      check_maintenance_due: { Args: never; Returns: undefined }
       create_notification_with_push: {
         Args: {
           p_message: string
