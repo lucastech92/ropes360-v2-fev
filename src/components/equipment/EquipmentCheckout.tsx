@@ -27,7 +27,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Equipment, EquipmentCondition } from "@/hooks/useEquipment";
+import type { EquipmentCondition } from "@/hooks/useUnifiedInventory";
+
+// Equipment type for checkout component
+interface Equipment {
+  id: string;
+  code: string;
+  name: string;
+  category: string;
+  status: string;
+  condition: EquipmentCondition;
+  current_location: string | null;
+  manufacturer: string | null;
+  model: string | null;
+  serial_number: string | null;
+  acquisition_date: string | null;
+  last_calibration: string | null;
+  next_calibration: string | null;
+  calibration_interval_months: number | null;
+  notes: string | null;
+  photo_url: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  created_by: string | null;
+  current_service_id: string | null;
+  inventory_item_id: string | null;
+}
 import { supabase } from "@/integrations/supabase/client";
 import { LogOut } from "lucide-react";
 

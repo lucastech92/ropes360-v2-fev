@@ -119,7 +119,7 @@ export function GlobalSearch() {
             title: record.equipment_name,
             subtitle: record.equipment_code,
             category: "maintenance",
-            path: "/manutencao",
+            path: "/inventario?tab=maintenance",
           });
         });
 
