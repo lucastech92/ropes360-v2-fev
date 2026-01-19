@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -13,15 +11,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   Table,
   TableBody,
   TableCell,
@@ -29,13 +18,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Search, Edit, Trash2, Wrench, CheckCircle, Clock, AlertTriangle, Download } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { exportToExcel } from "@/utils/exportUtils";
 import type { UnifiedInventoryItem } from "@/hooks/useUnifiedInventory";
+import MaintenanceFormDialog from "./maintenance/MaintenanceFormDialog";
 
 interface MaintenanceRecord {
   id: string;
@@ -70,24 +60,6 @@ export default function MaintenanceTab({ equipmentItems, canManage }: Maintenanc
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<MaintenanceRecord | null>(null);
   const { toast } = useToast();
-
-  const [formData, setFormData] = useState({
-    inventory_item_id: "",
-    equipment_name: "",
-    equipment_code: "",
-    maintenance_type: "preventiva",
-    priority: "media",
-    status: "pendente",
-    scheduled_date: "",
-    completion_date: "",
-    technician: "",
-    description: "",
-    actions_taken: "",
-    parts_used: "",
-    hours_spent: "",
-    cost: "",
-    next_maintenance: "",
-  });
 
   useEffect(() => {
     fetchRecords();
@@ -131,91 +103,8 @@ export default function MaintenanceTab({ equipmentItems, canManage }: Maintenanc
     setFilteredRecords(filtered);
   };
 
-  const handleSelectEquipment = (itemId: string) => {
-    const item = equipmentItems.find((i) => i.id === itemId);
-    if (item) {
-      setFormData({
-        ...formData,
-        inventory_item_id: itemId,
-        equipment_name: item.item_name,
-        equipment_code: item.code || "",
-      });
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const recordData = {
-      inventory_item_id: formData.inventory_item_id || null,
-      equipment_name: formData.equipment_name,
-      equipment_code: formData.equipment_code,
-      maintenance_type: formData.maintenance_type,
-      priority: formData.priority,
-      status: formData.status,
-      scheduled_date: formData.scheduled_date,
-      completion_date: formData.completion_date || null,
-      technician: formData.technician,
-      description: formData.description,
-      actions_taken: formData.actions_taken || null,
-      parts_used: formData.parts_used || null,
-      hours_spent: formData.hours_spent ? parseFloat(formData.hours_spent) : null,
-      cost: formData.cost ? parseFloat(formData.cost) : null,
-      next_maintenance: formData.next_maintenance || null,
-      created_by: user.id,
-    };
-
-    let error;
-    if (editingRecord) {
-      ({ error } = await supabase
-        .from("maintenance_records")
-        .update(recordData)
-        .eq("id", editingRecord.id));
-    } else {
-      ({ error } = await supabase.from("maintenance_records").insert([recordData]));
-    }
-
-    if (error) {
-      toast({
-        title: "Erro ao salvar",
-        description: error.message,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: editingRecord ? "Registro atualizado" : "Registro criado",
-      description: "Manutenção salva com sucesso",
-    });
-
-    setIsDialogOpen(false);
-    resetForm();
-    fetchRecords();
-  };
-
   const handleEdit = (record: MaintenanceRecord) => {
     setEditingRecord(record);
-    setFormData({
-      inventory_item_id: record.inventory_item_id || "",
-      equipment_name: record.equipment_name,
-      equipment_code: record.equipment_code,
-      maintenance_type: record.maintenance_type,
-      priority: record.priority,
-      status: record.status,
-      scheduled_date: record.scheduled_date,
-      completion_date: record.completion_date || "",
-      technician: record.technician,
-      description: record.description,
-      actions_taken: record.actions_taken || "",
-      parts_used: record.parts_used || "",
-      hours_spent: record.hours_spent?.toString() || "",
-      cost: record.cost?.toString() || "",
-      next_maintenance: record.next_maintenance || "",
-    });
     setIsDialogOpen(true);
   };
 
@@ -239,27 +128,6 @@ export default function MaintenanceTab({ equipmentItems, canManage }: Maintenanc
     });
 
     fetchRecords();
-  };
-
-  const resetForm = () => {
-    setFormData({
-      inventory_item_id: "",
-      equipment_name: "",
-      equipment_code: "",
-      maintenance_type: "preventiva",
-      priority: "media",
-      status: "pendente",
-      scheduled_date: "",
-      completion_date: "",
-      technician: "",
-      description: "",
-      actions_taken: "",
-      parts_used: "",
-      hours_spent: "",
-      cost: "",
-      next_maintenance: "",
-    });
-    setEditingRecord(null);
   };
 
   const handleExport = () => {
@@ -292,6 +160,17 @@ export default function MaintenanceTab({ equipmentItems, canManage }: Maintenanc
         {label}
       </Badge>
     );
+  };
+
+  const getPriorityBadge = (priority: string) => {
+    const config: Record<string, { label: string; className: string }> = {
+      baixa: { label: "Baixa", className: "bg-muted text-muted-foreground" },
+      media: { label: "Média", className: "bg-blue-500/10 text-blue-600" },
+      alta: { label: "Alta", className: "bg-orange-500/10 text-orange-600" },
+      urgente: { label: "Urgente", className: "bg-red-500/10 text-red-600" },
+    };
+    const { label, className } = config[priority] || config.media;
+    return <Badge variant="outline" className={className}>{label}</Badge>;
   };
 
   const stats = {
@@ -383,184 +262,10 @@ export default function MaintenanceTab({ equipmentItems, canManage }: Maintenanc
             Exportar
           </Button>
           {canManage && (
-            <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) resetForm(); }}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nova Manutenção
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>{editingRecord ? "Editar Manutenção" : "Nova Manutenção"}</DialogTitle>
-                  <DialogDescription>Preencha os dados da manutenção</DialogDescription>
-                </DialogHeader>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Selecionar Equipamento</Label>
-                      <Select value={formData.inventory_item_id} onValueChange={handleSelectEquipment}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um equipamento" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {equipmentItems.map((item) => (
-                            <SelectItem key={item.id} value={item.id}>
-                              {item.item_name} {item.code ? `(${item.code})` : ""}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Código do Equipamento</Label>
-                      <Input
-                        value={formData.equipment_code}
-                        onChange={(e) => setFormData({ ...formData, equipment_code: e.target.value })}
-                        placeholder="Código"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Nome do Equipamento *</Label>
-                    <Input
-                      value={formData.equipment_name}
-                      onChange={(e) => setFormData({ ...formData, equipment_name: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label>Tipo *</Label>
-                      <Select value={formData.maintenance_type} onValueChange={(v) => setFormData({ ...formData, maintenance_type: v })}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="preventiva">Preventiva</SelectItem>
-                          <SelectItem value="corretiva">Corretiva</SelectItem>
-                          <SelectItem value="preditiva">Preditiva</SelectItem>
-                          <SelectItem value="calibracao">Calibração</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Prioridade *</Label>
-                      <Select value={formData.priority} onValueChange={(v) => setFormData({ ...formData, priority: v })}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="baixa">Baixa</SelectItem>
-                          <SelectItem value="media">Média</SelectItem>
-                          <SelectItem value="alta">Alta</SelectItem>
-                          <SelectItem value="urgente">Urgente</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Status *</Label>
-                      <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pendente">Pendente</SelectItem>
-                          <SelectItem value="em_andamento">Em Andamento</SelectItem>
-                          <SelectItem value="concluida">Concluída</SelectItem>
-                          <SelectItem value="cancelada">Cancelada</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Data Programada *</Label>
-                      <Input
-                        type="date"
-                        value={formData.scheduled_date}
-                        onChange={(e) => setFormData({ ...formData, scheduled_date: e.target.value })}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Técnico Responsável *</Label>
-                      <Input
-                        value={formData.technician}
-                        onChange={(e) => setFormData({ ...formData, technician: e.target.value })}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Descrição *</Label>
-                    <Textarea
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Data de Conclusão</Label>
-                      <Input
-                        type="date"
-                        value={formData.completion_date}
-                        onChange={(e) => setFormData({ ...formData, completion_date: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Próxima Manutenção</Label>
-                      <Input
-                        type="date"
-                        value={formData.next_maintenance}
-                        onChange={(e) => setFormData({ ...formData, next_maintenance: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Horas Gastas</Label>
-                      <Input
-                        type="number"
-                        step="0.5"
-                        value={formData.hours_spent}
-                        onChange={(e) => setFormData({ ...formData, hours_spent: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Custo (R$)</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={formData.cost}
-                        onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <DialogFooter>
-                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                      Cancelar
-                    </Button>
-                    <Button type="submit">{editingRecord ? "Salvar" : "Criar"}</Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
+            <Button onClick={() => { setEditingRecord(null); setIsDialogOpen(true); }}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Manutenção
+            </Button>
           )}
         </div>
       </div>
@@ -573,6 +278,7 @@ export default function MaintenanceTab({ equipmentItems, canManage }: Maintenanc
               <TableRow>
                 <TableHead>Equipamento</TableHead>
                 <TableHead>Tipo</TableHead>
+                <TableHead>Prioridade</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Data Agendada</TableHead>
                 <TableHead>Técnico</TableHead>
@@ -582,7 +288,7 @@ export default function MaintenanceTab({ equipmentItems, canManage }: Maintenanc
             <TableBody>
               {filteredRecords.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     Nenhum registro de manutenção encontrado
                   </TableCell>
                 </TableRow>
@@ -598,6 +304,7 @@ export default function MaintenanceTab({ equipmentItems, canManage }: Maintenanc
                     <TableCell>
                       <Badge variant="outline">{record.maintenance_type}</Badge>
                     </TableCell>
+                    <TableCell>{getPriorityBadge(record.priority)}</TableCell>
                     <TableCell>{getStatusBadge(record.status)}</TableCell>
                     <TableCell>
                       {format(new Date(record.scheduled_date), "dd/MM/yyyy", { locale: ptBR })}
@@ -624,6 +331,15 @@ export default function MaintenanceTab({ equipmentItems, canManage }: Maintenanc
           </Table>
         </CardContent>
       </Card>
+
+      {/* Form Dialog */}
+      <MaintenanceFormDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        equipmentItems={equipmentItems}
+        editingRecord={editingRecord}
+        onSuccess={fetchRecords}
+      />
     </div>
   );
 }
