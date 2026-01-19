@@ -65,18 +65,35 @@ export default function InventoryItemCard({
   const calibrationDue = item.next_calibration ? new Date(item.next_calibration) : null;
   const isCalibrationUrgent = calibrationDue && calibrationDue <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Prevent click if clicking on dropdown or buttons
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('[role="menu"]')) {
+      return;
+    }
+    onViewDetails?.(item);
+  };
+
   return (
-    <Card className={`${isLowStock ? "border-destructive/50 bg-destructive/5" : ""}`}>
+    <Card 
+      className={`
+        ${isLowStock ? "border-destructive/50 bg-destructive/5" : ""}
+        cursor-pointer transition-all duration-200 
+        hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 hover:border-primary/30
+        group
+      `}
+      onClick={handleCardClick}
+    >
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
             <div className="flex items-center gap-2">
               {isEquipment ? (
-                <Wrench className="h-4 w-4 text-muted-foreground" />
+                <Wrench className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
               ) : (
-                <Package className="h-4 w-4 text-muted-foreground" />
+                <Package className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
               )}
-              <CardTitle className="text-base font-semibold">{item.item_name}</CardTitle>
+              <CardTitle className="text-base font-semibold group-hover:text-primary transition-colors">{item.item_name}</CardTitle>
             </div>
             {isEquipment && item.code && (
               <p className="text-xs text-muted-foreground font-mono">{item.code}</p>
@@ -104,17 +121,15 @@ export default function InventoryItemCard({
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                {isEquipment && onViewDetails && (
-                  <DropdownMenuItem onClick={() => onViewDetails(item)}>
-                    <Eye className="h-4 w-4 mr-2" />
-                    Ver Detalhes
-                  </DropdownMenuItem>
-                )}
+                <DropdownMenuItem onClick={() => onViewDetails?.(item)}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Ver Detalhes
+                </DropdownMenuItem>
                 
                 {isEquipment && item.status === "available" && onCheckout && (
                   <DropdownMenuItem onClick={() => onCheckout(item)}>
