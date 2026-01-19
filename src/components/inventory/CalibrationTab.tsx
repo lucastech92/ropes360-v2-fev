@@ -3,15 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -42,11 +33,10 @@ import {
   TrendingUp,
   AlertCircle,
 } from "lucide-react";
-import { format, differenceInDays, addMonths } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import type { UnifiedInventoryItem } from "@/hooks/useUnifiedInventory";
+import { CalibrationFormDialog } from "./calibration/CalibrationFormDialog";
 
 interface CalibrationTabProps {
   items: UnifiedInventoryItem[];
@@ -65,10 +55,8 @@ interface CalibrationItem extends UnifiedInventoryItem {
 export default function CalibrationTab({ items, onRefresh, preSelectedItemId, onClearPreselection }: CalibrationTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<CalibrationItem | null>(null);
-  const [newCalibrationDate, setNewCalibrationDate] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [preselectedItem, setPreselectedItem] = useState<UnifiedInventoryItem | null>(null);
 
   // Process equipment items with calibration status
   const calibrationItems = useMemo(() => {
@@ -103,7 +91,8 @@ export default function CalibrationTab({ items, onRefresh, preSelectedItemId, on
     if (preSelectedItemId && calibrationItems.length > 0) {
       const item = calibrationItems.find(i => i.id === preSelectedItemId);
       if (item) {
-        handleScheduleCalibration(item);
+        setPreselectedItem(item);
+        setDialogOpen(true);
         onClearPreselection?.();
       }
     }
@@ -178,42 +167,20 @@ export default function CalibrationTab({ items, onRefresh, preSelectedItemId, on
     }
   };
 
-  const handleScheduleCalibration = (item: CalibrationItem) => {
-    setSelectedItem(item);
-    // Pre-fill with suggested date based on interval
-    if (item.calibration_interval_months) {
-      const suggestedDate = addMonths(new Date(), item.calibration_interval_months);
-      setNewCalibrationDate(format(suggestedDate, "yyyy-MM-dd"));
-    } else {
-      setNewCalibrationDate("");
-    }
-    setScheduleDialogOpen(true);
+  const handleOpenNewCalibration = () => {
+    setPreselectedItem(null);
+    setDialogOpen(true);
   };
 
-  const handleSaveCalibration = async () => {
-    if (!selectedItem || !newCalibrationDate) return;
+  const handleScheduleCalibration = (item: CalibrationItem) => {
+    setPreselectedItem(item);
+    setDialogOpen(true);
+  };
 
-    setSaving(true);
-    try {
-      const { error } = await supabase
-        .from("inventory")
-        .update({
-          last_calibration: format(new Date(), "yyyy-MM-dd"),
-          next_calibration: newCalibrationDate,
-        } as any)
-        .eq("id", selectedItem.id);
-
-      if (error) throw error;
-
-      toast.success("Calibração agendada com sucesso!");
-      setScheduleDialogOpen(false);
-      setSelectedItem(null);
-      onRefresh();
-    } catch (error: any) {
-      toast.error("Erro ao agendar calibração: " + error.message);
-    } finally {
-      setSaving(false);
-    }
+  const handleSuccess = () => {
+    setDialogOpen(false);
+    setPreselectedItem(null);
+    onRefresh();
   };
 
   return (
@@ -365,11 +332,7 @@ export default function CalibrationTab({ items, onRefresh, preSelectedItemId, on
           </SelectContent>
         </Select>
 
-        <Button onClick={() => {
-          setSelectedItem(null);
-          setNewCalibrationDate("");
-          setScheduleDialogOpen(true);
-        }} className="gap-2">
+        <Button onClick={handleOpenNewCalibration} className="gap-2">
           <CalendarClock className="h-4 w-4" />
           Nova Calibração
         </Button>
@@ -467,64 +430,14 @@ export default function CalibrationTab({ items, onRefresh, preSelectedItemId, on
         </CardContent>
       </Card>
 
-      {/* Schedule Calibration Dialog */}
-      <Dialog open={scheduleDialogOpen} onOpenChange={setScheduleDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CalendarClock className="h-5 w-5" />
-              Agendar Calibração
-            </DialogTitle>
-            <DialogDescription>
-              {selectedItem && (
-                <>
-                  Agende a próxima calibração para{" "}
-                  <strong>{selectedItem.item_name}</strong>
-                  {selectedItem.code && ` (${selectedItem.code})`}
-                </>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            {selectedItem?.calibration_interval_months && (
-              <div className="p-3 rounded-lg bg-muted/50 text-sm">
-                <p className="text-muted-foreground">
-                  Intervalo de calibração configurado:{" "}
-                  <strong>{selectedItem.calibration_interval_months} meses</strong>
-                </p>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="calibration-date">Data da Próxima Calibração</Label>
-              <Input
-                id="calibration-date"
-                type="date"
-                value={newCalibrationDate}
-                onChange={(e) => setNewCalibrationDate(e.target.value)}
-                min={format(new Date(), "yyyy-MM-dd")}
-              />
-            </div>
-
-            {selectedItem?.last_calibration && (
-              <div className="text-sm text-muted-foreground">
-                Última calibração:{" "}
-                {format(new Date(selectedItem.last_calibration), "dd/MM/yyyy", { locale: ptBR })}
-              </div>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setScheduleDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSaveCalibration} disabled={!newCalibrationDate || saving}>
-              {saving ? "Salvando..." : "Confirmar Calibração"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Calibration Form Dialog */}
+      <CalibrationFormDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        items={items}
+        onSuccess={handleSuccess}
+        preselectedItem={preselectedItem}
+      />
     </div>
   );
 }
