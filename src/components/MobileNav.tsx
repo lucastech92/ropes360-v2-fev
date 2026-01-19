@@ -5,7 +5,6 @@ import {
   LogOut, 
   ClipboardList, 
   Package, 
-  Settings, 
   Calendar, 
   Shield,
   History,
@@ -16,7 +15,6 @@ import {
   CloudOff,
   Gamepad2,
   Sparkles,
-  Cog,
   Menu
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -85,7 +83,6 @@ export const MobileNav = () => {
         { label: t('modules.servicos'), href: "/servicos", icon: ClipboardList },
         { label: t('modules.checkLists'), href: "/checklist", icon: ClipboardList },
         { label: t('modules.inventario'), href: "/inventario", icon: Package },
-        { label: "Equipamentos", href: "/equipamentos", icon: Cog },
         { label: t('modules.modelosRelatorios'), href: "/modelos-relatorios", icon: FileText },
       ]
     },
@@ -93,8 +90,8 @@ export const MobileNav = () => {
       section: t('modules.management'),
       items: [
         { label: t('modules.historico'), href: "/historico", icon: History },
-        { label: t('modules.controleManutencao'), href: "/manutencao", icon: Settings },
         { label: t('modules.folhaPonto'), href: "/folha-ponto", icon: Calendar },
+        { label: "Calendário", href: "/calendario", icon: Calendar },
         { label: "Gerenciar Usuários", href: "/gerenciar-usuarios", icon: Shield },
       ]
     },

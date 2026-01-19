@@ -11,14 +11,12 @@ import {
   History, 
   ClipboardCheck, 
   Package, 
-  Settings, 
   Users, 
   Briefcase, 
   Plus, 
   Edit, 
   Sparkles, 
   Clock, 
-  Truck, 
   Download,
   LayoutDashboard,
   type LucideIcon
@@ -48,15 +46,14 @@ const routeConfig: Record<string, { label: string; icon: LucideIcon }> = {
   "/historico": { label: "Histórico", icon: History },
   "/checklist": { label: "Checklist", icon: ClipboardCheck },
   "/inventario": { label: "Inventário", icon: Package },
-  "/manutencao": { label: "Manutenção", icon: Settings },
   "/gerenciar-usuarios": { label: "Gerenciar Usuários", icon: Users },
   "/servicos": { label: "Serviços", icon: Briefcase },
   "/novo-servico": { label: "Novo Serviço", icon: Plus },
   "/editar-servico": { label: "Editar Serviço", icon: Edit },
   "/assistente-tecnico": { label: "Assistente IA", icon: Sparkles },
   "/folha-ponto": { label: "Folha de Ponto", icon: Clock },
-  "/equipamentos": { label: "Equipamentos", icon: Truck },
   "/meus-downloads": { label: "Meus Downloads", icon: Download },
+  "/calendario": { label: "Calendário", icon: Clock },
 };
 
 // Route hierarchy for parent paths

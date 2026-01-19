@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useLanguagePreference } from "./hooks/useLanguagePreference";
 import { ThemeProvider } from "./components/ThemeProvider";
 import Index from "./pages/Index";
@@ -21,17 +21,14 @@ import CheckList from "./pages/CheckList";
 import Inventario from "./pages/Inventario";
 import WireRopeInspection from "./pages/WireRopeInspection";
 import SavedReports from "./pages/SavedReports";
-import Manutencao from "./pages/Manutencao";
 import GerenciarUsuarios from "./pages/GerenciarUsuarios";
 import Servicos from "./pages/Servicos";
 import NovoServico from "./pages/NovoServico";
 import AssistenteTecnico from "./pages/AssistenteTecnico";
 import Install from "./pages/Install";
 import FolhaPonto from "./pages/FolhaPonto";
-import Equipamentos from "./pages/Equipamentos";
 import MeusDownloads from "./pages/MeusDownloads";
 import Calendario from "./pages/Calendario";
-// import { ProtectedRoute } from "./components/ProtectedRoute"; // Temporarily disabled
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import { NotificationPermissionPrompt } from "./components/NotificationPermissionPrompt";
@@ -71,14 +68,15 @@ const App = () => {
               <Route path="/historico" element={<Historico />} />
               <Route path="/checklist" element={<CheckList />} />
               <Route path="/inventario" element={<Inventario />} />
-              <Route path="/manutencao" element={<Manutencao />} />
+              {/* Redirects from old routes to unified inventory */}
+              <Route path="/manutencao" element={<Navigate to="/inventario?tab=maintenance" replace />} />
+              <Route path="/equipamentos" element={<Navigate to="/inventario?tab=items&type=equipamento" replace />} />
               <Route path="/gerenciar-usuarios" element={<GerenciarUsuarios />} />
               <Route path="/servicos" element={<Servicos />} />
               <Route path="/novo-servico" element={<NovoServico />} />
               <Route path="/editar-servico/:id" element={<NovoServico />} />
               <Route path="/assistente-tecnico" element={<AssistenteTecnico />} />
               <Route path="/folha-ponto" element={<FolhaPonto />} />
-              <Route path="/equipamentos" element={<Equipamentos />} />
               <Route path="/meus-downloads" element={<MeusDownloads />} />
               <Route path="/treinamento-iso4309" element={<TreinamentoISO4309 />} />
               <Route path="/calendario" element={<Calendario />} />

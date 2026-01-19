@@ -25,7 +25,7 @@ const Calendario = () => {
             title: "Manutenção",
             description: `Visualizando ${event.title}`,
           });
-          navigate("/manutencao");
+          navigate("/inventario?tab=maintenance");
         }
         break;
       case "calibration":
@@ -33,11 +33,7 @@ const Calendario = () => {
           title: "Calibração",
           description: `Equipamento: ${event.title}`,
         });
-        if (event.metadata?.equipmentId) {
-          navigate("/equipamentos");
-        } else if (event.metadata?.inventoryId) {
-          navigate("/inventario");
-        }
+        navigate("/inventario?tab=items&type=equipamento");
         break;
       case "timesheet":
         toast({

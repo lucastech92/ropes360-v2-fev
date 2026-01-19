@@ -16,11 +16,9 @@ import {
   ClipboardList, 
   Package, 
   FolderOpen, 
-  Settings, 
   Shield, 
   Calendar,
   CalendarDays,
-  Cog,
   Sparkles,
   ArrowRight,
   BookOpen,
@@ -102,16 +100,9 @@ const Index = () => {
       },
       {
         title: t('modules.inventario'),
-        description: "Controle de itens e consumíveis disponíveis na base com alertas de estoque mínimo.",
+        description: "Gestão unificada de consumíveis, equipamentos, manutenções e calibrações.",
         icon: Package,
         href: "/inventario",
-        color: "accent"
-      },
-      {
-        title: "Gestão de Equipamentos",
-        description: "Rastreamento de equipamentos com check-in/check-out, calibração e histórico de alocações.",
-        icon: Cog,
-        href: "/equipamentos",
         color: "accent"
       }
     ],
@@ -128,13 +119,6 @@ const Index = () => {
         description: "Registros de inspeções anteriores, rastreabilidade e acompanhamento de manutenções.",
         icon: History,
         href: "/historico",
-        color: "primary"
-      },
-      {
-        title: t('modules.controleManutencao'),
-        description: "Sistema completo de gestão de manutenções preventivas, corretivas e preditivas de equipamentos.",
-        icon: Settings,
-        href: "/manutencao",
         color: "primary"
       },
       {

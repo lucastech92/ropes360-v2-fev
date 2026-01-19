@@ -21,7 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { EquipmentSuggestions } from "@/components/equipment/EquipmentSuggestions";
+// Equipment suggestions removed - now managed in unified inventory module
 import { ServiceCollaboratorsSelect } from "@/components/service/ServiceCollaboratorsSelect";
 import { ServiceChecklistsSelect } from "@/components/service/ServiceChecklistsSelect";
 
@@ -437,11 +437,7 @@ const NovoServico = () => {
                 />
               </div>
 
-              <EquipmentSuggestions
-                serviceScope={formData.escopo.filter(e => e !== "Outros")}
-                currentEquipmentText={formData.equipamentos}
-                onAddEquipment={(text) => setFormData({ ...formData, equipamentos: text })}
-              />
+              {/* Equipment suggestions removed - now managed in unified inventory module */}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">

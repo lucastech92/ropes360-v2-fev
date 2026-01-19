@@ -113,7 +113,7 @@ export const DashboardMetrics = () => {
       value: metrics.pendingMaintenance,
       icon: Settings,
       color: "text-accent",
-      href: "/manutencao",
+      href: "/inventario?tab=maintenance",
     },
     {
       title: "Atividades (7 dias)",
