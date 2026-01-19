@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useUnifiedInventory, UnifiedInventoryItem, EquipmentCondition } from "@/hooks/useUnifiedInventory";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, Wrench, BarChart3, Sparkles, History } from "lucide-react";
+import { Package, Wrench, BarChart3, Sparkles, History, Gauge } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +23,7 @@ import MaintenanceTab from "@/components/inventory/MaintenanceTab";
 import UtilizationTab from "@/components/inventory/UtilizationTab";
 import { InventoryTrendsAI } from "@/components/inventory/InventoryTrendsAI";
 import { InventoryAuditTrail } from "@/components/inventory/InventoryAuditTrail";
+import CalibrationTab from "@/components/inventory/CalibrationTab";
 import EquipmentCheckout from "@/components/equipment/EquipmentCheckout";
 import EquipmentCheckin from "@/components/equipment/EquipmentCheckin";
 
@@ -40,6 +41,7 @@ const Inventario = () => {
     checkoutItem,
     checkinItem,
     fetchAllocations,
+    fetchItems,
   } = useUnifiedInventory();
 
   const [canManage, setCanManage] = useState(false);
@@ -170,10 +172,14 @@ const Inventario = () => {
           <InventoryDashboard stats={stats} />
 
           <Tabs defaultValue={initialTab} className="w-full">
-            <TabsList className="grid w-full max-w-3xl grid-cols-5">
+            <TabsList className="grid w-full max-w-4xl grid-cols-6">
               <TabsTrigger value="items" className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
                 Itens
+              </TabsTrigger>
+              <TabsTrigger value="calibration" className="flex items-center gap-2">
+                <Gauge className="h-4 w-4" />
+                Calibrações
               </TabsTrigger>
               <TabsTrigger value="maintenance" className="flex items-center gap-2">
                 <Wrench className="h-4 w-4" />
@@ -189,7 +195,7 @@ const Inventario = () => {
               </TabsTrigger>
               <TabsTrigger value="trends" className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4" />
-                Tendências IA
+                IA
               </TabsTrigger>
             </TabsList>
 
@@ -210,6 +216,10 @@ const Inventario = () => {
                   canManage={canManage}
                 />
               )}
+            </TabsContent>
+
+            <TabsContent value="calibration" className="mt-6">
+              <CalibrationTab items={items} onRefresh={fetchItems} />
             </TabsContent>
 
             <TabsContent value="maintenance" className="mt-6">
