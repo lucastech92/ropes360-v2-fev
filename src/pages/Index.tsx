@@ -132,9 +132,8 @@ const Index = () => {
                 </span>
               </h1>
               
-              <p className="mx-auto max-w-2xl text-base md:text-xl text-muted-foreground animate-fade-in">Portal completo de conhecimento técnico para inspetores de campo e centralizaçao para a equipe de suporte.
- Documentação, procedimentos, certificados, inventario e projetos 
-em um só lugar.<span className="text-foreground font-medium"> Documentação, procedimentos, certificados, inventario e projetos</span> em um só lugar.
+              <p className="mx-auto max-w-2xl text-base md:text-xl text-muted-foreground animate-fade-in">Portal completo de conhecimento técnico para inspetores de campo e centralização para a equipe de suporte.
+                {" "}<span className="text-foreground font-medium">Documentação, procedimentos, certificados, inventário e projetos</span> em um só lugar.
               </p>
               
               <div className="flex justify-center pt-4 animate-fade-in">
