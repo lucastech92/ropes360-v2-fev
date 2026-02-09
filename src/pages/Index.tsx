@@ -5,146 +5,108 @@ import Header from "@/components/Header";
 import ModuleCard from "@/components/ModuleCard";
 import { DashboardMetrics } from "@/components/DashboardMetrics";
 import { HomeSearch } from "@/components/HomeSearch";
-import { 
-  FileCheck, 
-  Wrench, 
-  GraduationCap, 
-  FileText, 
-  AlertTriangle, 
-  HelpCircle, 
-  History, 
-  ClipboardList, 
-  Package, 
-  FolderOpen, 
-  Shield, 
-  Calendar,
-  CalendarDays,
-  Sparkles,
-  ArrowRight,
-  BookOpen,
-  Briefcase,
-  BarChart3
-} from "lucide-react";
+import { FileCheck, Wrench, GraduationCap, FileText, AlertTriangle, HelpCircle, History, ClipboardList, Package, FolderOpen, Shield, Calendar, CalendarDays, Sparkles, ArrowRight, BookOpen, Briefcase, BarChart3 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FolderManager } from "@/components/FolderManager";
 import { DocumentUploadWithTags } from "@/components/DocumentUploadWithTags";
 import { DocumentListWithTags } from "@/components/DocumentListWithTags";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-
 const Index = () => {
-  const { t } = useTranslation();
+  const {
+    t
+  } = useTranslation();
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [selectedFolderName, setSelectedFolderName] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-
   const modulesByCategory = {
-    knowledge: [
-      {
-        title: t('modules.procedimentosOficiais'),
-        description: "Acesse todos os procedimentos e normas oficiais da empresa, incluindo ISO 4309 e diretrizes de segurança.",
-        icon: FileCheck,
-        href: "/procedimentos-oficiais",
-        color: "primary"
-      },
-      {
-        title: t('modules.manuaisBridon'),
-        description: "Instruções detalhadas para instalação, soquetagem, remoção e manutenção de cabos de aço.",
-        icon: Wrench,
-        href: "/procedimentos-tecnicos",
-        color: "primary"
-      },
-      {
-        title: t('modules.treinamento'),
-        description: "Materiais de treinamento, glossário técnico e vídeos educativos para desenvolvimento contínuo.",
-        icon: GraduationCap,
-        href: "/treinamento",
-        color: "primary"
-      },
-      {
-        title: "Resolução de Problemas",
-        description: "Casos reais de falhas, análises de causa raiz e soluções aplicadas em campo.",
-        icon: AlertTriangle,
-        href: "/resolucao-problemas",
-        color: "primary"
-      },
-      {
-        title: t('modules.duvidasFrequentes'),
-        description: "Treinamentos, Drake, etc...",
-        icon: HelpCircle,
-        href: "/duvidas-frequentes",
-        color: "primary"
-      }
-    ],
-    operations: [
-      {
-        title: t('modules.servicos'),
-        description: "Gerencie todos os serviços registrados com código JBR, cliente, escopo e equipamentos.",
-        icon: ClipboardList,
-        href: "/servicos",
-        color: "accent"
-      },
-      {
-        title: t('modules.checkLists'),
-        description: "Checklists preenchíveis para montagem de containers e verificação de ferramentas (JBR).",
-        icon: ClipboardList,
-        href: "/checklist",
-        color: "accent"
-      },
-      {
-        title: t('modules.modelosRelatorios'),
-        description: "Upload e download de modelos de relatórios para inspeções e procedimentos.",
-        icon: FileText,
-        href: "/modelos-relatorios",
-        color: "accent"
-      },
-      {
-        title: t('modules.inventario'),
-        description: "Gestão unificada de consumíveis, equipamentos, manutenções e calibrações.",
-        icon: Package,
-        href: "/inventario",
-        color: "accent"
-      }
-    ],
-    management: [
-      {
-        title: "Calendário Integrado",
-        description: "Visualização unificada de serviços, manutenções, calibrações e folha de ponto.",
-        icon: CalendarDays,
-        href: "/calendario",
-        color: "accent"
-      },
-      {
-        title: t('modules.historico'),
-        description: "Registros de inspeções anteriores, rastreabilidade e acompanhamento de manutenções.",
-        icon: History,
-        href: "/historico",
-        color: "primary"
-      },
-      {
-        title: t('modules.folhaPonto'),
-        description: "Controle de ponto dos colaboradores com calendário interativo e tipos de check-in.",
-        icon: Calendar,
-        href: "/folha-ponto",
-        color: "primary"
-      },
-      {
-        title: "Gerenciar Usuários",
-        description: "Aprovar novos usuários e gerenciar níveis de acesso ao sistema (Admin).",
-        icon: Shield,
-        href: "/gerenciar-usuarios",
-        color: "primary"
-      }
-    ]
+    knowledge: [{
+      title: t('modules.procedimentosOficiais'),
+      description: "Acesse todos os procedimentos e normas oficiais da empresa, incluindo ISO 4309 e diretrizes de segurança.",
+      icon: FileCheck,
+      href: "/procedimentos-oficiais",
+      color: "primary"
+    }, {
+      title: t('modules.manuaisBridon'),
+      description: "Instruções detalhadas para instalação, soquetagem, remoção e manutenção de cabos de aço.",
+      icon: Wrench,
+      href: "/procedimentos-tecnicos",
+      color: "primary"
+    }, {
+      title: t('modules.treinamento'),
+      description: "Materiais de treinamento, glossário técnico e vídeos educativos para desenvolvimento contínuo.",
+      icon: GraduationCap,
+      href: "/treinamento",
+      color: "primary"
+    }, {
+      title: "Resolução de Problemas",
+      description: "Casos reais de falhas, análises de causa raiz e soluções aplicadas em campo.",
+      icon: AlertTriangle,
+      href: "/resolucao-problemas",
+      color: "primary"
+    }, {
+      title: t('modules.duvidasFrequentes'),
+      description: "Treinamentos, Drake, etc...",
+      icon: HelpCircle,
+      href: "/duvidas-frequentes",
+      color: "primary"
+    }],
+    operations: [{
+      title: t('modules.servicos'),
+      description: "Gerencie todos os serviços registrados com código JBR, cliente, escopo e equipamentos.",
+      icon: ClipboardList,
+      href: "/servicos",
+      color: "accent"
+    }, {
+      title: t('modules.checkLists'),
+      description: "Checklists preenchíveis para montagem de containers e verificação de ferramentas (JBR).",
+      icon: ClipboardList,
+      href: "/checklist",
+      color: "accent"
+    }, {
+      title: t('modules.modelosRelatorios'),
+      description: "Upload e download de modelos de relatórios para inspeções e procedimentos.",
+      icon: FileText,
+      href: "/modelos-relatorios",
+      color: "accent"
+    }, {
+      title: t('modules.inventario'),
+      description: "Gestão unificada de consumíveis, equipamentos, manutenções e calibrações.",
+      icon: Package,
+      href: "/inventario",
+      color: "accent"
+    }],
+    management: [{
+      title: "Calendário Integrado",
+      description: "Visualização unificada de serviços, manutenções, calibrações e folha de ponto.",
+      icon: CalendarDays,
+      href: "/calendario",
+      color: "accent"
+    }, {
+      title: t('modules.historico'),
+      description: "Registros de inspeções anteriores, rastreabilidade e acompanhamento de manutenções.",
+      icon: History,
+      href: "/historico",
+      color: "primary"
+    }, {
+      title: t('modules.folhaPonto'),
+      description: "Controle de ponto dos colaboradores com calendário interativo e tipos de check-in.",
+      icon: Calendar,
+      href: "/folha-ponto",
+      color: "primary"
+    }, {
+      title: "Gerenciar Usuários",
+      description: "Aprovar novos usuários e gerenciar níveis de acesso ao sistema (Admin).",
+      icon: Shield,
+      href: "/gerenciar-usuarios",
+      color: "primary"
+    }]
   };
-
   const handleFolderSelect = (folderId: string | null, folderName: string | null) => {
     setSelectedFolderId(folderId);
     setSelectedFolderName(folderName);
   };
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <Header />
       
       <main className="relative">
@@ -170,9 +132,9 @@ const Index = () => {
                 </span>
               </h1>
               
-              <p className="mx-auto max-w-2xl text-base md:text-xl text-muted-foreground animate-fade-in">
-                Portal completo de conhecimento técnico para inspetores de campo. 
-                <span className="text-foreground font-medium"> Documentação, procedimentos e ferramentas</span> em um só lugar.
+              <p className="mx-auto max-w-2xl text-base md:text-xl text-muted-foreground animate-fade-in">Portal completo de conhecimento técnico para inspetores de campo e centralizaçao para a equipe de suporte.
+ Documentação, procedimentos, certificados, inventario e projetos 
+em um só lugar.<span className="text-foreground font-medium"> Documentação, procedimentos, certificados, inventario e projetos</span> em um só lugar.
               </p>
               
               <div className="flex justify-center pt-4 animate-fade-in">
@@ -201,9 +163,7 @@ const Index = () => {
               </div>
             </div>
             <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {modulesByCategory.knowledge.map((module) => (
-                <ModuleCard key={module.href} {...module} />
-              ))}
+              {modulesByCategory.knowledge.map(module => <ModuleCard key={module.href} {...module} />)}
             </div>
           </section>
 
@@ -219,9 +179,7 @@ const Index = () => {
               </div>
             </div>
             <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {modulesByCategory.operations.map((module) => (
-                <ModuleCard key={module.href} {...module} />
-              ))}
+              {modulesByCategory.operations.map(module => <ModuleCard key={module.href} {...module} />)}
             </div>
           </section>
 
@@ -237,9 +195,7 @@ const Index = () => {
               </div>
             </div>
             <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {modulesByCategory.management.map((module) => (
-                <ModuleCard key={module.href} {...module} />
-              ))}
+              {modulesByCategory.management.map(module => <ModuleCard key={module.href} {...module} />)}
             </div>
           </section>
 
@@ -260,16 +216,11 @@ const Index = () => {
                 </div>
               </CardHeader>
               <CardContent className="pt-4">
-                <FolderManager 
-                  category="home" 
-                  onFolderSelect={handleFolderSelect} 
-                  selectedFolderId={selectedFolderId} 
-                />
+                <FolderManager category="home" onFolderSelect={handleFolderSelect} selectedFolderId={selectedFolderId} />
               </CardContent>
             </Card>
 
-            {selectedFolderId && (
-              <Card className="border-border/50 shadow-card animate-fade-in">
+            {selectedFolderId && <Card className="border-border/50 shadow-card animate-fade-in">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
                     <div>
@@ -294,24 +245,15 @@ const Index = () => {
                     </TabsList>
                     
                     <TabsContent value="documents" className="mt-6">
-                      <DocumentListWithTags 
-                        folderId={selectedFolderId} 
-                        category="home" 
-                        refreshTrigger={refreshTrigger} 
-                      />
+                      <DocumentListWithTags folderId={selectedFolderId} category="home" refreshTrigger={refreshTrigger} />
                     </TabsContent>
                     
                     <TabsContent value="upload" className="mt-6">
-                      <DocumentUploadWithTags 
-                        folderId={selectedFolderId} 
-                        category="home" 
-                        onUploadComplete={() => setRefreshTrigger(prev => prev + 1)} 
-                      />
+                      <DocumentUploadWithTags folderId={selectedFolderId} category="home" onUploadComplete={() => setRefreshTrigger(prev => prev + 1)} />
                     </TabsContent>
                   </Tabs>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
           </section>
 
           {/* Help Footer */}
@@ -324,10 +266,7 @@ const Index = () => {
                   Entre em contato com a equipe técnica ou consulte nossa documentação
                 </p>
               </div>
-              <Link 
-                to="/duvidas-frequentes" 
-                className="group inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-all hover:gap-3"
-              >
+              <Link to="/duvidas-frequentes" className="group inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-all hover:gap-3">
                 Dúvidas Frequentes
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
@@ -335,8 +274,6 @@ const Index = () => {
           </section>
         </div>
       </main>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
