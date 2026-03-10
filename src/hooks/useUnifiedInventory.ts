@@ -213,8 +213,32 @@ export const useUnifiedInventory = () => {
 
   const deleteItem = async (id: string) => {
     try {
-      const { error } = await supabase.from("inventory").delete().eq("id", id);
+      // Delete related records first to avoid foreign key violations
+      const { error: maintenanceError } = await supabase
+        .from("maintenance_records")
+        .delete()
+        .eq("inventory_item_id", id);
+      if (maintenanceError) throw maintenanceError;
 
+      const { error: allocationsError } = await supabase
+        .from("inventory_allocations")
+        .delete()
+        .eq("inventory_item_id", id);
+      if (allocationsError) throw allocationsError;
+
+      const { error: consumptionError } = await supabase
+        .from("inventory_consumption_history")
+        .delete()
+        .eq("inventory_item_id", id);
+      if (consumptionError) throw consumptionError;
+
+      const { error: predictionsError } = await supabase
+        .from("inventory_predictions")
+        .delete()
+        .eq("inventory_item_id", id);
+      if (predictionsError) throw predictionsError;
+
+      const { error } = await supabase.from("inventory").delete().eq("id", id);
       if (error) throw error;
 
       toast({
