@@ -18,7 +18,7 @@ export const useAutoSave = ({
   enabled = true
 }: UseAutoSaveOptions) => {
   const { toast } = useToast();
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const lastSavedRef = useRef<string>('');
   const isSavingRef = useRef(false);
 
