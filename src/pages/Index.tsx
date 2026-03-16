@@ -47,6 +47,7 @@ const Index = () => {
     ],
     management: [
       { title: "Calendário Integrado", description: "Visualização unificada de serviços, manutenções, calibrações e folha de ponto.", icon: CalendarDays, href: "/calendario", color: "accent" },
+      { title: t('modules.certificacoes'), description: "Gestão de certificados dos técnicos com alertas de vencimento e matriz de competências.", icon: Award, href: "/certificacoes", color: "accent" },
       { title: t('modules.historico'), description: "Registros de inspeções anteriores, rastreabilidade e acompanhamento de manutenções.", icon: History, href: "/historico", color: "primary" },
       { title: t('modules.folhaPonto'), description: "Controle de ponto dos colaboradores com calendário interativo e tipos de check-in.", icon: Calendar, href: "/folha-ponto", color: "primary" },
       { title: "Gerenciar Usuários", description: "Aprovar novos usuários e gerenciar níveis de acesso ao sistema (Admin).", icon: Shield, href: "/gerenciar-usuarios", color: "primary" },
