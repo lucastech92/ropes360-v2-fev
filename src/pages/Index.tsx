@@ -5,7 +5,8 @@ import Header from "@/components/Header";
 import ModuleCard from "@/components/ModuleCard";
 import { DashboardMetrics } from "@/components/DashboardMetrics";
 import { HomeSearch } from "@/components/HomeSearch";
-import { FileCheck, Wrench, GraduationCap, FileText, AlertTriangle, HelpCircle, History, ClipboardList, Package, FolderOpen, Shield, Calendar, CalendarDays, Sparkles, ArrowRight, BookOpen, Briefcase, BarChart3 } from "lucide-react";
+import { FileCheck, Wrench, GraduationCap, FileText, AlertTriangle, HelpCircle, History, ClipboardList, Package, FolderOpen, Shield, Calendar, CalendarDays, Sparkles, ArrowRight, BookOpen, Briefcase, BarChart3, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FolderManager } from "@/components/FolderManager";
 import { DocumentUploadWithTags } from "@/components/DocumentUploadWithTags";
@@ -138,6 +139,15 @@ const Index = () => {
               
               <div className="flex justify-center pt-4 animate-fade-in">
                 <HomeSearch />
+              </div>
+
+              <div className="flex justify-center pt-2 animate-fade-in">
+                <Button variant="outline" size="sm" asChild className="gap-2">
+                  <Link to="/install">
+                    <Download className="h-4 w-4" />
+                    Instalar App no Celular
+                  </Link>
+                </Button>
               </div>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
+import { Shield, Eye, EyeOff, Loader2, ArrowLeft, Download } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -453,6 +453,16 @@ const Auth = () => {
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* Install App Button */}
+      <div className="absolute bottom-6 left-0 right-0 flex justify-center z-10">
+        <Button variant="outline" size="sm" asChild className="gap-2 bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card">
+          <Link to="/install">
+            <Download className="h-4 w-4" />
+            Instalar App no Celular
+          </Link>
+        </Button>
+      </div>
 
       {/* Forgot Password Dialog */}
       <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
