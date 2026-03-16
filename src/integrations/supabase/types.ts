@@ -109,6 +109,39 @@ export type Database = {
           },
         ]
       }
+      certifications: {
+        Row: {
+          certification_name: string
+          created_at: string
+          created_by: string
+          expiry_date: string
+          file_name: string
+          file_path: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          certification_name: string
+          created_at?: string
+          created_by: string
+          expiry_date: string
+          file_name: string
+          file_path: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          certification_name?: string
+          created_at?: string
+          created_by?: string
+          expiry_date?: string
+          file_name?: string
+          file_path?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       checklist_items: {
         Row: {
           checklist_id: string
@@ -193,6 +226,39 @@ export type Database = {
           name?: string
           service_tag?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      competency_matrix: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          skill_level: string
+          skill_name: string
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          skill_level?: string
+          skill_name: string
+          user_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          skill_level?: string
+          skill_name?: string
+          user_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: []
       }
@@ -1429,6 +1495,7 @@ export type Database = {
     }
     Functions: {
       check_expiring_calibrations: { Args: never; Returns: undefined }
+      check_expiring_certifications: { Args: never; Returns: undefined }
       check_expiring_documents: { Args: never; Returns: undefined }
       check_maintenance_due: { Args: never; Returns: undefined }
       create_notification_with_push: {
