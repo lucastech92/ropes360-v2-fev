@@ -65,6 +65,7 @@ export const MobileNav = () => {
         { label: t('header.dashboard'), href: "/dashboard", icon: LayoutDashboard },
         { label: "Assistente IA", href: "/assistente-tecnico", icon: Sparkles },
         { label: "Meus Downloads", href: "/meus-downloads", icon: CloudOff },
+        { label: "Instalar App", href: "/install", icon: Download },
       ]
     },
     {

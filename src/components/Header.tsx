@@ -111,6 +111,19 @@ const Header = () => {
                   <TooltipContent>Assistente Técnico IA</TooltipContent>
                 </Tooltip>
               )}
+              {location.pathname !== "/install" && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="sm" asChild className="gap-2">
+                      <Link to="/install">
+                        <Download className="h-4 w-4" />
+                        <span className="hidden lg:inline">Instalar App</span>
+                      </Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Instalar App</TooltipContent>
+                </Tooltip>
+              )}
             </div>
 
             {/* Divider */}
