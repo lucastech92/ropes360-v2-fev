@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import ModuleCard from "@/components/ModuleCard";
 import { DashboardMetrics } from "@/components/DashboardMetrics";
 import { HomeSearch } from "@/components/HomeSearch";
-import { FileCheck, Wrench, GraduationCap, FileText, AlertTriangle, HelpCircle, History, ClipboardList, Package, FolderOpen, Shield, Calendar, CalendarDays, Sparkles, ArrowRight, BookOpen, Briefcase, BarChart3, Download } from "lucide-react";
+import { FileCheck, Wrench, GraduationCap, FileText, AlertTriangle, HelpCircle, History, ClipboardList, Package, FolderOpen, Shield, Calendar, CalendarDays, Sparkles, ArrowRight, BookOpen, Briefcase, BarChart3, Download, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FolderManager } from "@/components/FolderManager";
@@ -13,116 +13,74 @@ import { DocumentUploadWithTags } from "@/components/DocumentUploadWithTags";
 import { DocumentListWithTags } from "@/components/DocumentListWithTags";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+
 const Index = () => {
-  const {
-    t
-  } = useTranslation();
+  const { t } = useTranslation();
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [selectedFolderName, setSelectedFolderName] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const modulesByCategory = {
-    knowledge: [{
-      title: t('modules.procedimentosOficiais'),
-      description: "Acesse todos os procedimentos e normas oficiais da empresa, incluindo ISO 4309 e diretrizes de segurança.",
-      icon: FileCheck,
-      href: "/procedimentos-oficiais",
-      color: "primary"
-    }, {
-      title: t('modules.manuaisBridon'),
-      description: "Instruções detalhadas para instalação, soquetagem, remoção e manutenção de cabos de aço.",
-      icon: Wrench,
-      href: "/procedimentos-tecnicos",
-      color: "primary"
-    }, {
-      title: t('modules.treinamento'),
-      description: "Materiais de treinamento, glossário técnico e vídeos educativos para desenvolvimento contínuo.",
-      icon: GraduationCap,
-      href: "/treinamento",
-      color: "primary"
-    }, {
-      title: "Resolução de Problemas",
-      description: "Casos reais de falhas, análises de causa raiz e soluções aplicadas em campo.",
-      icon: AlertTriangle,
-      href: "/resolucao-problemas",
-      color: "primary"
-    }, {
-      title: t('modules.duvidasFrequentes'),
-      description: "Treinamentos, Drake, etc...",
-      icon: HelpCircle,
-      href: "/duvidas-frequentes",
-      color: "primary"
-    }],
-    operations: [{
-      title: t('modules.servicos'),
-      description: "Gerencie todos os serviços registrados com código JBR, cliente, escopo e equipamentos.",
-      icon: ClipboardList,
-      href: "/servicos",
-      color: "accent"
-    }, {
-      title: t('modules.checkLists'),
-      description: "Checklists preenchíveis para montagem de containers e verificação de ferramentas (JBR).",
-      icon: ClipboardList,
-      href: "/checklist",
-      color: "accent"
-    }, {
-      title: t('modules.modelosRelatorios'),
-      description: "Upload e download de modelos de relatórios para inspeções e procedimentos.",
-      icon: FileText,
-      href: "/modelos-relatorios",
-      color: "accent"
-    }, {
-      title: t('modules.inventario'),
-      description: "Gestão unificada de consumíveis, equipamentos, manutenções e calibrações.",
-      icon: Package,
-      href: "/inventario",
-      color: "accent"
-    }],
-    management: [{
-      title: "Calendário Integrado",
-      description: "Visualização unificada de serviços, manutenções, calibrações e folha de ponto.",
-      icon: CalendarDays,
-      href: "/calendario",
-      color: "accent"
-    }, {
-      title: t('modules.historico'),
-      description: "Registros de inspeções anteriores, rastreabilidade e acompanhamento de manutenções.",
-      icon: History,
-      href: "/historico",
-      color: "primary"
-    }, {
-      title: t('modules.folhaPonto'),
-      description: "Controle de ponto dos colaboradores com calendário interativo e tipos de check-in.",
-      icon: Calendar,
-      href: "/folha-ponto",
-      color: "primary"
-    }, {
-      title: "Gerenciar Usuários",
-      description: "Aprovar novos usuários e gerenciar níveis de acesso ao sistema (Admin).",
-      icon: Shield,
-      href: "/gerenciar-usuarios",
-      color: "primary"
-    }]
+
+  // Refs for anchor navigation
+  const knowledgeRef = useRef<HTMLElement>(null);
+  const operationsRef = useRef<HTMLElement>(null);
+  const managementRef = useRef<HTMLElement>(null);
+  const foldersRef = useRef<HTMLElement>(null);
+
+  const scrollTo = (ref: React.RefObject<HTMLElement | null>) => {
+    ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  const modulesByCategory = {
+    knowledge: [
+      { title: t('modules.procedimentosOficiais'), description: "Acesse todos os procedimentos e normas oficiais da empresa, incluindo ISO 4309 e diretrizes de segurança.", icon: FileCheck, href: "/procedimentos-oficiais", color: "primary" },
+      { title: t('modules.manuaisBridon'), description: "Instruções detalhadas para instalação, soquetagem, remoção e manutenção de cabos de aço.", icon: Wrench, href: "/procedimentos-tecnicos", color: "primary" },
+      { title: t('modules.treinamento'), description: "Materiais de treinamento, glossário técnico e vídeos educativos para desenvolvimento contínuo.", icon: GraduationCap, href: "/treinamento", color: "primary" },
+      { title: "Resolução de Problemas", description: "Casos reais de falhas, análises de causa raiz e soluções aplicadas em campo.", icon: AlertTriangle, href: "/resolucao-problemas", color: "primary" },
+      { title: t('modules.duvidasFrequentes'), description: "Treinamentos, Drake, etc...", icon: HelpCircle, href: "/duvidas-frequentes", color: "primary" },
+    ],
+    operations: [
+      { title: t('modules.servicos'), description: "Gerencie todos os serviços registrados com código JBR, cliente, escopo e equipamentos.", icon: ClipboardList, href: "/servicos", color: "accent" },
+      { title: t('modules.checkLists'), description: "Checklists preenchíveis para montagem de containers e verificação de ferramentas (JBR).", icon: ClipboardList, href: "/checklist", color: "accent" },
+      { title: t('modules.modelosRelatorios'), description: "Upload e download de modelos de relatórios para inspeções e procedimentos.", icon: FileText, href: "/modelos-relatorios", color: "accent" },
+      { title: t('modules.inventario'), description: "Gestão unificada de consumíveis, equipamentos, manutenções e calibrações.", icon: Package, href: "/inventario", color: "accent" },
+    ],
+    management: [
+      { title: "Calendário Integrado", description: "Visualização unificada de serviços, manutenções, calibrações e folha de ponto.", icon: CalendarDays, href: "/calendario", color: "accent" },
+      { title: t('modules.historico'), description: "Registros de inspeções anteriores, rastreabilidade e acompanhamento de manutenções.", icon: History, href: "/historico", color: "primary" },
+      { title: t('modules.folhaPonto'), description: "Controle de ponto dos colaboradores com calendário interativo e tipos de check-in.", icon: Calendar, href: "/folha-ponto", color: "primary" },
+      { title: "Gerenciar Usuários", description: "Aprovar novos usuários e gerenciar níveis de acesso ao sistema (Admin).", icon: Shield, href: "/gerenciar-usuarios", color: "primary" },
+    ],
+  };
+
+  const navItems = [
+    { label: t('modules.knowledge'), icon: BookOpen, ref: knowledgeRef, color: "bg-primary/10 text-primary" },
+    { label: t('modules.operations'), icon: Briefcase, ref: operationsRef, color: "bg-accent/10 text-accent-foreground" },
+    { label: t('modules.management'), icon: BarChart3, ref: managementRef, color: "bg-primary/10 text-primary" },
+    { label: "Minhas Pastas", icon: FolderOpen, ref: foldersRef, color: "bg-primary/10 text-primary" },
+  ];
+
   const handleFolderSelect = (folderId: string | null, folderName: string | null) => {
     setSelectedFolderId(folderId);
     setSelectedFolderName(folderName);
   };
-  return <div className="min-h-screen bg-background">
+
+  return (
+    <div className="min-h-screen bg-background">
       <Header />
-      
+
       <main className="relative">
         {/* Hero Section */}
         <section className="relative overflow-hidden border-b bg-gradient-to-b from-primary/5 via-background to-background">
-          {/* Background decoration */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-float" />
             <div className="absolute top-20 -left-20 w-72 h-72 bg-accent/10 rounded-full blur-3xl" />
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
           </div>
 
-          <div className="container relative py-12 md:py-20 px-4">
-            <div className="mx-auto max-w-4xl text-center space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4 animate-fade-in">
+          <div className="container relative py-10 md:py-16 px-4">
+            <div className="mx-auto max-w-4xl text-center space-y-5">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-2 animate-fade-in">
                 <Sparkles className="h-4 w-4" />
                 <span>Centro de Inteligência Técnica</span>
               </div>
@@ -132,16 +90,17 @@ const Index = () => {
                   Ropes 360
                 </span>
               </h1>
-              
-              <p className="mx-auto max-w-2xl text-base md:text-xl text-muted-foreground animate-fade-in">Portal completo de conhecimento técnico para inspetores de campo e centralização para a equipe de suporte.
+
+              <p className="mx-auto max-w-2xl text-base md:text-lg text-muted-foreground animate-fade-in">
+                Portal completo de conhecimento técnico para inspetores de campo e centralização para a equipe de suporte.
                 {" "}<span className="text-foreground font-medium">Documentação, procedimentos, certificados, inventário e projetos</span> em um só lugar.
               </p>
-              
-              <div className="flex justify-center pt-4 animate-fade-in">
+
+              <div className="flex justify-center pt-2 animate-fade-in">
                 <HomeSearch />
               </div>
 
-              <div className="flex justify-center pt-2 animate-fade-in">
+              <div className="flex justify-center pt-1 animate-fade-in">
                 <Button variant="outline" size="sm" asChild className="gap-2">
                   <Link to="/install">
                     <Download className="h-4 w-4" />
@@ -153,15 +112,34 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Quick Navigation Bar */}
+        <nav className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-lg">
+          <div className="container px-4">
+            <div className="flex items-center gap-1 py-2 overflow-x-auto scrollbar-hide">
+              {navItems.map((item) => (
+                <button
+                  key={item.label}
+                  onClick={() => scrollTo(item.ref)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors whitespace-nowrap shrink-0"
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                  <ChevronDown className="h-3 w-3 opacity-50" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </nav>
+
         {/* Metrics Section */}
-        <section className="container py-8 md:py-12 px-4">
+        <section className="container py-8 md:py-10 px-4">
           <DashboardMetrics />
         </section>
 
         {/* Modules Sections */}
-        <div className="container px-4 space-y-12 md:space-y-16 pb-12">
+        <div className="container px-4 space-y-10 md:space-y-14 pb-12">
           {/* Knowledge Section */}
-          <section className="space-y-6">
+          <section ref={knowledgeRef} className="scroll-mt-20 space-y-5">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
                 <BookOpen className="h-5 w-5 text-primary" />
@@ -172,15 +150,17 @@ const Index = () => {
               </div>
             </div>
             <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {modulesByCategory.knowledge.map(module => <ModuleCard key={module.href} {...module} />)}
+              {modulesByCategory.knowledge.map((module) => (
+                <ModuleCard key={module.href} {...module} />
+              ))}
             </div>
           </section>
 
           {/* Operations Section */}
-          <section className="space-y-6">
+          <section ref={operationsRef} className="scroll-mt-20 space-y-5">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10">
-                <Briefcase className="h-5 w-5 text-accent" />
+                <Briefcase className="h-5 w-5 text-accent-foreground" />
               </div>
               <div>
                 <h2 className="text-xl md:text-2xl font-bold">{t('modules.operations')}</h2>
@@ -188,12 +168,14 @@ const Index = () => {
               </div>
             </div>
             <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {modulesByCategory.operations.map(module => <ModuleCard key={module.href} {...module} />)}
+              {modulesByCategory.operations.map((module) => (
+                <ModuleCard key={module.href} {...module} />
+              ))}
             </div>
           </section>
 
           {/* Management Section */}
-          <section className="space-y-6">
+          <section ref={managementRef} className="scroll-mt-20 space-y-5">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
                 <BarChart3 className="h-5 w-5 text-primary" />
@@ -204,12 +186,14 @@ const Index = () => {
               </div>
             </div>
             <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {modulesByCategory.management.map(module => <ModuleCard key={module.href} {...module} />)}
+              {modulesByCategory.management.map((module) => (
+                <ModuleCard key={module.href} {...module} />
+              ))}
             </div>
           </section>
 
           {/* My Folders Section */}
-          <section className="space-y-6">
+          <section ref={foldersRef} className="scroll-mt-20 space-y-6">
             <Card className="border-border/50 shadow-card overflow-hidden">
               <CardHeader className="pb-4 bg-gradient-to-r from-muted/50 to-transparent">
                 <div className="flex items-center gap-3">
@@ -218,9 +202,7 @@ const Index = () => {
                   </div>
                   <div>
                     <CardTitle className="text-lg md:text-xl">Minhas Pastas</CardTitle>
-                    <CardDescription>
-                      Crie e gerencie suas próprias pastas e documentos
-                    </CardDescription>
+                    <CardDescription>Crie e gerencie suas próprias pastas e documentos</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -229,7 +211,8 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            {selectedFolderId && <Card className="border-border/50 shadow-card animate-fade-in">
+            {selectedFolderId && (
+              <Card className="border-border/50 shadow-card animate-fade-in">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
                     <div>
@@ -237,13 +220,9 @@ const Index = () => {
                         <FolderOpen className="h-5 w-5 text-primary" />
                         {selectedFolderName}
                       </CardTitle>
-                      <CardDescription>
-                        Gerencie documentos e subpastas
-                      </CardDescription>
+                      <CardDescription>Gerencie documentos e subpastas</CardDescription>
                     </div>
-                    <Badge variant="secondary" className="hidden sm:flex">
-                      Pasta selecionada
-                    </Badge>
+                    <Badge variant="secondary" className="hidden sm:flex">Pasta selecionada</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -252,17 +231,16 @@ const Index = () => {
                       <TabsTrigger value="documents">Documentos</TabsTrigger>
                       <TabsTrigger value="upload">Upload</TabsTrigger>
                     </TabsList>
-                    
                     <TabsContent value="documents" className="mt-6">
                       <DocumentListWithTags folderId={selectedFolderId} category="home" refreshTrigger={refreshTrigger} />
                     </TabsContent>
-                    
                     <TabsContent value="upload" className="mt-6">
-                      <DocumentUploadWithTags folderId={selectedFolderId} category="home" onUploadComplete={() => setRefreshTrigger(prev => prev + 1)} />
+                      <DocumentUploadWithTags folderId={selectedFolderId} category="home" onUploadComplete={() => setRefreshTrigger((prev) => prev + 1)} />
                     </TabsContent>
                   </Tabs>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
           </section>
 
           {/* Help Footer */}
@@ -271,9 +249,7 @@ const Index = () => {
             <div className="relative flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
               <div className="space-y-1">
                 <h3 className="text-lg font-semibold">Precisa de ajuda?</h3>
-                <p className="text-sm text-muted-foreground">
-                  Entre em contato com a equipe técnica ou consulte nossa documentação
-                </p>
+                <p className="text-sm text-muted-foreground">Entre em contato com a equipe técnica ou consulte nossa documentação</p>
               </div>
               <Link to="/duvidas-frequentes" className="group inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-all hover:gap-3">
                 Dúvidas Frequentes
@@ -283,6 +259,8 @@ const Index = () => {
           </section>
         </div>
       </main>
-    </div>;
+    </div>
+  );
 };
+
 export default Index;
