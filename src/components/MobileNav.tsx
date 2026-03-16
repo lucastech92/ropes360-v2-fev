@@ -12,7 +12,8 @@ import {
   GraduationCap,
   HelpCircle,
   AlertTriangle,
-  CloudOff,
+    CloudOff,
+    Download,
   Gamepad2,
   Sparkles,
   Menu
