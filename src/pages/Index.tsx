@@ -140,6 +140,15 @@ const Index = () => {
               <div className="flex justify-center pt-4 animate-fade-in">
                 <HomeSearch />
               </div>
+
+              <div className="flex justify-center pt-2 animate-fade-in">
+                <Button variant="outline" size="sm" asChild className="gap-2">
+                  <Link to="/install">
+                    <Download className="h-4 w-4" />
+                    Instalar App no Celular
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
         </section>

@@ -454,6 +454,16 @@ const Auth = () => {
         </CardContent>
       </Card>
 
+      {/* Install App Button */}
+      <div className="absolute bottom-6 left-0 right-0 flex justify-center z-10">
+        <Button variant="outline" size="sm" asChild className="gap-2 bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card">
+          <Link to="/install">
+            <Download className="h-4 w-4" />
+            Instalar App no Celular
+          </Link>
+        </Button>
+      </div>
+
       {/* Forgot Password Dialog */}
       <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
         <DialogContent className="sm:max-w-md">
