@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FileText, LogOut, LayoutDashboard, Home, Sparkles } from "lucide-react";
+import { FileText, LogOut, LayoutDashboard, Home, Sparkles, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -109,6 +109,19 @@ const Header = () => {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>Assistente Técnico IA</TooltipContent>
+                </Tooltip>
+              )}
+              {location.pathname !== "/install" && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="sm" asChild className="gap-2">
+                      <Link to="/install">
+                        <Download className="h-4 w-4" />
+                        <span className="hidden lg:inline">Instalar App</span>
+                      </Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Instalar App</TooltipContent>
                 </Tooltip>
               )}
             </div>
