@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FileText, LogOut, LayoutDashboard, Home, Sparkles } from "lucide-react";
+import { FileText, LogOut, LayoutDashboard, Home, Sparkles, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
