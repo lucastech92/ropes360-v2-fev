@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import ModuleCard from "@/components/ModuleCard";
 import { DashboardMetrics } from "@/components/DashboardMetrics";
+import { HealthScoreGauge } from "@/components/dashboard/HealthScoreGauge";
 import { HomeSearch } from "@/components/HomeSearch";
 import { FileCheck, Wrench, GraduationCap, FileText, AlertTriangle, HelpCircle, History, ClipboardList, Package, FolderOpen, Shield, Calendar, CalendarDays, Sparkles, ArrowRight, BookOpen, Briefcase, BarChart3, Download, ChevronDown, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -132,8 +133,9 @@ const Index = () => {
           </div>
         </nav>
 
-        {/* Metrics Section */}
-        <section className="container py-8 md:py-10 px-4">
+        {/* Health Score + Metrics Section */}
+        <section className="container py-8 md:py-10 px-4 space-y-6">
+          <HealthScoreGauge compact />
           <DashboardMetrics />
         </section>
 

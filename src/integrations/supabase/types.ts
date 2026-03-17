@@ -1494,6 +1494,7 @@ export type Database = {
       }
     }
     Functions: {
+      calculate_health_score: { Args: never; Returns: Json }
       check_expiring_calibrations: { Args: never; Returns: undefined }
       check_expiring_certifications: { Args: never; Returns: undefined }
       check_expiring_documents: { Args: never; Returns: undefined }

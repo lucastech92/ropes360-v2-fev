@@ -27,6 +27,7 @@ import { MaintenanceDetailsDialog } from "@/components/dashboard/MaintenanceDeta
 import { ServicesEvolutionChart } from "@/components/dashboard/ServicesEvolutionChart";
 import { MaintenanceTypeChart } from "@/components/dashboard/MaintenanceTypeChart";
 import { InventoryTrendsChart } from "@/components/dashboard/InventoryTrendsChart";
+import { HealthScoreGauge } from "@/components/dashboard/HealthScoreGauge";
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -191,6 +192,11 @@ const Dashboard = () => {
             href="/assistente-tecnico"
             color="primary"
           />
+        </div>
+
+        {/* Health Score */}
+        <div className="mb-8">
+          <HealthScoreGauge />
         </div>
 
         {/* Métricas Principais */}
