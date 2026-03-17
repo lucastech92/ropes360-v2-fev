@@ -249,14 +249,26 @@ const Servicos = () => {
                           : "-"}
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate(`/editar-servico/${service.id}`)}
-                          className="transition-all hover:scale-110 active:scale-95"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => navigate(`/servico/${service.id}/timeline`)}
+                            className="transition-all hover:scale-110 active:scale-95"
+                            title="Ver Timeline"
+                          >
+                            <Clock className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => navigate(`/editar-servico/${service.id}`)}
+                            className="transition-all hover:scale-110 active:scale-95"
+                            title="Editar"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
