@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.equipment-ai]
 verify_jwt = false
+
+[functions.executive-report]
+verify_jwt = false

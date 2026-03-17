@@ -16,7 +16,8 @@ import {
   CheckCircle2,
   Clock,
   ArrowRight,
-  Bot
+  Bot,
+  FileBarChart
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -194,7 +195,17 @@ const Dashboard = () => {
           />
         </div>
 
-        {/* Health Score */}
+        {/* Relatório Executivo */}
+        <div className="mb-8">
+          <ModuleCard
+            title="Relatório Executivo"
+            description="Resumo operacional com IA e recomendações estratégicas para diretoria"
+            icon={FileBarChart}
+            href="/relatorio-executivo"
+            color="accent"
+          />
+        </div>
+
         <div className="mb-8">
           <HealthScoreGauge />
         </div>
