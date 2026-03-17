@@ -29,6 +29,7 @@ import { ServicesEvolutionChart } from "@/components/dashboard/ServicesEvolution
 import { MaintenanceTypeChart } from "@/components/dashboard/MaintenanceTypeChart";
 import { InventoryTrendsChart } from "@/components/dashboard/InventoryTrendsChart";
 import { HealthScoreGauge } from "@/components/dashboard/HealthScoreGauge";
+import { AlertsSummaryWidget } from "@/components/dashboard/AlertsSummaryWidget";
 
 const Dashboard = () => {
   const { t } = useTranslation();
