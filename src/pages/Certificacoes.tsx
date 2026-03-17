@@ -18,6 +18,7 @@ const Certificacoes = () => {
   const { t } = useTranslation();
   const { certifications, isLoadingCerts, deleteCertification } = useCertifications();
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [userFilter, setUserFilter] = useState<string>("all");
   const [isAdmin, setIsAdmin] = useState(false);
 
   const { data: profiles } = useQuery({
@@ -51,9 +52,13 @@ const Certificacoes = () => {
     return p?.full_name || p?.email || "";
   };
 
+  // Get unique user IDs from certifications for the filter
+  const certUserIds = Array.from(new Set(certifications.map((c) => c.user_id)));
+
   const filteredCerts = certifications.filter((c) => {
-    if (statusFilter === "all") return true;
-    return getCertStatus(c.expiry_date) === statusFilter;
+    const statusMatch = statusFilter === "all" || getCertStatus(c.expiry_date) === statusFilter;
+    const userMatch = userFilter === "all" || c.user_id === userFilter;
+    return statusMatch && userMatch;
   });
 
   const validCount = certifications.filter((c) => getCertStatus(c.expiry_date) === "valid").length;
