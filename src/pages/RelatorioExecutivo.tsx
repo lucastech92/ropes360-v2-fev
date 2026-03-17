@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
-import NavigationBreadcrumb from "@/components/NavigationBreadcrumb";
+import { NavigationBreadcrumb } from "@/components/NavigationBreadcrumb";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
