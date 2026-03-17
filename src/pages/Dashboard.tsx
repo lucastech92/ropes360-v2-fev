@@ -185,6 +185,11 @@ const Dashboard = () => {
           </p>
         </div>
 
+        {/* Alertas Ativos */}
+        <div className="mb-8">
+          <AlertsSummaryWidget />
+        </div>
+
         {/* Assistente Técnico */}
         <div className="mb-8">
           <ModuleCard

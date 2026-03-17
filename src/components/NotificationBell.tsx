@@ -330,6 +330,16 @@ export const NotificationBell = () => {
               </div>
             )}
           </ScrollArea>
+
+          {/* Ver todas link */}
+          <div className="pt-2 border-t">
+            <Link
+              to="/notificacoes"
+              className="block text-center text-sm text-primary font-medium hover:underline py-1"
+            >
+              Ver todas as notificações
+            </Link>
+          </div>
         </div>
       </PopoverContent>
     </Popover>
