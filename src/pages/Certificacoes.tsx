@@ -21,36 +21,7 @@ const Certificacoes = () => {
   const [userFilter, setUserFilter] = useState<string>("all");
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const { data: profiles } = useQuery({
-    queryKey: ["user_profiles_for_certs"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .select("user_id, full_name, email");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  useEffect(() => {
-    const checkRole = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .in("role", ["admin", "moderator"])
-        .maybeSingle();
-      setIsAdmin(!!data);
-    };
-    checkRole();
-  }, []);
-
-  const getUserName = (userId: string) => {
-    const p = profiles?.find((p) => p.user_id === userId);
-    return p?.full_name || p?.email || "";
-  };
+  // profiles and role check moved into the new block above
 
   // Get unique user IDs from certifications for the filter
   const certUserIds = Array.from(new Set(certifications.map((c) => c.user_id)));
