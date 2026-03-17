@@ -85,6 +85,7 @@ const App = () => {
               <Route path="/calendario" element={<ProtectedRoute><Calendario /></ProtectedRoute>} />
               <Route path="/certificacoes" element={<ProtectedRoute><Certificacoes /></ProtectedRoute>} />
               <Route path="/servico/:id/timeline" element={<ProtectedRoute><ServiceTimeline /></ProtectedRoute>} />
+              <Route path="/relatorio-executivo" element={<ProtectedRoute><RelatorioExecutivo /></ProtectedRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
