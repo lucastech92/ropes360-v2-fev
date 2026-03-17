@@ -31,6 +31,7 @@ import FolhaPonto from "./pages/FolhaPonto";
 import MeusDownloads from "./pages/MeusDownloads";
 import Calendario from "./pages/Calendario";
 import Certificacoes from "./pages/Certificacoes";
+import ServiceTimeline from "./pages/ServiceTimeline";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import { NotificationPermissionPrompt } from "./components/NotificationPermissionPrompt";
