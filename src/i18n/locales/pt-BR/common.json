@@ -80,7 +80,10 @@
     "competencyMatrix": "Matriz de Competências",
     "competencyDescription": "Nível de habilidade dos técnicos por competência",
     "addSkill": "Nova competência...",
-    "technician": "Técnico"
+    "technician": "Técnico",
+    "allTechnicians": "Todos os técnicos",
+    "certOwner": "Pertence a",
+    "selectOwner": "Selecione o técnico"
   },
   "search": {
     "placeholder": "Buscar em todos os módulos...",
