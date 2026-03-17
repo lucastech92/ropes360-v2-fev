@@ -194,6 +194,11 @@ const Dashboard = () => {
           />
         </div>
 
+        {/* Health Score */}
+        <div className="mb-8">
+          <HealthScoreGauge />
+        </div>
+
         {/* Métricas Principais */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
           <Card className="hover:shadow-lg transition-all cursor-pointer border-primary/20" onClick={() => {}}>

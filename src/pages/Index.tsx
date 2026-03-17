@@ -133,8 +133,9 @@ const Index = () => {
           </div>
         </nav>
 
-        {/* Metrics Section */}
-        <section className="container py-8 md:py-10 px-4">
+        {/* Health Score + Metrics Section */}
+        <section className="container py-8 md:py-10 px-4 space-y-6">
+          <HealthScoreGauge compact />
           <DashboardMetrics />
         </section>
 
