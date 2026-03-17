@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Award, FileCheck, Users, BarChart3, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 import { CertificationUpload } from "@/components/certifications/CertificationUpload";
@@ -21,9 +20,37 @@ const Certificacoes = () => {
   const [userFilter, setUserFilter] = useState<string>("all");
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // profiles and role check moved into the new block above
+  const { data: profiles } = useQuery({
+    queryKey: ["user_profiles_for_certs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_profiles")
+        .select("user_id, full_name, email");
+      if (error) throw error;
+      return data;
+    },
+  });
 
-  // Get unique user IDs from certifications for the filter
+  useEffect(() => {
+    const checkRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .in("role", ["admin", "moderator"])
+        .maybeSingle();
+      setIsAdmin(!!data);
+    };
+    checkRole();
+  }, []);
+
+  const getUserName = (userId: string) => {
+    const p = profiles?.find((pr) => pr.user_id === userId);
+    return p?.full_name || p?.email || "";
+  };
+
   const certUserIds = Array.from(new Set(certifications.map((c) => c.user_id)));
 
   const filteredCerts = certifications.filter((c) => {
@@ -78,30 +105,49 @@ const Certificacoes = () => {
                   <CardDescription>{t("certifications.uploadDescription")}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <CertificationUpload />
+                  <CertificationUpload isAdmin={isAdmin} profiles={profiles ?? []} />
                 </CardContent>
               </Card>
 
               {/* List Card */}
               <Card className="lg:col-span-2 border-border/50">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg">{t("certifications.myCertificates")}</CardTitle>
-                    <CardDescription>
-                      {certifications.length} {t("certifications.certificatesTotal")}
-                    </CardDescription>
+                <CardHeader>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between w-full">
+                    <div>
+                      <CardTitle className="text-lg">{t("certifications.myCertificates")}</CardTitle>
+                      <CardDescription>
+                        {filteredCerts.length} {t("certifications.certificatesTotal")}
+                      </CardDescription>
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      {isAdmin && certUserIds.length > 0 && (
+                        <Select value={userFilter} onValueChange={setUserFilter}>
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder={t("certifications.allTechnicians")} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">{t("certifications.allTechnicians")}</SelectItem>
+                            {certUserIds.map((uid) => (
+                              <SelectItem key={uid} value={uid}>
+                                {getUserName(uid) || uid.slice(0, 8)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                      <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger className="w-[150px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">{t("certifications.allStatus")}</SelectItem>
+                          <SelectItem value="valid">{t("certifications.valid")}</SelectItem>
+                          <SelectItem value="expiring">{t("certifications.expiringSoon")}</SelectItem>
+                          <SelectItem value="expired">{t("certifications.expired")}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-[150px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">{t("certifications.allStatus")}</SelectItem>
-                      <SelectItem value="valid">{t("certifications.valid")}</SelectItem>
-                      <SelectItem value="expiring">{t("certifications.expiringSoon")}</SelectItem>
-                      <SelectItem value="expired">{t("certifications.expired")}</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -173,7 +219,6 @@ const Certificacoes = () => {
               </Card>
             </div>
 
-            {/* Urgent Actions */}
             {(expiringCount > 0 || expiredCount > 0) && (
               <Card className="border-border/50">
                 <CardHeader>

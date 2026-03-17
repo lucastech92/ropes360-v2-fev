@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -20,12 +21,24 @@ const SUGGESTIONS = [
   "ASO", "CREA", "Curso Offshore",
 ];
 
-export const CertificationUpload = () => {
+interface Profile {
+  user_id: string;
+  full_name: string | null;
+  email: string | null;
+}
+
+interface CertificationUploadProps {
+  isAdmin?: boolean;
+  profiles?: Profile[];
+}
+
+export const CertificationUpload = ({ isAdmin = false, profiles = [] }: CertificationUploadProps) => {
   const { t } = useTranslation();
   const { uploadCertification } = useCertifications();
   const [file, setFile] = useState<File | null>(null);
   const [certName, setCertName] = useState("");
   const [expiryDate, setExpiryDate] = useState<Date>();
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -40,16 +53,19 @@ export const CertificationUpload = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
+    const targetUserId = (isAdmin && selectedUserId) ? selectedUserId : user.id;
+
     await uploadCertification.mutateAsync({
       file,
       certificationName: certName.trim(),
       expiryDate: format(expiryDate, "yyyy-MM-dd"),
-      userId: user.id,
+      userId: targetUserId,
     });
 
     setFile(null);
     setCertName("");
     setExpiryDate(undefined);
+    setSelectedUserId("");
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -61,6 +77,25 @@ export const CertificationUpload = () => {
 
   return (
     <div className="space-y-6">
+      {/* Owner selector for admins */}
+      {isAdmin && profiles.length > 0 && (
+        <div>
+          <Label className="text-sm font-medium mb-2 block">{t("certifications.certOwner")}</Label>
+          <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+            <SelectTrigger>
+              <SelectValue placeholder={t("certifications.selectOwner")} />
+            </SelectTrigger>
+            <SelectContent>
+              {profiles.map((p) => (
+                <SelectItem key={p.user_id} value={p.user_id}>
+                  {p.full_name || p.email || p.user_id.slice(0, 8)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
       {/* File Drop Zone */}
       <div>
         <Label className="text-sm font-medium mb-2 block">1. {t("certifications.selectFile")}</Label>
