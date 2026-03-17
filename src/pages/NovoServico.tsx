@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, Clock } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -314,14 +314,24 @@ const NovoServico = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="container mx-auto py-8 px-4 max-w-3xl">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/servicos")}
-          className="mb-6"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          {t('common.back')}
-        </Button>
+        <div className="flex items-center justify-between mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/servicos")}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            {t('common.back')}
+          </Button>
+          {id && (
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/servico/${id}/timeline`)}
+            >
+              <Clock className="mr-2 h-4 w-4" />
+              Ver Timeline
+            </Button>
+          )}
+        </div>
 
         <Card>
           <CardHeader>

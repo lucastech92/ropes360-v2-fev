@@ -31,6 +31,7 @@ import FolhaPonto from "./pages/FolhaPonto";
 import MeusDownloads from "./pages/MeusDownloads";
 import Calendario from "./pages/Calendario";
 import Certificacoes from "./pages/Certificacoes";
+import ServiceTimeline from "./pages/ServiceTimeline";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import { NotificationPermissionPrompt } from "./components/NotificationPermissionPrompt";
@@ -82,6 +83,7 @@ const App = () => {
               <Route path="/treinamento-iso4309" element={<ProtectedRoute><TreinamentoISO4309 /></ProtectedRoute>} />
               <Route path="/calendario" element={<ProtectedRoute><Calendario /></ProtectedRoute>} />
               <Route path="/certificacoes" element={<ProtectedRoute><Certificacoes /></ProtectedRoute>} />
+              <Route path="/servico/:id/timeline" element={<ProtectedRoute><ServiceTimeline /></ProtectedRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
