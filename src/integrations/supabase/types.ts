@@ -1509,6 +1509,18 @@ export type Database = {
         }
         Returns: string
       }
+      get_service_timeline: {
+        Args: { p_service_id: string }
+        Returns: {
+          actor_name: string
+          description: string
+          event_date: string
+          event_type: string
+          icon_type: string
+          metadata: Json
+          title: string
+        }[]
+      }
       get_services_with_counts: {
         Args: never
         Returns: {
