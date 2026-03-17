@@ -52,9 +52,17 @@ const ModuleCard = ({ title, description, icon: Icon, href, color = "primary" }:
         </CardHeader>
         
         <CardContent className="relative p-4 pt-0 md:p-6 md:pt-0">
-          <CardDescription className="text-sm leading-relaxed line-clamp-2 md:line-clamp-3 text-muted-foreground/80">
+          <CardDescription className="text-sm leading-relaxed line-clamp-2 md:line-clamp-3 text-muted-foreground/80 mb-3">
             {description}
           </CardDescription>
+          <div className={cn(
+            "inline-flex items-center gap-1.5 text-sm font-medium transition-all duration-300 group-hover:gap-2.5",
+            color === "primary" && "text-primary",
+            color === "accent" && "text-accent"
+          )}>
+            Acessar
+            <ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </div>
         </CardContent>
       </Card>
     </Link>
