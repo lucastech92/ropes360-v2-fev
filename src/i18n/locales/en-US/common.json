@@ -80,7 +80,10 @@
     "competencyMatrix": "Competency Matrix",
     "competencyDescription": "Technician skill levels by competency",
     "addSkill": "New skill...",
-    "technician": "Technician"
+    "technician": "Technician",
+    "allTechnicians": "All technicians",
+    "certOwner": "Belongs to",
+    "selectOwner": "Select technician"
   },
   "search": {
     "placeholder": "Search all modules...",
