@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { 
   Bell, 
   Wrench, 
@@ -23,8 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate, Link } from "react-router-dom";
 type Notification = {
   id: string;
   title: string;
