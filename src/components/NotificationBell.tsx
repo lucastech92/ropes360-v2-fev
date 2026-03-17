@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { 
   Bell, 
   Wrench, 
@@ -23,8 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate, Link } from "react-router-dom";
 type Notification = {
   id: string;
   title: string;
@@ -40,6 +40,17 @@ export const NotificationBell = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  // Realtime subscription for instant updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('notification-bell-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => {
+        queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [queryClient]);
 
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ["notifications"],
@@ -319,6 +330,16 @@ export const NotificationBell = () => {
               </div>
             )}
           </ScrollArea>
+
+          {/* Ver todas link */}
+          <div className="pt-2 border-t">
+            <Link
+              to="/notificacoes"
+              className="block text-center text-sm text-primary font-medium hover:underline py-1"
+            >
+              Ver todas as notificações
+            </Link>
+          </div>
         </div>
       </PopoverContent>
     </Popover>

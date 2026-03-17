@@ -29,6 +29,7 @@ import { ServicesEvolutionChart } from "@/components/dashboard/ServicesEvolution
 import { MaintenanceTypeChart } from "@/components/dashboard/MaintenanceTypeChart";
 import { InventoryTrendsChart } from "@/components/dashboard/InventoryTrendsChart";
 import { HealthScoreGauge } from "@/components/dashboard/HealthScoreGauge";
+import { AlertsSummaryWidget } from "@/components/dashboard/AlertsSummaryWidget";
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -182,6 +183,11 @@ const Dashboard = () => {
           <p className="text-muted-foreground">
             {t('dashboard.overview')}
           </p>
+        </div>
+
+        {/* Alertas Ativos */}
+        <div className="mb-8">
+          <AlertsSummaryWidget />
         </div>
 
         {/* Assistente Técnico */}
