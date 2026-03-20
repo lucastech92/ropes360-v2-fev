@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Header from "@/components/Header";
-import { ClipboardList, FolderOpen, FileText } from "lucide-react";
+import { ClipboardList, FolderOpen, FileText, Archive } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
@@ -18,6 +18,7 @@ import { ChecklistCloneDialog } from "@/components/checklist/ChecklistCloneDialo
 import { ChecklistSelector } from "@/components/checklist/ChecklistSelector";
 import { ChecklistDetails } from "@/components/checklist/ChecklistDetails";
 import { TemplatesTab } from "@/components/checklist/TemplatesTab";
+import { SavedChecklistsTab } from "@/components/checklist/SavedChecklistsTab";
 
 const CheckList = () => {
   const {
@@ -28,6 +29,7 @@ const CheckList = () => {
     inventoryItems,
     templates,
     serviceChecklists,
+    savedChecklists,
     currentChecklist,
     completedCount,
     totalCount,
@@ -38,6 +40,8 @@ const CheckList = () => {
     createChecklist,
     updateChecklist,
     cloneTemplate,
+    saveChecklist,
+    restoreChecklist,
   } = useChecklistData();
 
   const [activeTab, setActiveTab] = useState<string>("servicos");
@@ -140,6 +144,11 @@ const CheckList = () => {
     setActiveTab("servicos");
   };
 
+  const handleViewSaved = (id: string) => {
+    setSelectedChecklist(id);
+    setActiveTab("servicos");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -156,7 +165,7 @@ const CheckList = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsList className="grid w-full max-w-lg grid-cols-3">
             <TabsTrigger value="servicos" className="flex items-center gap-2">
               <FolderOpen className="h-4 w-4" />
               Serviços ({serviceChecklists.length})
@@ -164,6 +173,10 @@ const CheckList = () => {
             <TabsTrigger value="templates" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Templates ({templates.length})
+            </TabsTrigger>
+            <TabsTrigger value="salvos" className="flex items-center gap-2">
+              <Archive className="h-4 w-4" />
+              Salvos ({savedChecklists.length})
             </TabsTrigger>
           </TabsList>
 
@@ -179,7 +192,7 @@ const CheckList = () => {
           <TabsContent value="servicos" className="space-y-6">
             <div className="grid gap-6">
               <ChecklistSelector
-                checklists={checklists}
+                checklists={serviceChecklists}
                 selectedChecklist={selectedChecklist}
                 onSelectChecklist={setSelectedChecklist}
                 onCreateClick={() => openCreateDialog(false)}
@@ -198,9 +211,21 @@ const CheckList = () => {
                   onDeleteItem={(id) => setDeleteItemId(id)}
                   onAddItem={addItem}
                   onCloneClick={() => openCloneDialog(currentChecklist)}
+                  onSaveClick={currentChecklist && !currentChecklist.is_template && !currentChecklist.is_saved
+                    ? () => saveChecklist(currentChecklist.id)
+                    : undefined
+                  }
                 />
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="salvos" className="space-y-6">
+            <SavedChecklistsTab
+              savedChecklists={savedChecklists}
+              onRestore={restoreChecklist}
+              onView={handleViewSaved}
+            />
           </TabsContent>
         </Tabs>
 
