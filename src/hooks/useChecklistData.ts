@@ -48,8 +48,9 @@ export const useChecklistData = () => {
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const { toast } = useToast();
 
-  const templates = checklists.filter(c => c.is_template);
-  const serviceChecklists = checklists.filter(c => !c.is_template);
+  const templates = checklists.filter(c => c.is_template && !c.is_saved);
+  const serviceChecklists = checklists.filter(c => !c.is_template && !c.is_saved);
+  const savedChecklists = checklists.filter(c => c.is_saved && !c.is_template);
   const currentChecklist = checklists.find(c => c.id === selectedChecklist);
   const completedCount = items.filter(i => i.is_checked).length;
   const totalCount = items.length;
