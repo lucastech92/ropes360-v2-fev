@@ -28,6 +28,8 @@ export interface Checklist {
   service_tag: string | null;
   checklist_type: 'entrada' | 'saida';
   is_template: boolean;
+  is_saved: boolean;
+  saved_at: string | null;
   items?: ChecklistItem[];
 }
 
@@ -46,8 +48,9 @@ export const useChecklistData = () => {
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const { toast } = useToast();
 
-  const templates = checklists.filter(c => c.is_template);
-  const serviceChecklists = checklists.filter(c => !c.is_template);
+  const templates = checklists.filter(c => c.is_template && !c.is_saved);
+  const serviceChecklists = checklists.filter(c => !c.is_template && !c.is_saved);
+  const savedChecklists = checklists.filter(c => c.is_saved && !c.is_template);
   const currentChecklist = checklists.find(c => c.id === selectedChecklist);
   const completedCount = items.filter(i => i.is_checked).length;
   const totalCount = items.length;
@@ -368,6 +371,41 @@ export const useChecklistData = () => {
     return newChecklist;
   };
 
+  const saveChecklist = async (checklistId: string) => {
+    const { error } = await supabase
+      .from("checklists")
+      .update({ is_saved: true, saved_at: new Date().toISOString() })
+      .eq("id", checklistId);
+
+    if (error) {
+      toast({ title: "Erro", description: "Não foi possível salvar o checklist", variant: "destructive" });
+      return false;
+    }
+
+    if (selectedChecklist === checklistId) {
+      setSelectedChecklist(null);
+    }
+    await fetchChecklists();
+    toast({ title: "Checklist salvo", description: "Checklist movido para a aba Salvos" });
+    return true;
+  };
+
+  const restoreChecklist = async (checklistId: string) => {
+    const { error } = await supabase
+      .from("checklists")
+      .update({ is_saved: false, saved_at: null })
+      .eq("id", checklistId);
+
+    if (error) {
+      toast({ title: "Erro", description: "Não foi possível restaurar o checklist", variant: "destructive" });
+      return false;
+    }
+
+    await fetchChecklists();
+    toast({ title: "Checklist restaurado", description: "Checklist movido de volta para Serviços" });
+    return true;
+  };
+
   return {
     checklists,
     selectedChecklist,
@@ -376,6 +414,7 @@ export const useChecklistData = () => {
     inventoryItems,
     templates,
     serviceChecklists,
+    savedChecklists,
     currentChecklist,
     completedCount,
     totalCount,
@@ -386,6 +425,8 @@ export const useChecklistData = () => {
     createChecklist,
     updateChecklist,
     cloneTemplate,
+    saveChecklist,
+    restoreChecklist,
     fetchInventoryItems,
   };
 };

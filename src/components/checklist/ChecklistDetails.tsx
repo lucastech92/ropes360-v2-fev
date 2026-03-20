@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Copy, FileText, PackageMinus, PackagePlus } from "lucide-react";
+import { Copy, FileText, PackageMinus, PackagePlus, Archive } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Checklist, ChecklistItem } from "@/hooks/useChecklistData";
 import { ChecklistItemRow } from "./ChecklistItemRow";
@@ -26,6 +26,7 @@ interface ChecklistDetailsProps {
   onDeleteItem: (itemId: string) => void;
   onAddItem: (inventoryItemId: string, quantity: number) => Promise<boolean>;
   onCloneClick: () => void;
+  onSaveClick?: () => void;
 }
 
 export const ChecklistDetails = ({
@@ -39,6 +40,7 @@ export const ChecklistDetails = ({
   onDeleteItem,
   onAddItem,
   onCloneClick,
+  onSaveClick,
 }: ChecklistDetailsProps) => {
   return (
     <Card>
@@ -50,6 +52,12 @@ export const ChecklistDetails = ({
               <CardTitle>{checklist.name}</CardTitle>
               {checklist.is_template && (
                 <Badge variant="secondary">Template</Badge>
+              )}
+              {checklist.is_saved && (
+                <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20">
+                  <Archive className="h-3 w-3 mr-1" />
+                  Salvo
+                </Badge>
               )}
               <span className={`text-sm font-semibold px-2 py-1 rounded flex items-center gap-1 ${
                 checklist.checklist_type === 'entrada' 
@@ -82,21 +90,33 @@ export const ChecklistDetails = ({
               </div>
             )}
           </div>
-          <div className="text-right">
+          <div className="text-right space-y-2">
             <div className="text-2xl font-bold">{progress}%</div>
             <div className="text-sm text-muted-foreground">
               {completedCount}/{totalCount} completos
             </div>
-            {checklist.is_template && (
-              <Button
-                size="sm"
-                className="mt-2"
-                onClick={onCloneClick}
-              >
-                <Copy className="h-4 w-4 mr-1" />
-                Clonar
-              </Button>
-            )}
+            <div className="flex flex-col gap-1">
+              {checklist.is_template && (
+                <Button
+                  size="sm"
+                  onClick={onCloneClick}
+                >
+                  <Copy className="h-4 w-4 mr-1" />
+                  Clonar
+                </Button>
+              )}
+              {onSaveClick && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={onSaveClick}
+                  className="text-amber-600 border-amber-500/30 hover:bg-amber-500/10"
+                >
+                  <Archive className="h-4 w-4 mr-1" />
+                  Salvar
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </CardHeader>
