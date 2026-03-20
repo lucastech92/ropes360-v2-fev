@@ -21,6 +21,7 @@ import { TemplatesTab } from "@/components/checklist/TemplatesTab";
 import { SavedChecklistsTab } from "@/components/checklist/SavedChecklistsTab";
 
 const CheckList = () => {
+  const { t } = useTranslation();
   const {
     checklists,
     selectedChecklist,
