@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Archive, Search, PackagePlus, PackageMinus, RotateCcw, Eye } from "lucide-react";
+import { Archive, Search, PackagePlus, PackageMinus, RotateCcw, Eye, FileText } from "lucide-react";
 import { Checklist } from "@/hooks/useChecklistData";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -13,12 +13,14 @@ interface SavedChecklistsTabProps {
   savedChecklists: Checklist[];
   onRestore: (id: string) => void;
   onView: (id: string) => void;
+  onSaveAsTemplate?: (id: string) => void;
 }
 
 export const SavedChecklistsTab = ({
   savedChecklists,
   onRestore,
   onView,
+  onSaveAsTemplate,
 }: SavedChecklistsTabProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -91,7 +93,7 @@ export const SavedChecklistsTab = ({
               {filtered.map((checklist) => (
                 <div
                   key={checklist.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors gap-3"
                 >
                   <div className="flex-1 min-w-0 space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -112,7 +114,7 @@ export const SavedChecklistsTab = ({
                         {checklist.checklist_type === "entrada" ? "Entrada" : "Saída"}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
                       {checklist.service_tag && (
                         <span className="font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded text-xs">
                           {checklist.service_tag}
@@ -121,14 +123,14 @@ export const SavedChecklistsTab = ({
                       {checklist.description && (
                         <span className="truncate">{checklist.description}</span>
                       )}
-                      {(checklist as any).saved_at && (
+                      {checklist.saved_at && (
                         <span className="text-xs">
-                          Salvo em {format(new Date((checklist as any).saved_at), "dd/MM/yyyy", { locale: ptBR })}
+                          Salvo em {format(new Date(checklist.saved_at), "dd/MM/yyyy", { locale: ptBR })}
                         </span>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 ml-3 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
                     <Button
                       variant="outline"
                       size="sm"
@@ -137,6 +139,17 @@ export const SavedChecklistsTab = ({
                       <Eye className="h-4 w-4 mr-1" />
                       Ver
                     </Button>
+                    {onSaveAsTemplate && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onSaveAsTemplate(checklist.id)}
+                        className="text-primary border-primary/30 hover:bg-primary/10"
+                      >
+                        <FileText className="h-4 w-4 mr-1" />
+                        Salvar como Template
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"

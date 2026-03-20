@@ -42,6 +42,7 @@ const CheckList = () => {
     cloneTemplate,
     saveChecklist,
     restoreChecklist,
+    saveAsTemplate,
   } = useChecklistData();
 
   const [activeTab, setActiveTab] = useState<string>("servicos");
