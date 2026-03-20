@@ -170,26 +170,24 @@ const CheckList = () => {
         <div className="space-y-2">
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <ClipboardList className="h-8 w-8" />
-            Check List
+            {t('checklists.title')}
           </h1>
-          <p className="text-muted-foreground">
-            Checklists com controle automático de inventário - itens de entrada/saída sincronizados com o estoque
-          </p>
+          <p className="text-muted-foreground">{t('checklists.subtitle')}</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full max-w-lg grid-cols-3">
             <TabsTrigger value="servicos" className="flex items-center gap-2">
               <FolderOpen className="h-4 w-4" />
-              Serviços ({serviceChecklists.length})
+              {t('checklists.tabs.services')} ({serviceChecklists.length})
             </TabsTrigger>
             <TabsTrigger value="templates" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Templates ({templates.length})
+              {t('checklists.tabs.templates')} ({templates.length})
             </TabsTrigger>
             <TabsTrigger value="salvos" className="flex items-center gap-2">
               <Archive className="h-4 w-4" />
-              Salvos ({savedChecklists.length})
+              {t('checklists.tabs.saved')} ({savedChecklists.length})
             </TabsTrigger>
           </TabsList>
 
