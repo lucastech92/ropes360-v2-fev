@@ -230,37 +230,33 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
                     )}
                   />
 
-                  {itemType === "consumivel" && (
-                    <>
-                      <FormField
-                        control={form.control}
-                        name="unit"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Unidade</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="un, kg, m..." />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                  <FormField
+                    control={form.control}
+                    name="unit"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Unidade</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="un, kg, m..." />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                      <FormField
-                        control={form.control}
-                        name="min_quantity"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Qtd. Mínima</FormLabel>
-                            <FormControl>
-                              <Input {...field} type="number" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </>
-                  )}
+                  <FormField
+                    control={form.control}
+                    name="min_quantity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Qtd. Mínima (Alerta)</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="number" placeholder="Para alertas de estoque" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 <FormField
