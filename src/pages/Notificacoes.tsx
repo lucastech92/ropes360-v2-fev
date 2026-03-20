@@ -12,9 +12,10 @@ import {
   CheckCheck, Filter
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { getDateLocale } from "@/utils/dateLocale";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 type Notification = {
   id: string;
@@ -28,29 +29,6 @@ type Notification = {
 };
 
 const PAGE_SIZE = 20;
-
-const typeOptions = [
-  { value: "all", label: "Todos os tipos" },
-  { value: "calibration", label: "Calibração" },
-  { value: "maintenance", label: "Manutenção" },
-  { value: "inventory", label: "Inventário" },
-  { value: "document", label: "Documentos" },
-  { value: "certification", label: "Certificações" },
-  { value: "user", label: "Aprovação" },
-];
-
-const urgencyOptions = [
-  { value: "all", label: "Todas urgências" },
-  { value: "critical", label: "Crítica" },
-  { value: "warning", label: "Atenção" },
-  { value: "info", label: "Informativo" },
-];
-
-const readOptions = [
-  { value: "all", label: "Todas" },
-  { value: "unread", label: "Não lidas" },
-  { value: "read", label: "Lidas" },
-];
 
 const getNotificationIcon = (type: string) => {
   if (type.includes("calibration")) return Gauge;
@@ -68,15 +46,6 @@ const getUrgencyLevel = (notification: Notification): 'critical' | 'warning' | '
   if (type.includes('expiring') || title.includes('atenção') || title.includes('vencendo')) return 'warning';
   if (type.includes('scheduled') || type.includes('low') || type.includes('approval')) return 'info';
   return 'success';
-};
-
-const getUrgencyStyles = (urgency: string) => {
-  switch (urgency) {
-    case 'critical': return { iconClass: 'text-destructive', bgClass: 'bg-destructive/10 border-destructive/30', dotClass: 'bg-destructive', label: 'Crítica' };
-    case 'warning': return { iconClass: 'text-orange-500', bgClass: 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800/50', dotClass: 'bg-orange-500', label: 'Atenção' };
-    case 'info': return { iconClass: 'text-blue-500', bgClass: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800/50', dotClass: 'bg-blue-500', label: 'Informativo' };
-    default: return { iconClass: 'text-green-500', bgClass: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800/50', dotClass: 'bg-green-500', label: 'OK' };
-  }
 };
 
 const getUrgencyIcon = (urgency: string) => {
@@ -106,10 +75,43 @@ const Notificacoes = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const [typeFilter, setTypeFilter] = useState("all");
   const [urgencyFilter, setUrgencyFilter] = useState("all");
   const [readFilter, setReadFilter] = useState("all");
   const [page, setPage] = useState(0);
+
+  const typeOptions = [
+    { value: "all", label: t('notifications.page.typeAll') },
+    { value: "calibration", label: t('notifications.page.typeCalibration') },
+    { value: "maintenance", label: t('notifications.page.typeMaintenance') },
+    { value: "inventory", label: t('notifications.page.typeInventory') },
+    { value: "document", label: t('notifications.page.typeDocuments') },
+    { value: "certification", label: t('notifications.page.typeCertifications') },
+    { value: "user", label: t('notifications.page.typeApproval') },
+  ];
+
+  const urgencyOptions = [
+    { value: "all", label: t('notifications.page.urgencyAll') },
+    { value: "critical", label: t('notifications.page.urgencyCritical') },
+    { value: "warning", label: t('notifications.page.urgencyWarning') },
+    { value: "info", label: t('notifications.page.urgencyInfo') },
+  ];
+
+  const readOptions = [
+    { value: "all", label: t('notifications.page.readAll') },
+    { value: "unread", label: t('notifications.page.readUnread') },
+    { value: "read", label: t('notifications.page.readRead') },
+  ];
+
+  const getUrgencyStyles = (urgency: string) => {
+    switch (urgency) {
+      case 'critical': return { iconClass: 'text-destructive', bgClass: 'bg-destructive/10 border-destructive/30', dotClass: 'bg-destructive', label: t('notifications.page.urgencyCritical') };
+      case 'warning': return { iconClass: 'text-orange-500', bgClass: 'bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800/50', dotClass: 'bg-orange-500', label: t('notifications.page.urgencyWarning') };
+      case 'info': return { iconClass: 'text-blue-500', bgClass: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800/50', dotClass: 'bg-blue-500', label: t('notifications.page.urgencyInfo') };
+      default: return { iconClass: 'text-green-500', bgClass: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800/50', dotClass: 'bg-green-500', label: 'OK' };
+    }
+  };
 
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ["all-notifications"],
@@ -126,7 +128,6 @@ const Notificacoes = () => {
     },
   });
 
-  // Realtime subscription
   useEffect(() => {
     const channel = supabase
       .channel('notificacoes-page')
@@ -158,7 +159,7 @@ const Notificacoes = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["all-notifications"] });
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      toast({ title: "Todas as notificações foram marcadas como lidas" });
+      toast({ title: t('notifications.page.allMarkedRead') });
     },
   });
 
@@ -193,17 +194,19 @@ const Notificacoes = () => {
           <div>
             <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
               <Bell className="h-8 w-8" />
-              Notificações
+              {t('notifications.title')}
               {unreadCount > 0 && (
-                <Badge variant="destructive">{unreadCount} não lida{unreadCount > 1 ? 's' : ''}</Badge>
+                <Badge variant="destructive">
+                  {unreadCount} {unreadCount > 1 ? t('notifications.page.unreadPlural') : t('notifications.page.unread')}
+                </Badge>
               )}
             </h1>
-            <p className="text-muted-foreground mt-1">{filtered.length} notificação(ões) encontrada(s)</p>
+            <p className="text-muted-foreground mt-1">{filtered.length} {t('notifications.page.found')}</p>
           </div>
           {unreadCount > 0 && (
             <Button variant="outline" onClick={() => markAllAsRead.mutate()} className="gap-2">
               <CheckCheck className="h-4 w-4" />
-              Marcar todas como lidas
+              {t('notifications.page.markAllRead')}
             </Button>
           )}
         </div>
@@ -241,8 +244,8 @@ const Notificacoes = () => {
         ) : paginated.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
             <Bell className="h-16 w-16 mb-4 opacity-20" />
-            <p className="text-lg">Nenhuma notificação encontrada</p>
-            <p className="text-sm">Ajuste os filtros para ver mais resultados</p>
+            <p className="text-lg">{t('notifications.page.noNotificationsFound')}</p>
+            <p className="text-sm">{t('notifications.page.adjustFilters')}</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -278,7 +281,7 @@ const Notificacoes = () => {
                       <p className="text-sm text-muted-foreground">{notification.message}</p>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Clock className="h-3 w-3" />
-                        {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: ptBR })}
+                        {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: getDateLocale() })}
                       </div>
                     </div>
                     {!notification.is_read && (
@@ -295,13 +298,13 @@ const Notificacoes = () => {
         {totalPages > 1 && (
           <div className="flex items-center justify-center gap-2 mt-6">
             <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>
-              Anterior
+              {t('common.previous')}
             </Button>
             <span className="text-sm text-muted-foreground">
-              Página {page + 1} de {totalPages}
+              {t('common.page')} {page + 1} {t('common.of')} {totalPages}
             </span>
             <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}>
-              Próxima
+              {t('common.next')}
             </Button>
           </div>
         )}

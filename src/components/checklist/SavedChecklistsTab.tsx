@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Archive, Search, PackagePlus, PackageMinus, RotateCcw, Eye, FileText } from "lucide-react";
 import { Checklist } from "@/hooks/useChecklistData";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { getDateLocale } from "@/utils/dateLocale";
+import { useTranslation } from "react-i18next";
 
 interface SavedChecklistsTabProps {
   savedChecklists: Checklist[];
@@ -22,6 +23,7 @@ export const SavedChecklistsTab = ({
   onView,
   onSaveAsTemplate,
 }: SavedChecklistsTabProps) => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
 
@@ -46,20 +48,17 @@ export const SavedChecklistsTab = ({
           <div className="flex items-center gap-2">
             <Archive className="h-5 w-5 text-muted-foreground" />
             <div>
-              <CardTitle>Checklists Salvos</CardTitle>
-              <CardDescription>
-                Checklists finalizados e arquivados para consulta
-              </CardDescription>
+              <CardTitle>{t('checklists.savedTitle')}</CardTitle>
+              <CardDescription>{t('checklists.savedDescription')}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar por nome ou código JBR..."
+                placeholder={t('checklists.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9"
@@ -67,25 +66,24 @@ export const SavedChecklistsTab = ({
             </div>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Tipo" />
+                <SelectValue placeholder={t('checklists.checklistType')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos os tipos</SelectItem>
-                <SelectItem value="entrada">Entrada</SelectItem>
-                <SelectItem value="saida">Saída</SelectItem>
+                <SelectItem value="all">{t('common.allTypes')}</SelectItem>
+                <SelectItem value="entrada">{t('checklists.typeOptions.entrada')}</SelectItem>
+                <SelectItem value="saida">{t('checklists.typeOptions.saida')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {/* Results */}
           {filtered.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Archive className="h-12 w-12 mx-auto mb-3 opacity-40" />
-              <p className="font-medium">Nenhum checklist salvo</p>
+              <p className="font-medium">{t('checklists.noSavedChecklists')}</p>
               <p className="text-sm mt-1">
                 {savedChecklists.length === 0
-                  ? "Salve checklists concluídos para consultá-los aqui"
-                  : "Nenhum resultado encontrado para os filtros aplicados"}
+                  ? t('checklists.saveChecklistsHint')
+                  : t('checklists.noFilterResults')}
               </p>
             </div>
           ) : (
@@ -111,7 +109,7 @@ export const SavedChecklistsTab = ({
                         ) : (
                           <PackageMinus className="h-3 w-3 mr-1" />
                         )}
-                        {checklist.checklist_type === "entrada" ? "Entrada" : "Saída"}
+                        {checklist.checklist_type === "entrada" ? t('checklists.typeOptions.entrada') : t('checklists.typeOptions.saida')}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
@@ -125,19 +123,15 @@ export const SavedChecklistsTab = ({
                       )}
                       {checklist.saved_at && (
                         <span className="text-xs">
-                          Salvo em {format(new Date(checklist.saved_at), "dd/MM/yyyy", { locale: ptBR })}
+                          {t('checklists.savedAt')} {format(new Date(checklist.saved_at), "dd/MM/yyyy", { locale: getDateLocale() })}
                         </span>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onView(checklist.id)}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => onView(checklist.id)}>
                       <Eye className="h-4 w-4 mr-1" />
-                      Ver
+                      {t('common.view')}
                     </Button>
                     {onSaveAsTemplate && (
                       <Button
@@ -147,16 +141,12 @@ export const SavedChecklistsTab = ({
                         className="text-primary border-primary/30 hover:bg-primary/10"
                       >
                         <FileText className="h-4 w-4 mr-1" />
-                        Salvar como Template
+                        {t('common.saveAsTemplate')}
                       </Button>
                     )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onRestore(checklist.id)}
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => onRestore(checklist.id)}>
                       <RotateCcw className="h-4 w-4 mr-1" />
-                      Restaurar
+                      {t('common.restore')}
                     </Button>
                   </div>
                 </div>

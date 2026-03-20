@@ -22,7 +22,6 @@ const Index = () => {
   const [selectedFolderName, setSelectedFolderName] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // Refs for anchor navigation
   const knowledgeRef = useRef<HTMLElement>(null);
   const operationsRef = useRef<HTMLElement>(null);
   const managementRef = useRef<HTMLElement>(null);
@@ -34,24 +33,24 @@ const Index = () => {
 
   const modulesByCategory = {
     knowledge: [
-      { title: t('modules.procedimentosOficiais'), description: "Acesse todos os procedimentos e normas oficiais da empresa, incluindo ISO 4309 e diretrizes de segurança.", icon: FileCheck, href: "/procedimentos-oficiais", color: "primary" },
-      { title: t('modules.manuaisBridon'), description: "Instruções detalhadas para instalação, soquetagem, remoção e manutenção de cabos de aço.", icon: Wrench, href: "/procedimentos-tecnicos", color: "primary" },
-      { title: t('modules.treinamento'), description: "Materiais de treinamento, glossário técnico e vídeos educativos para desenvolvimento contínuo.", icon: GraduationCap, href: "/treinamento", color: "primary" },
-      { title: "Resolução de Problemas", description: "Casos reais de falhas, análises de causa raiz e soluções aplicadas em campo.", icon: AlertTriangle, href: "/resolucao-problemas", color: "primary" },
-      { title: t('modules.duvidasFrequentes'), description: "Treinamentos, Drake, etc...", icon: HelpCircle, href: "/duvidas-frequentes", color: "primary" },
+      { title: t('modules.procedimentosOficiais'), description: t('modules.descriptions.officialProcedures'), icon: FileCheck, href: "/procedimentos-oficiais", color: "primary" },
+      { title: t('modules.manuaisBridon'), description: t('modules.descriptions.technicalProcedures'), icon: Wrench, href: "/procedimentos-tecnicos", color: "primary" },
+      { title: t('modules.treinamento'), description: t('modules.descriptions.training'), icon: GraduationCap, href: "/treinamento", color: "primary" },
+      { title: t('modules.troubleshooting'), description: t('modules.descriptions.troubleshooting'), icon: AlertTriangle, href: "/resolucao-problemas", color: "primary" },
+      { title: t('modules.duvidasFrequentes'), description: t('modules.descriptions.faq'), icon: HelpCircle, href: "/duvidas-frequentes", color: "primary" },
     ],
     operations: [
-      { title: t('modules.servicos'), description: "Gerencie todos os serviços registrados com código JBR, cliente, escopo e equipamentos.", icon: ClipboardList, href: "/servicos", color: "accent" },
-      { title: t('modules.checkLists'), description: "Checklists preenchíveis para montagem de containers e verificação de ferramentas (JBR).", icon: ClipboardList, href: "/checklist", color: "accent" },
-      { title: t('modules.modelosRelatorios'), description: "Upload e download de modelos de relatórios para inspeções e procedimentos.", icon: FileText, href: "/modelos-relatorios", color: "accent" },
-      { title: t('modules.inventario'), description: "Gestão unificada de consumíveis, equipamentos, manutenções e calibrações.", icon: Package, href: "/inventario", color: "accent" },
+      { title: t('modules.servicos'), description: t('modules.descriptions.services'), icon: ClipboardList, href: "/servicos", color: "accent" },
+      { title: t('modules.checkLists'), description: t('modules.descriptions.checklists'), icon: ClipboardList, href: "/checklist", color: "accent" },
+      { title: t('modules.modelosRelatorios'), description: t('modules.descriptions.reportTemplates'), icon: FileText, href: "/modelos-relatorios", color: "accent" },
+      { title: t('modules.inventario'), description: t('modules.descriptions.inventory'), icon: Package, href: "/inventario", color: "accent" },
     ],
     management: [
-      { title: "Calendário Integrado", description: "Visualização unificada de serviços, manutenções, calibrações e folha de ponto.", icon: CalendarDays, href: "/calendario", color: "accent" },
-      { title: t('modules.certificacoes'), description: "Gestão de certificados dos técnicos com alertas de vencimento e matriz de competências.", icon: Award, href: "/certificacoes", color: "accent" },
-      { title: t('modules.historico'), description: "Registros de inspeções anteriores, rastreabilidade e acompanhamento de manutenções.", icon: History, href: "/historico", color: "primary" },
-      { title: t('modules.folhaPonto'), description: "Controle de ponto dos colaboradores com calendário interativo e tipos de check-in.", icon: Calendar, href: "/folha-ponto", color: "primary" },
-      { title: "Gerenciar Usuários", description: "Aprovar novos usuários e gerenciar níveis de acesso ao sistema (Admin).", icon: Shield, href: "/gerenciar-usuarios", color: "primary" },
+      { title: t('modules.calendar'), description: t('modules.descriptions.calendar'), icon: CalendarDays, href: "/calendario", color: "accent" },
+      { title: t('modules.certificacoes'), description: t('modules.descriptions.certifications'), icon: Award, href: "/certificacoes", color: "accent" },
+      { title: t('modules.historico'), description: t('modules.descriptions.history'), icon: History, href: "/historico", color: "primary" },
+      { title: t('modules.folhaPonto'), description: t('modules.descriptions.timesheet'), icon: Calendar, href: "/folha-ponto", color: "primary" },
+      { title: t('modules.gerenciarUsuarios'), description: t('modules.descriptions.manageUsers'), icon: Shield, href: "/gerenciar-usuarios", color: "primary" },
     ],
   };
 
@@ -59,7 +58,7 @@ const Index = () => {
     { label: t('modules.knowledge'), icon: BookOpen, ref: knowledgeRef, color: "bg-primary/10 text-primary" },
     { label: t('modules.operations'), icon: Briefcase, ref: operationsRef, color: "bg-accent/10 text-accent-foreground" },
     { label: t('modules.management'), icon: BarChart3, ref: managementRef, color: "bg-primary/10 text-primary" },
-    { label: "Minhas Pastas", icon: FolderOpen, ref: foldersRef, color: "bg-primary/10 text-primary" },
+    { label: t('home.myFolders'), icon: FolderOpen, ref: foldersRef, color: "bg-primary/10 text-primary" },
   ];
 
   const handleFolderSelect = (folderId: string | null, folderName: string | null) => {
@@ -84,7 +83,7 @@ const Index = () => {
             <div className="mx-auto max-w-4xl text-center space-y-5">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-2 animate-fade-in">
                 <Sparkles className="h-4 w-4" />
-                <span>Centro de Inteligência Técnica</span>
+                <span>{t('home.heroBadge')}</span>
               </div>
 
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight animate-fade-in">
@@ -94,8 +93,8 @@ const Index = () => {
               </h1>
 
               <p className="mx-auto max-w-2xl text-base md:text-lg text-muted-foreground animate-fade-in">
-                Portal completo de conhecimento técnico para inspetores de campo e centralização para a equipe de suporte.
-                {" "}<span className="text-foreground font-medium">Documentação, procedimentos, certificados, inventário e projetos</span> em um só lugar.
+                {t('home.heroDescription')}
+                {" "}<span className="text-foreground font-medium">{t('home.heroHighlight')}</span> {t('home.heroHighlightSuffix')}
               </p>
 
               <div className="flex justify-center pt-2 animate-fade-in">
@@ -106,7 +105,7 @@ const Index = () => {
                 <Button variant="outline" size="sm" asChild className="gap-2">
                   <Link to="/install">
                     <Download className="h-4 w-4" />
-                    Instalar App no Celular
+                    {t('home.installAppButton')}
                   </Link>
                 </Button>
               </div>
@@ -149,7 +148,7 @@ const Index = () => {
               </div>
               <div>
                 <h2 className="text-xl md:text-2xl font-bold">{t('modules.knowledge')}</h2>
-                <p className="text-sm text-muted-foreground">Base de conhecimento e documentação técnica</p>
+                <p className="text-sm text-muted-foreground">{t('modules.descriptions.knowledgeSubtitle')}</p>
               </div>
             </div>
             <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -167,7 +166,7 @@ const Index = () => {
               </div>
               <div>
                 <h2 className="text-xl md:text-2xl font-bold">{t('modules.operations')}</h2>
-                <p className="text-sm text-muted-foreground">Gestão de serviços e operações em campo</p>
+                <p className="text-sm text-muted-foreground">{t('modules.descriptions.operationsSubtitle')}</p>
               </div>
             </div>
             <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -185,7 +184,7 @@ const Index = () => {
               </div>
               <div>
                 <h2 className="text-xl md:text-2xl font-bold">{t('modules.management')}</h2>
-                <p className="text-sm text-muted-foreground">Controle administrativo e gestão de recursos</p>
+                <p className="text-sm text-muted-foreground">{t('modules.descriptions.managementSubtitle')}</p>
               </div>
             </div>
             <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -204,8 +203,8 @@ const Index = () => {
                     <FolderOpen className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg md:text-xl">Minhas Pastas</CardTitle>
-                    <CardDescription>Crie e gerencie suas próprias pastas e documentos</CardDescription>
+                    <CardTitle className="text-lg md:text-xl">{t('home.myFolders')}</CardTitle>
+                    <CardDescription>{t('home.myFoldersDescription')}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -223,16 +222,16 @@ const Index = () => {
                         <FolderOpen className="h-5 w-5 text-primary" />
                         {selectedFolderName}
                       </CardTitle>
-                      <CardDescription>Gerencie documentos e subpastas</CardDescription>
+                      <CardDescription>{t('home.manageDocumentsSubfolders')}</CardDescription>
                     </div>
-                    <Badge variant="secondary" className="hidden sm:flex">Pasta selecionada</Badge>
+                    <Badge variant="secondary" className="hidden sm:flex">{t('home.selectedFolder')}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <Tabs defaultValue="documents">
                     <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="documents">Documentos</TabsTrigger>
-                      <TabsTrigger value="upload">Upload</TabsTrigger>
+                      <TabsTrigger value="documents">{t('home.documentsTab')}</TabsTrigger>
+                      <TabsTrigger value="upload">{t('home.uploadTab')}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="documents" className="mt-6">
                       <DocumentListWithTags folderId={selectedFolderId} category="home" refreshTrigger={refreshTrigger} />
@@ -251,11 +250,11 @@ const Index = () => {
             <div className="absolute inset-0 bg-gradient-mesh opacity-50" />
             <div className="relative flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
               <div className="space-y-1">
-                <h3 className="text-lg font-semibold">Precisa de ajuda?</h3>
-                <p className="text-sm text-muted-foreground">Entre em contato com a equipe técnica ou consulte nossa documentação</p>
+                <h3 className="text-lg font-semibold">{t('home.needHelp')}</h3>
+                <p className="text-sm text-muted-foreground">{t('home.needHelpDescription')}</p>
               </div>
               <Link to="/duvidas-frequentes" className="group inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-all hover:gap-3">
-                Dúvidas Frequentes
+                {t('home.faqLink')}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
