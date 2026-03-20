@@ -225,6 +225,10 @@ const CheckList = () => {
               savedChecklists={savedChecklists}
               onRestore={restoreChecklist}
               onView={handleViewSaved}
+              onSaveAsTemplate={async (id) => {
+                const result = await saveAsTemplate(id);
+                if (result) setActiveTab("templates");
+              }}
             />
           </TabsContent>
         </Tabs>
