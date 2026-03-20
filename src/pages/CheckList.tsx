@@ -127,7 +127,7 @@ const CheckList = () => {
       serviceTag: formServiceTag,
       type: formType,
       isTemplate: formIsTemplate,
-    });
+    }, selectedServiceId);
 
     if (success) {
       setIsEditDialogOpen(false);
