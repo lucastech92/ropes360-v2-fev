@@ -42,6 +42,7 @@ const CheckList = () => {
     cloneTemplate,
     saveChecklist,
     restoreChecklist,
+    saveAsTemplate,
   } = useChecklistData();
 
   const [activeTab, setActiveTab] = useState<string>("servicos");
@@ -225,6 +226,10 @@ const CheckList = () => {
               savedChecklists={savedChecklists}
               onRestore={restoreChecklist}
               onView={handleViewSaved}
+              onSaveAsTemplate={async (id) => {
+                const result = await saveAsTemplate(id);
+                if (result) setActiveTab("templates");
+              }}
             />
           </TabsContent>
         </Tabs>

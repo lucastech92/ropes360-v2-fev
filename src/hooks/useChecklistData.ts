@@ -406,6 +406,57 @@ export const useChecklistData = () => {
     return true;
   };
 
+  const saveAsTemplate = async (checklistId: string) => {
+    const checklist = checklists.find(c => c.id === checklistId);
+    if (!checklist) return null;
+
+    const { data: userData } = await supabase.auth.getUser();
+
+    const { data: newTemplate, error: templateError } = await supabase
+      .from("checklists")
+      .insert({
+        name: checklist.name + " (Template)",
+        description: checklist.description,
+        service_tag: null,
+        checklist_type: checklist.checklist_type,
+        is_template: true,
+        is_saved: false,
+        created_by: userData?.user?.id,
+      })
+      .select()
+      .single();
+
+    if (templateError || !newTemplate) {
+      toast({ title: "Erro", description: "Não foi possível criar o template", variant: "destructive" });
+      return null;
+    }
+
+    // Copy items
+    const { data: sourceItems } = await supabase
+      .from("checklist_items")
+      .select("*")
+      .eq("checklist_id", checklistId)
+      .order("order_index");
+
+    if (sourceItems && sourceItems.length > 0) {
+      await supabase.from("checklist_items").insert(
+        sourceItems.map(item => ({
+          checklist_id: newTemplate.id,
+          item_text: item.item_text,
+          order_index: item.order_index,
+          target_quantity: item.target_quantity,
+          current_quantity: 0,
+          is_checked: false,
+          inventory_item_id: item.inventory_item_id,
+        }))
+      );
+    }
+
+    await fetchChecklists();
+    toast({ title: "Template criado", description: `Template "${newTemplate.name}" criado com ${sourceItems?.length || 0} itens` });
+    return newTemplate;
+  };
+
   return {
     checklists,
     selectedChecklist,
@@ -427,6 +478,7 @@ export const useChecklistData = () => {
     cloneTemplate,
     saveChecklist,
     restoreChecklist,
+    saveAsTemplate,
     fetchInventoryItems,
   };
 };
