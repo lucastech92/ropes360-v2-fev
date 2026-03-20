@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useUnifiedInventory, UnifiedInventoryItem, EquipmentCondition } from "@/hooks/useUnifiedInventory";
@@ -28,6 +29,7 @@ import EquipmentCheckout from "@/components/equipment/EquipmentCheckout";
 import EquipmentCheckin from "@/components/equipment/EquipmentCheckin";
 
 const Inventario = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') || 'items';
   
@@ -176,10 +178,10 @@ const Inventario = () => {
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <Package className="h-8 w-8" />
-              Inventário / Almoxarifado
+              {t('inventory.title')}
             </h1>
             <p className="text-muted-foreground">
-              Gestão unificada de consumíveis, equipamentos e manutenções
+              {t('inventory.subtitle')}
             </p>
           </div>
 
@@ -189,34 +191,34 @@ const Inventario = () => {
             <TabsList className="grid w-full max-w-4xl grid-cols-6">
               <TabsTrigger value="items" className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
-                Itens
+                {t('inventory.tabs.items')}
               </TabsTrigger>
               <TabsTrigger value="calibration" className="flex items-center gap-2">
                 <Gauge className="h-4 w-4" />
-                Calibrações
+                {t('inventory.tabs.calibrations')}
               </TabsTrigger>
               <TabsTrigger value="maintenance" className="flex items-center gap-2">
                 <Wrench className="h-4 w-4" />
-                Manutenções
+                {t('inventory.tabs.maintenance')}
               </TabsTrigger>
               <TabsTrigger value="utilization" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
-                Utilização
+                {t('inventory.tabs.utilization')}
               </TabsTrigger>
               <TabsTrigger value="history" className="flex items-center gap-2">
                 <History className="h-4 w-4" />
-                Histórico
+                {t('inventory.tabs.history')}
               </TabsTrigger>
               <TabsTrigger value="trends" className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4" />
-                IA
+                {t('inventory.tabs.ai')}
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="items" className="mt-6">
               {loading ? (
                 <div className="text-center py-12 text-muted-foreground">
-                  Carregando itens...
+                  {t('inventory.loadingItems')}
                 </div>
               ) : (
                 <InventoryItemList
@@ -351,15 +353,15 @@ const Inventario = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogTitle>{t('common.confirmDeletion')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.
+              {t('common.deleteConfirmMessage')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
-              Excluir
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -6,6 +6,34 @@
     "documents": "Main",
     "logout": "Logout"
   },
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "officialProcedures": "Official Procedures",
+    "technicalProcedures": "Technical Procedures",
+    "training": "Training",
+    "iso4309": "ISO 4309",
+    "reportTemplates": "Report Templates",
+    "wireRopeInspection": "Wire Rope Inspection",
+    "savedReports": "Saved Reports",
+    "troubleshooting": "Troubleshooting",
+    "faq": "FAQ",
+    "history": "History",
+    "checklist": "Checklist",
+    "inventory": "Inventory",
+    "manageUsers": "Manage Users",
+    "services": "Services",
+    "newService": "New Service",
+    "editService": "Edit Service",
+    "aiAssistant": "AI Assistant",
+    "timesheet": "Timesheet",
+    "myDownloads": "My Downloads",
+    "calendar": "Calendar",
+    "installApp": "Install App",
+    "certifications": "Certifications",
+    "main": "Main",
+    "myFolders": "My Folders"
+  },
   "dashboard": {
     "title": "Control Panel",
     "overview": "Overview of all operations and system metrics",
@@ -52,7 +80,44 @@
     "historico": "History",
     "gerenciarUsuarios": "Manage Users",
     "folhaPonto": "Timesheet",
-    "certificacoes": "Certifications"
+    "certificacoes": "Certifications",
+    "troubleshooting": "Troubleshooting",
+    "calendar": "Integrated Calendar",
+    "descriptions": {
+      "officialProcedures": "Access all official company procedures and standards, including ISO 4309 and safety guidelines.",
+      "technicalProcedures": "Detailed instructions for installation, socketing, removal and maintenance of wire ropes.",
+      "training": "Training materials, technical glossary and educational videos for continuous development.",
+      "troubleshooting": "Real failure cases, root cause analyses and solutions applied in the field.",
+      "faq": "Training, Drake, etc...",
+      "services": "Manage all registered services with JBR code, client, scope and equipment.",
+      "checklists": "Fillable checklists for container assembly and tool verification (JBR).",
+      "reportTemplates": "Upload and download report templates for inspections and procedures.",
+      "inventory": "Unified management of consumables, equipment, maintenance and calibrations.",
+      "calendar": "Unified view of services, maintenance, calibrations and timesheet.",
+      "certifications": "Technician certificate management with expiry alerts and competency matrix.",
+      "history": "Previous inspection records, traceability and maintenance tracking.",
+      "timesheet": "Employee time tracking with interactive calendar and check-in types.",
+      "manageUsers": "Approve new users and manage system access levels (Admin).",
+      "knowledgeSubtitle": "Knowledge base and technical documentation",
+      "operationsSubtitle": "Service management and field operations",
+      "managementSubtitle": "Administrative control and resource management"
+    }
+  },
+  "home": {
+    "heroBadge": "Technical Intelligence Center",
+    "heroDescription": "Complete technical knowledge portal for field inspectors and centralization for the support team.",
+    "heroHighlight": "Documentation, procedures, certificates, inventory and projects",
+    "heroHighlightSuffix": "in one place.",
+    "installAppButton": "Install App on Phone",
+    "myFolders": "My Folders",
+    "myFoldersDescription": "Create and manage your own folders and documents",
+    "manageDocumentsSubfolders": "Manage documents and subfolders",
+    "selectedFolder": "Selected folder",
+    "documentsTab": "Documents",
+    "uploadTab": "Upload",
+    "needHelp": "Need help?",
+    "needHelpDescription": "Contact the technical team or consult our documentation",
+    "faqLink": "FAQ"
   },
   "certifications": {
     "title": "Certifications & Competencies",
@@ -117,7 +182,17 @@
     "submit": "Submit",
     "clear": "Clear",
     "update": "Update",
-    "actions": "Actions"
+    "actions": "Actions",
+    "view": "View",
+    "restore": "Restore",
+    "saveAsTemplate": "Save as Template",
+    "allTypes": "All types",
+    "page": "Page",
+    "of": "of",
+    "noResults": "No results found",
+    "confirmDeletion": "Confirm Deletion",
+    "deleteConfirmMessage": "Are you sure you want to delete this item? This action cannot be undone.",
+    "theme": "Theme"
   },
   "services": {
     "title": "Services",
@@ -155,6 +230,7 @@
   },
   "inventory": {
     "title": "Inventory/Warehouse",
+    "subtitle": "Unified management of consumables, equipment and maintenance",
     "addItem": "Add Item",
     "itemName": "Item Name",
     "category": "Category",
@@ -164,7 +240,16 @@
     "location": "Location",
     "notes": "Notes",
     "lastUpdated": "Last Updated",
-    "lowStock": "Low Stock"
+    "lowStock": "Low Stock",
+    "tabs": {
+      "items": "Items",
+      "calibrations": "Calibrations",
+      "maintenance": "Maintenance",
+      "utilization": "Utilization",
+      "history": "History",
+      "ai": "AI"
+    },
+    "loadingItems": "Loading items..."
   },
   "maintenance": {
     "title": "Maintenance Control",
@@ -197,6 +282,7 @@
   },
   "checklists": {
     "title": "Checklists",
+    "subtitle": "Checklists with automatic inventory control - incoming/outgoing items synced with stock",
     "newChecklist": "New Checklist",
     "checklistName": "Checklist Name",
     "checklistType": "Checklist Type",
@@ -208,7 +294,21 @@
     "typeOptions": {
       "entrada": "Incoming",
       "saida": "Outgoing"
-    }
+    },
+    "tabs": {
+      "services": "Services",
+      "templates": "Templates",
+      "saved": "Saved"
+    },
+    "savedTitle": "Saved Checklists",
+    "savedDescription": "Completed and archived checklists for reference",
+    "searchPlaceholder": "Search by name or JBR code...",
+    "noSavedChecklists": "No saved checklists",
+    "saveChecklistsHint": "Save completed checklists to view them here",
+    "noFilterResults": "No results found for the applied filters",
+    "savedAt": "Saved on",
+    "deleteItemTitle": "Confirm deletion",
+    "deleteItemDescription": "Are you sure you want to remove this item from the checklist? Stock will be updated automatically and this action cannot be undone."
   },
   "documents": {
     "title": "Documents",
@@ -258,7 +358,20 @@
     "iso4309": "ISO 4309",
     "internalData": "Internal Data",
     "accessProfiles": "Access Profiles",
-    "noMessages": "No messages yet. Start by asking a question!"
+    "noMessages": "No messages yet. Start by asking a question!",
+    "sendImage": "Send image",
+    "analyzing": "Analyzing image...",
+    "imageAnalyzed": "Image analyzed successfully",
+    "imageError": "Error analyzing image",
+    "addComment": "Add a comment (optional)...",
+    "typeOrSendImage": "Type your question, send an image or report...",
+    "uploadReport": "Send report",
+    "analyzingReport": "Analyzing report...",
+    "reportAnalyzed": "Report analyzed successfully",
+    "reportError": "Error analyzing report",
+    "addContext": "Add context about the report (optional)...",
+    "unsupportedFormat": "Unsupported format",
+    "supportedFormats": "Please send a PDF, DOCX or XLSX file"
   },
   "history": {
     "title": "History",
@@ -303,7 +416,39 @@
     "benefit3": "Low stock items",
     "later": "Later",
     "enable": "Enable",
-    "enabling": "Enabling..."
+    "enabling": "Enabling...",
+    "page": {
+      "unread": "unread",
+      "unreadPlural": "unread",
+      "found": "notification(s) found",
+      "markAllRead": "Mark all as read",
+      "allMarkedRead": "All notifications marked as read",
+      "noNotificationsFound": "No notifications found",
+      "adjustFilters": "Adjust filters to see more results",
+      "typeAll": "All types",
+      "typeCalibration": "Calibration",
+      "typeMaintenance": "Maintenance",
+      "typeInventory": "Inventory",
+      "typeDocuments": "Documents",
+      "typeCertifications": "Certifications",
+      "typeApproval": "Approval",
+      "urgencyAll": "All urgencies",
+      "urgencyCritical": "Critical",
+      "urgencyWarning": "Warning",
+      "urgencyInfo": "Informational",
+      "readAll": "All",
+      "readUnread": "Unread",
+      "readRead": "Read"
+    }
+  },
+  "alerts": {
+    "activeAlerts": "Active Alerts",
+    "viewAll": "View all",
+    "calibrations": "Calibrations",
+    "maintenances": "Maintenance",
+    "documents": "Documents",
+    "certifications": "Certifications",
+    "stock": "Stock"
   },
   "pwa": {
     "offline": "Offline",

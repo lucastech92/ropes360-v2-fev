@@ -12,8 +12,8 @@ import {
   GraduationCap,
   HelpCircle,
   AlertTriangle,
-    CloudOff,
-    Download,
+  CloudOff,
+  Download,
   Gamepad2,
   Sparkles,
   Menu
@@ -44,14 +44,14 @@ export const MobileNav = () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
       toast({
-        title: "Erro ao sair",
+        title: t('common.error'),
         description: error.message,
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Logout realizado",
-        description: "Até logo!",
+        title: "Logout",
+        description: "OK",
       });
       setOpen(false);
     }
@@ -59,13 +59,13 @@ export const MobileNav = () => {
 
   const navItems: { section: string; items: NavItem[] }[] = [
     {
-      section: "Principal",
+      section: t('nav.main'),
       items: [
-        { label: "Home", href: "/", icon: LayoutDashboard },
+        { label: t('nav.home'), href: "/", icon: LayoutDashboard },
         { label: t('header.dashboard'), href: "/dashboard", icon: LayoutDashboard },
-        { label: "Assistente IA", href: "/assistente-tecnico", icon: Sparkles },
-        { label: "Meus Downloads", href: "/meus-downloads", icon: CloudOff },
-        { label: "Instalar App", href: "/install", icon: Download },
+        { label: t('nav.aiAssistant'), href: "/assistente-tecnico", icon: Sparkles },
+        { label: t('nav.myDownloads'), href: "/meus-downloads", icon: CloudOff },
+        { label: t('nav.installApp'), href: "/install", icon: Download },
       ]
     },
     {
@@ -74,8 +74,8 @@ export const MobileNav = () => {
         { label: t('modules.procedimentosOficiais'), href: "/procedimentos-oficiais", icon: FileText },
         { label: t('modules.manuaisBridon'), href: "/procedimentos-tecnicos", icon: Wrench },
         { label: t('modules.treinamento'), href: "/treinamento", icon: GraduationCap },
-        { label: "Treinamento ISO 4309", href: "/treinamento-iso4309", icon: Gamepad2 },
-        { label: "Resolução de Problemas", href: "/resolucao-problemas", icon: AlertTriangle },
+        { label: t('nav.iso4309'), href: "/treinamento-iso4309", icon: Gamepad2 },
+        { label: t('modules.troubleshooting'), href: "/resolucao-problemas", icon: AlertTriangle },
         { label: t('modules.duvidasFrequentes'), href: "/duvidas-frequentes", icon: HelpCircle },
       ]
     },
@@ -93,8 +93,8 @@ export const MobileNav = () => {
       items: [
         { label: t('modules.historico'), href: "/historico", icon: History },
         { label: t('modules.folhaPonto'), href: "/folha-ponto", icon: Calendar },
-        { label: "Calendário", href: "/calendario", icon: Calendar },
-        { label: "Gerenciar Usuários", href: "/gerenciar-usuarios", icon: Shield },
+        { label: t('nav.calendar'), href: "/calendario", icon: Calendar },
+        { label: t('modules.gerenciarUsuarios'), href: "/gerenciar-usuarios", icon: Shield },
       ]
     },
   ];
@@ -115,7 +115,7 @@ export const MobileNav = () => {
             </div>
             <div>
               <span className="font-bold block">Ropes 360</span>
-              <span className="text-xs text-muted-foreground font-normal">Centro de Inteligência</span>
+              <span className="text-xs text-muted-foreground font-normal">{t('header.subtitle')}</span>
             </div>
           </SheetTitle>
         </SheetHeader>
@@ -155,9 +155,8 @@ export const MobileNav = () => {
         </ScrollArea>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-background/95 backdrop-blur space-y-3">
-          {/* Theme Toggle */}
           <div className="flex items-center justify-between px-1">
-            <span className="text-sm text-muted-foreground">Tema</span>
+            <span className="text-sm text-muted-foreground">{t('common.theme')}</span>
             <ThemeToggle variant="full" />
           </div>
           

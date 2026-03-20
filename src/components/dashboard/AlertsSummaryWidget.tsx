@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Bell, Gauge, Wrench, FileText, Package, Award, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 type AlertCount = {
   calibration: number;
@@ -15,6 +16,8 @@ type AlertCount = {
 };
 
 export const AlertsSummaryWidget = () => {
+  const { t } = useTranslation();
+
   const { data: alerts } = useQuery({
     queryKey: ["alerts-summary"],
     queryFn: async () => {
@@ -45,11 +48,11 @@ export const AlertsSummaryWidget = () => {
   if (!alerts || alerts.total === 0) return null;
 
   const items = [
-    { icon: Gauge, label: "Calibrações", count: alerts.calibration, color: "text-orange-500" },
-    { icon: Wrench, label: "Manutenções", count: alerts.maintenance, color: "text-blue-500" },
-    { icon: FileText, label: "Documentos", count: alerts.documents, color: "text-purple-500" },
-    { icon: Award, label: "Certificações", count: alerts.certifications, color: "text-green-500" },
-    { icon: Package, label: "Estoque", count: alerts.inventory, color: "text-red-500" },
+    { icon: Gauge, label: t('alerts.calibrations'), count: alerts.calibration, color: "text-orange-500" },
+    { icon: Wrench, label: t('alerts.maintenances'), count: alerts.maintenance, color: "text-blue-500" },
+    { icon: FileText, label: t('alerts.documents'), count: alerts.documents, color: "text-purple-500" },
+    { icon: Award, label: t('alerts.certifications'), count: alerts.certifications, color: "text-green-500" },
+    { icon: Package, label: t('alerts.stock'), count: alerts.inventory, color: "text-red-500" },
   ].filter(i => i.count > 0);
 
   return (
@@ -58,11 +61,11 @@ export const AlertsSummaryWidget = () => {
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <Bell className="h-5 w-5 text-destructive" />
-            Alertas Ativos
+            {t('alerts.activeAlerts')}
             <Badge variant="destructive">{alerts.total}</Badge>
           </CardTitle>
           <Link to="/notificacoes" className="text-sm text-primary flex items-center gap-1 hover:underline">
-            Ver todas <ArrowRight className="h-3.5 w-3.5" />
+            {t('alerts.viewAll')} <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
       </CardHeader>

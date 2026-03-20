@@ -19,6 +19,8 @@ import {
   Clock, 
   Download,
   LayoutDashboard,
+  Award,
+  CalendarDays,
   type LucideIcon
 } from "lucide-react";
 import {
@@ -29,57 +31,60 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-
-// Route configuration with labels and icons
-const routeConfig: Record<string, { label: string; icon: LucideIcon }> = {
-  "/": { label: "Início", icon: Home },
-  "/dashboard": { label: "Dashboard", icon: LayoutDashboard },
-  "/procedimentos-oficiais": { label: "Procedimentos Oficiais", icon: FileText },
-  "/procedimentos-tecnicos": { label: "Procedimentos Técnicos", icon: BookOpen },
-  "/treinamento": { label: "Treinamento", icon: GraduationCap },
-  "/treinamento-iso4309": { label: "ISO 4309", icon: GraduationCap },
-  "/modelos-relatorios": { label: "Modelos de Relatórios", icon: FileCheck },
-  "/wire-rope-inspection": { label: "Inspeção de Cabos", icon: FileCheck },
-  "/saved-reports": { label: "Relatórios Salvos", icon: FileCheck },
-  "/resolucao-problemas": { label: "Resolução de Problemas", icon: Wrench },
-  "/duvidas-frequentes": { label: "Dúvidas Frequentes", icon: HelpCircle },
-  "/historico": { label: "Histórico", icon: History },
-  "/checklist": { label: "Checklist", icon: ClipboardCheck },
-  "/inventario": { label: "Inventário", icon: Package },
-  "/gerenciar-usuarios": { label: "Gerenciar Usuários", icon: Users },
-  "/servicos": { label: "Serviços", icon: Briefcase },
-  "/novo-servico": { label: "Novo Serviço", icon: Plus },
-  "/editar-servico": { label: "Editar Serviço", icon: Edit },
-  "/assistente-tecnico": { label: "Assistente IA", icon: Sparkles },
-  "/folha-ponto": { label: "Folha de Ponto", icon: Clock },
-  "/meus-downloads": { label: "Meus Downloads", icon: Download },
-  "/calendario": { label: "Calendário", icon: Clock },
-};
-
-// Route hierarchy for parent paths
-const routeParents: Record<string, string> = {
-  "/treinamento-iso4309": "/treinamento",
-  "/wire-rope-inspection": "/modelos-relatorios",
-  "/saved-reports": "/modelos-relatorios",
-  "/novo-servico": "/servicos",
-  "/editar-servico": "/servicos",
-};
+import { useTranslation } from "react-i18next";
 
 export const NavigationBreadcrumb = () => {
   const location = useLocation();
   const currentPath = location.pathname;
+  const { t } = useTranslation();
 
   // Don't show breadcrumbs on home page or auth pages
   if (currentPath === "/" || currentPath === "/auth" || currentPath === "/install") {
     return null;
   }
 
+  // Route configuration with labels and icons
+  const routeConfig: Record<string, { label: string; icon: LucideIcon }> = {
+    "/": { label: t('nav.home'), icon: Home },
+    "/dashboard": { label: t('nav.dashboard'), icon: LayoutDashboard },
+    "/procedimentos-oficiais": { label: t('nav.officialProcedures'), icon: FileText },
+    "/procedimentos-tecnicos": { label: t('nav.technicalProcedures'), icon: BookOpen },
+    "/treinamento": { label: t('nav.training'), icon: GraduationCap },
+    "/treinamento-iso4309": { label: t('nav.iso4309'), icon: GraduationCap },
+    "/modelos-relatorios": { label: t('nav.reportTemplates'), icon: FileCheck },
+    "/wire-rope-inspection": { label: t('nav.wireRopeInspection'), icon: FileCheck },
+    "/saved-reports": { label: t('nav.savedReports'), icon: FileCheck },
+    "/resolucao-problemas": { label: t('nav.troubleshooting'), icon: Wrench },
+    "/duvidas-frequentes": { label: t('nav.faq'), icon: HelpCircle },
+    "/historico": { label: t('nav.history'), icon: History },
+    "/checklist": { label: t('nav.checklist'), icon: ClipboardCheck },
+    "/inventario": { label: t('nav.inventory'), icon: Package },
+    "/gerenciar-usuarios": { label: t('nav.manageUsers'), icon: Users },
+    "/servicos": { label: t('nav.services'), icon: Briefcase },
+    "/novo-servico": { label: t('nav.newService'), icon: Plus },
+    "/editar-servico": { label: t('nav.editService'), icon: Edit },
+    "/assistente-tecnico": { label: t('nav.aiAssistant'), icon: Sparkles },
+    "/folha-ponto": { label: t('nav.timesheet'), icon: Clock },
+    "/meus-downloads": { label: t('nav.myDownloads'), icon: Download },
+    "/calendario": { label: t('nav.calendar'), icon: CalendarDays },
+    "/certificacoes": { label: t('nav.certifications'), icon: Award },
+  };
+
+  // Route hierarchy for parent paths
+  const routeParents: Record<string, string> = {
+    "/treinamento-iso4309": "/treinamento",
+    "/wire-rope-inspection": "/modelos-relatorios",
+    "/saved-reports": "/modelos-relatorios",
+    "/novo-servico": "/servicos",
+    "/editar-servico": "/servicos",
+  };
+
   // Build breadcrumb trail
   const buildBreadcrumbs = () => {
     const breadcrumbs: { path: string; label: string; icon: LucideIcon }[] = [];
     
     // Always start with home
-    breadcrumbs.push({ path: "/", label: "Início", icon: Home });
+    breadcrumbs.push({ path: "/", label: t('nav.home'), icon: Home });
 
     // Check if current path has a parent
     let pathToCheck = currentPath;

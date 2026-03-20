@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import { ClipboardList, FolderOpen, FileText, Archive } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,6 +22,7 @@ import { TemplatesTab } from "@/components/checklist/TemplatesTab";
 import { SavedChecklistsTab } from "@/components/checklist/SavedChecklistsTab";
 
 const CheckList = () => {
+  const { t } = useTranslation();
   const {
     checklists,
     selectedChecklist,
@@ -169,26 +171,24 @@ const CheckList = () => {
         <div className="space-y-2">
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <ClipboardList className="h-8 w-8" />
-            Check List
+            {t('checklists.title')}
           </h1>
-          <p className="text-muted-foreground">
-            Checklists com controle automático de inventário - itens de entrada/saída sincronizados com o estoque
-          </p>
+          <p className="text-muted-foreground">{t('checklists.subtitle')}</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full max-w-lg grid-cols-3">
             <TabsTrigger value="servicos" className="flex items-center gap-2">
               <FolderOpen className="h-4 w-4" />
-              Serviços ({serviceChecklists.length})
+              {t('checklists.tabs.services')} ({serviceChecklists.length})
             </TabsTrigger>
             <TabsTrigger value="templates" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Templates ({templates.length})
+              {t('checklists.tabs.templates')} ({templates.length})
             </TabsTrigger>
             <TabsTrigger value="salvos" className="flex items-center gap-2">
               <Archive className="h-4 w-4" />
-              Salvos ({savedChecklists.length})
+              {t('checklists.tabs.saved')} ({savedChecklists.length})
             </TabsTrigger>
           </TabsList>
 
@@ -297,15 +297,15 @@ const CheckList = () => {
         <AlertDialog open={!!deleteItemId} onOpenChange={(open) => !open && setDeleteItemId(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+              <AlertDialogTitle>{t('checklists.deleteItemTitle')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Tem certeza que deseja remover este item do checklist? O estoque será atualizado automaticamente e esta ação não pode ser desfeita.
+                {t('checklists.deleteItemDescription')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
               <AlertDialogAction onClick={handleDeleteItem} className="bg-destructive hover:bg-destructive/90">
-                Excluir
+                {t('common.delete')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
