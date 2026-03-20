@@ -296,15 +296,15 @@ const CheckList = () => {
         <AlertDialog open={!!deleteItemId} onOpenChange={(open) => !open && setDeleteItemId(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+              <AlertDialogTitle>{t('checklists.deleteItemTitle')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Tem certeza que deseja remover este item do checklist? O estoque será atualizado automaticamente e esta ação não pode ser desfeita.
+                {t('checklists.deleteItemDescription')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
               <AlertDialogAction onClick={handleDeleteItem} className="bg-destructive hover:bg-destructive/90">
-                Excluir
+                {t('common.delete')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
