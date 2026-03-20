@@ -29,6 +29,7 @@ import EquipmentCheckout from "@/components/equipment/EquipmentCheckout";
 import EquipmentCheckin from "@/components/equipment/EquipmentCheckin";
 
 const Inventario = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') || 'items';
   
