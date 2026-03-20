@@ -77,7 +77,7 @@ const CheckList = () => {
     setIsCreateDialogOpen(true);
   };
 
-  const openEditDialog = () => {
+  const openEditDialog = async () => {
     if (currentChecklist) {
       setFormName(currentChecklist.name);
       setFormDescription(currentChecklist.description || "");
@@ -85,6 +85,17 @@ const CheckList = () => {
       setFormType(currentChecklist.checklist_type);
       setFormIsTemplate(currentChecklist.is_template);
       setIsTemplateMode(currentChecklist.is_template);
+
+      // Load existing service link
+      const { data } = await import("@/integrations/supabase/client").then(m =>
+        m.supabase
+          .from("service_checklists")
+          .select("service_id")
+          .eq("checklist_id", currentChecklist.id)
+          .limit(1)
+      );
+      setSelectedServiceId(data?.[0]?.service_id || null);
+
       setIsEditDialogOpen(true);
     }
   };
