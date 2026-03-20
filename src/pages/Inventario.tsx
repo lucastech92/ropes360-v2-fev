@@ -218,7 +218,7 @@ const Inventario = () => {
             <TabsContent value="items" className="mt-6">
               {loading ? (
                 <div className="text-center py-12 text-muted-foreground">
-                  Carregando itens...
+                  {t('inventory.loadingItems')}
                 </div>
               ) : (
                 <InventoryItemList
