@@ -191,27 +191,27 @@ const Inventario = () => {
             <TabsList className="grid w-full max-w-4xl grid-cols-6">
               <TabsTrigger value="items" className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
-                Itens
+                {t('inventory.tabs.items')}
               </TabsTrigger>
               <TabsTrigger value="calibration" className="flex items-center gap-2">
                 <Gauge className="h-4 w-4" />
-                Calibrações
+                {t('inventory.tabs.calibrations')}
               </TabsTrigger>
               <TabsTrigger value="maintenance" className="flex items-center gap-2">
                 <Wrench className="h-4 w-4" />
-                Manutenções
+                {t('inventory.tabs.maintenance')}
               </TabsTrigger>
               <TabsTrigger value="utilization" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
-                Utilização
+                {t('inventory.tabs.utilization')}
               </TabsTrigger>
               <TabsTrigger value="history" className="flex items-center gap-2">
                 <History className="h-4 w-4" />
-                Histórico
+                {t('inventory.tabs.history')}
               </TabsTrigger>
               <TabsTrigger value="trends" className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4" />
-                IA
+                {t('inventory.tabs.ai')}
               </TabsTrigger>
             </TabsList>
 
