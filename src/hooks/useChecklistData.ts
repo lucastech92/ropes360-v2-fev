@@ -28,6 +28,8 @@ export interface Checklist {
   service_tag: string | null;
   checklist_type: 'entrada' | 'saida';
   is_template: boolean;
+  is_saved: boolean;
+  saved_at: string | null;
   items?: ChecklistItem[];
 }
 
