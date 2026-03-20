@@ -6,6 +6,34 @@
     "documents": "Principal",
     "logout": "Sair"
   },
+  "nav": {
+    "home": "Início",
+    "dashboard": "Dashboard",
+    "officialProcedures": "Procedimentos Oficiais",
+    "technicalProcedures": "Procedimentos Técnicos",
+    "training": "Treinamento",
+    "iso4309": "ISO 4309",
+    "reportTemplates": "Modelos de Relatórios",
+    "wireRopeInspection": "Inspeção de Cabos",
+    "savedReports": "Relatórios Salvos",
+    "troubleshooting": "Resolução de Problemas",
+    "faq": "Dúvidas Frequentes",
+    "history": "Histórico",
+    "checklist": "Checklist",
+    "inventory": "Inventário",
+    "manageUsers": "Gerenciar Usuários",
+    "services": "Serviços",
+    "newService": "Novo Serviço",
+    "editService": "Editar Serviço",
+    "aiAssistant": "Assistente IA",
+    "timesheet": "Folha de Ponto",
+    "myDownloads": "Meus Downloads",
+    "calendar": "Calendário",
+    "installApp": "Instalar App",
+    "certifications": "Certificações",
+    "main": "Principal",
+    "myFolders": "Minhas Pastas"
+  },
   "dashboard": {
     "title": "Painel de Controle",
     "overview": "Visão geral de todas as operações e métricas do sistema",
@@ -52,7 +80,44 @@
     "historico": "Histórico",
     "gerenciarUsuarios": "Gerenciar Usuários",
     "folhaPonto": "Folha de Ponto",
-    "certificacoes": "Certificações"
+    "certificacoes": "Certificações",
+    "troubleshooting": "Resolução de Problemas",
+    "calendar": "Calendário Integrado",
+    "descriptions": {
+      "officialProcedures": "Acesse todos os procedimentos e normas oficiais da empresa, incluindo ISO 4309 e diretrizes de segurança.",
+      "technicalProcedures": "Instruções detalhadas para instalação, soquetagem, remoção e manutenção de cabos de aço.",
+      "training": "Materiais de treinamento, glossário técnico e vídeos educativos para desenvolvimento contínuo.",
+      "troubleshooting": "Casos reais de falhas, análises de causa raiz e soluções aplicadas em campo.",
+      "faq": "Treinamentos, Drake, etc...",
+      "services": "Gerencie todos os serviços registrados com código JBR, cliente, escopo e equipamentos.",
+      "checklists": "Checklists preenchíveis para montagem de containers e verificação de ferramentas (JBR).",
+      "reportTemplates": "Upload e download de modelos de relatórios para inspeções e procedimentos.",
+      "inventory": "Gestão unificada de consumíveis, equipamentos, manutenções e calibrações.",
+      "calendar": "Visualização unificada de serviços, manutenções, calibrações e folha de ponto.",
+      "certifications": "Gestão de certificados dos técnicos com alertas de vencimento e matriz de competências.",
+      "history": "Registros de inspeções anteriores, rastreabilidade e acompanhamento de manutenções.",
+      "timesheet": "Controle de ponto dos colaboradores com calendário interativo e tipos de check-in.",
+      "manageUsers": "Aprovar novos usuários e gerenciar níveis de acesso ao sistema (Admin).",
+      "knowledgeSubtitle": "Base de conhecimento e documentação técnica",
+      "operationsSubtitle": "Gestão de serviços e operações em campo",
+      "managementSubtitle": "Controle administrativo e gestão de recursos"
+    }
+  },
+  "home": {
+    "heroBadge": "Centro de Inteligência Técnica",
+    "heroDescription": "Portal completo de conhecimento técnico para inspetores de campo e centralização para a equipe de suporte.",
+    "heroHighlight": "Documentação, procedimentos, certificados, inventário e projetos",
+    "heroHighlightSuffix": "em um só lugar.",
+    "installAppButton": "Instalar App no Celular",
+    "myFolders": "Minhas Pastas",
+    "myFoldersDescription": "Crie e gerencie suas próprias pastas e documentos",
+    "manageDocumentsSubfolders": "Gerencie documentos e subpastas",
+    "selectedFolder": "Pasta selecionada",
+    "documentsTab": "Documentos",
+    "uploadTab": "Upload",
+    "needHelp": "Precisa de ajuda?",
+    "needHelpDescription": "Entre em contato com a equipe técnica ou consulte nossa documentação",
+    "faqLink": "Dúvidas Frequentes"
   },
   "certifications": {
     "title": "Certificações e Competências",
@@ -117,7 +182,17 @@
     "submit": "Enviar",
     "clear": "Limpar",
     "update": "Atualizar",
-    "actions": "Ações"
+    "actions": "Ações",
+    "view": "Ver",
+    "restore": "Restaurar",
+    "saveAsTemplate": "Salvar como Template",
+    "allTypes": "Todos os tipos",
+    "page": "Página",
+    "of": "de",
+    "noResults": "Nenhum resultado encontrado",
+    "confirmDeletion": "Confirmar Exclusão",
+    "deleteConfirmMessage": "Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.",
+    "theme": "Tema"
   },
   "services": {
     "title": "Serviços",
@@ -155,6 +230,7 @@
   },
   "inventory": {
     "title": "Inventário/Almoxarife",
+    "subtitle": "Gestão unificada de consumíveis, equipamentos e manutenções",
     "addItem": "Adicionar Item",
     "itemName": "Nome do Item",
     "category": "Categoria",
@@ -164,7 +240,16 @@
     "location": "Localização",
     "notes": "Observações",
     "lastUpdated": "Última Atualização",
-    "lowStock": "Estoque Baixo"
+    "lowStock": "Estoque Baixo",
+    "tabs": {
+      "items": "Itens",
+      "calibrations": "Calibrações",
+      "maintenance": "Manutenções",
+      "utilization": "Utilização",
+      "history": "Histórico",
+      "ai": "IA"
+    },
+    "loadingItems": "Carregando itens..."
   },
   "maintenance": {
     "title": "Controle de Manutenção",
@@ -197,6 +282,7 @@
   },
   "checklists": {
     "title": "Check-Lists",
+    "subtitle": "Checklists com controle automático de inventário - itens de entrada/saída sincronizados com o estoque",
     "newChecklist": "Novo Check-List",
     "checklistName": "Nome do Check-List",
     "checklistType": "Tipo de Check-List",
@@ -208,7 +294,21 @@
     "typeOptions": {
       "entrada": "Entrada",
       "saida": "Saída"
-    }
+    },
+    "tabs": {
+      "services": "Serviços",
+      "templates": "Templates",
+      "saved": "Salvos"
+    },
+    "savedTitle": "Checklists Salvos",
+    "savedDescription": "Checklists finalizados e arquivados para consulta",
+    "searchPlaceholder": "Buscar por nome ou código JBR...",
+    "noSavedChecklists": "Nenhum checklist salvo",
+    "saveChecklistsHint": "Salve checklists concluídos para consultá-los aqui",
+    "noFilterResults": "Nenhum resultado encontrado para os filtros aplicados",
+    "savedAt": "Salvo em",
+    "deleteItemTitle": "Confirmar exclusão",
+    "deleteItemDescription": "Tem certeza que deseja remover este item do checklist? O estoque será atualizado automaticamente e esta ação não pode ser desfeita."
   },
   "documents": {
     "title": "Documentos",
@@ -336,7 +436,39 @@
     "benefit3": "Itens com estoque baixo",
     "later": "Mais tarde",
     "enable": "Ativar",
-    "enabling": "Ativando..."
+    "enabling": "Ativando...",
+    "page": {
+      "unread": "não lida",
+      "unreadPlural": "não lidas",
+      "found": "notificação(ões) encontrada(s)",
+      "markAllRead": "Marcar todas como lidas",
+      "allMarkedRead": "Todas as notificações foram marcadas como lidas",
+      "noNotificationsFound": "Nenhuma notificação encontrada",
+      "adjustFilters": "Ajuste os filtros para ver mais resultados",
+      "typeAll": "Todos os tipos",
+      "typeCalibration": "Calibração",
+      "typeMaintenance": "Manutenção",
+      "typeInventory": "Inventário",
+      "typeDocuments": "Documentos",
+      "typeCertifications": "Certificações",
+      "typeApproval": "Aprovação",
+      "urgencyAll": "Todas urgências",
+      "urgencyCritical": "Crítica",
+      "urgencyWarning": "Atenção",
+      "urgencyInfo": "Informativo",
+      "readAll": "Todas",
+      "readUnread": "Não lidas",
+      "readRead": "Lidas"
+    }
+  },
+  "alerts": {
+    "activeAlerts": "Alertas Ativos",
+    "viewAll": "Ver todas",
+    "calibrations": "Calibrações",
+    "maintenances": "Manutenções",
+    "documents": "Documentos",
+    "certifications": "Certificações",
+    "stock": "Estoque"
   },
   "pwa": {
     "offline": "Offline",
