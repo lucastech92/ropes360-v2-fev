@@ -256,7 +256,7 @@ export const useChecklistData = () => {
     return data;
   };
 
-  const updateChecklist = async (formData: ChecklistFormData) => {
+  const updateChecklist = async (formData: ChecklistFormData, selectedServiceId?: string | null) => {
     if (!selectedChecklist) return false;
 
     const { error } = await supabase
@@ -279,10 +279,25 @@ export const useChecklistData = () => {
       return false;
     }
 
+    // Handle service link: remove old links and add new one if selected
+    if (!formData.isTemplate) {
+      await supabase
+        .from("service_checklists")
+        .delete()
+        .eq("checklist_id", selectedChecklist);
+
+      if (selectedServiceId) {
+        await supabase.from("service_checklists").insert({
+          service_id: selectedServiceId,
+          checklist_id: selectedChecklist,
+        });
+      }
+    }
+
     await fetchChecklists();
     toast({
       title: "Checklist atualizado",
-      description: "Modelo de checklist atualizado com sucesso",
+      description: "Checklist atualizado com sucesso",
     });
     return true;
   };
