@@ -21,11 +21,13 @@ interface Service {
 interface ServiceLinkSelectProps {
   selectedServiceId: string | null;
   onChange: (serviceId: string | null) => void;
+  onServiceSelected?: (service: Service | null) => void;
 }
 
 export const ServiceLinkSelect = ({
   selectedServiceId,
   onChange,
+  onServiceSelected,
 }: ServiceLinkSelectProps) => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,12 +53,21 @@ export const ServiceLinkSelect = ({
     }
   };
 
+  const handleChange = (value: string) => {
+    const id = value === "none" ? null : value;
+    onChange(id);
+    if (onServiceSelected) {
+      const service = id ? services.find(s => s.id === id) || null : null;
+      onServiceSelected(service);
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-2">
         <Label className="flex items-center gap-2">
           <Briefcase className="h-4 w-4" />
-          Vincular a Serviço (JBR)
+          Vincular a Ordem de Serviço
         </Label>
         <div className="text-sm text-muted-foreground">Carregando...</div>
       </div>
@@ -67,11 +78,11 @@ export const ServiceLinkSelect = ({
     <div className="space-y-2">
       <Label className="flex items-center gap-2">
         <Briefcase className="h-4 w-4" />
-        Vincular a Serviço (JBR)
+        Vincular a Ordem de Serviço
       </Label>
       <Select 
         value={selectedServiceId || "none"} 
-        onValueChange={(value) => onChange(value === "none" ? null : value)}
+        onValueChange={handleChange}
       >
         <SelectTrigger>
           <SelectValue placeholder="Selecione um serviço" />
@@ -97,7 +108,7 @@ export const ServiceLinkSelect = ({
       </Select>
       {selectedServiceId && (
         <p className="text-xs text-muted-foreground">
-          O checklist será vinculado ao serviço selecionado
+          O checklist será vinculado ao serviço selecionado e o código JBR será preenchido automaticamente
         </p>
       )}
     </div>

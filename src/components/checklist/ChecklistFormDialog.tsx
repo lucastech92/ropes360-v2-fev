@@ -125,12 +125,17 @@ export const ChecklistFormDialog = ({
                   placeholder="Ex: JBR-2024-001"
                 />
               </div>
-              {isCreate && (
-                <ServiceLinkSelect
-                  selectedServiceId={selectedServiceId}
-                  onChange={onServiceIdChange}
-                />
-              )}
+              <ServiceLinkSelect
+                selectedServiceId={selectedServiceId}
+                onChange={(id) => {
+                  onServiceIdChange(id);
+                }}
+                onServiceSelected={(service) => {
+                  if (service) {
+                    onServiceTagChange(service.codigo_jbr);
+                  }
+                }}
+              />
             </>
           )}
           {isCreate && !isTemplate && (
