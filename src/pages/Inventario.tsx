@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useUnifiedInventory, UnifiedInventoryItem, EquipmentCondition } from "@/hooks/useUnifiedInventory";
