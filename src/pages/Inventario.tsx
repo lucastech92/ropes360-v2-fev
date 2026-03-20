@@ -178,10 +178,10 @@ const Inventario = () => {
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <Package className="h-8 w-8" />
-              Inventário / Almoxarifado
+              {t('inventory.title')}
             </h1>
             <p className="text-muted-foreground">
-              Gestão unificada de consumíveis, equipamentos e manutenções
+              {t('inventory.subtitle')}
             </p>
           </div>
 
