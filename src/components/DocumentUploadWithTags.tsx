@@ -133,6 +133,16 @@ export const DocumentUploadWithTags = ({
       return;
     }
 
+    const maxSize = 20 * 1024 * 1024; // 20MB
+    if (file.size > maxSize) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "Tamanho máximo permitido: 20MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!title.trim()) {
       toast({
         title: "Título obrigatório",

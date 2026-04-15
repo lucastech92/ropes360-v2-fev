@@ -50,6 +50,11 @@ export const CertificationUpload = ({ isAdmin = false, profiles = [] }: Certific
   const handleSubmit = async () => {
     if (!file || !certName.trim() || !expiryDate) return;
 
+    const maxSize = 20 * 1024 * 1024; // 20MB
+    if (file.size > maxSize) {
+      return;
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
