@@ -51,11 +51,11 @@ export const DocumentUpload = ({ category, employeeFolder, onUploadComplete }: D
     }
 
     // Client-side validation
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    const maxSize = 20 * 1024 * 1024; // 20MB
     if (file.size > maxSize) {
       toast({
         title: "Erro",
-        description: "Arquivo muito grande. Tamanho máximo: 10MB",
+        description: "Arquivo muito grande. Tamanho máximo: 20MB",
         variant: "destructive",
       });
       return;
