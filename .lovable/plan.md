@@ -1,58 +1,59 @@
 
 
-# Melhoria da Tradução - Plano
+# Pacotes de Inspeção — Reorganização de Modelos e Relatórios
 
 ## Problema Atual
+A página "Modelos e Relatórios" é genérica — apenas lista documentos avulsos. Não existe o conceito de **pacote de inspeção** que agrupe os arquivos relacionados a uma mesma inspeção (certificado Word com TAG incremental tipo "LS BR 001", arquivo SLB do MRT, e o relatório digital).
 
-A cobertura de tradução está incompleta em duas dimensões:
+## O que será construído
 
-1. **Strings hardcoded em português** — Muitos componentes usam texto em português diretamente no código ao invés de chaves i18n:
-   - `NavigationBreadcrumb.tsx`: todas as 15+ labels de rotas hardcoded
-   - `MobileNav.tsx`: "Assistente IA", "Meus Downloads", "Instalar App", "Treinamento ISO 4309", "Resolução de Problemas", "Calendário", "Gerenciar Usuários"
-   - `Index.tsx`: descrições dos módulos e labels como "Resolução de Problemas", "Gerenciar Usuários"
-   - `Notificacoes.tsx`: labels de filtros ("Todos os tipos", "Calibração", "Crítica", etc.)
-   - `Inventario.tsx`: labels de abas e botões
-   - Diversas páginas com títulos, placeholders e mensagens em português
+Uma nova aba **"Pacotes de Inspeção"** na página Modelos e Relatórios, com:
 
-2. **Chaves i18n faltando nos JSONs** — Novas features (notificações, checklist salvos, calendário, etc.) não tiveram suas chaves adicionadas aos 3 arquivos de idioma.
+1. **Tabela `inspection_packages`** no banco de dados:
+   - `id`, `user_id`, `tag_number` (ex: "LS BR 0268"), `client`, `service_id` (FK opcional para services), `description`, `inspection_date`, `created_at`
+   - Auto-incremento do número sequencial baseado no prefixo
 
-3. **date-fns locale hardcoded** — Vários componentes usam `ptBR` fixo do date-fns ao invés de selecionar o locale com base no idioma ativo.
+2. **Tabela `inspection_package_files`** para os arquivos de cada pacote:
+   - `id`, `package_id`, `file_type` (enum: `certificate`, `slb_mrt`, `report`, `other`), `file_name`, `file_path`, `file_size`, `uploaded_at`
 
-## Plano de Implementação
+3. **UI do Pacote de Inspeção:**
+   - Card de criação de novo pacote com campo para TAG (auto-sugerido com próximo número), cliente, data, descrição
+   - Zona de upload multi-arquivo com labels por tipo (Certificado Word, Arquivo SLB/MRT, Outros)
+   - Lista de pacotes com busca por TAG, cliente, data
+   - Visualização expandida mostrando todos os arquivos do pacote com download individual ou em lote
+   - Badge indicando quantos arquivos cada pacote tem e se está completo (certificado + SLB)
 
-### 1. Expandir os arquivos de tradução (3 arquivos JSON)
-Adicionar seções faltantes nos 3 idiomas (pt-BR, en-US, es-ES):
-- `notifications.page` — filtros e ações da página de notificações
-- `nav` — labels de navegação (breadcrumb + mobile nav)
-- `modules` — descrições dos módulos (Index.tsx)
-- `calendar` — página de calendário
-- `checklist` — novas keys para salvos/templates
-- `inventory.tabs` — abas do inventário
-- Chaves avulsas espalhadas pelo app
+4. **Vinculação opcional ao Serviço JBR** — dropdown para associar o pacote a uma ordem de serviço existente
 
-### 2. Substituir strings hardcoded nos componentes
-Atualizar os seguintes arquivos para usar `t()`:
-- `src/components/NavigationBreadcrumb.tsx`
-- `src/components/MobileNav.tsx`
-- `src/pages/Index.tsx`
-- `src/pages/Notificacoes.tsx`
-- `src/pages/Inventario.tsx`
-- `src/pages/CheckList.tsx`
-- `src/components/checklist/SavedChecklistsTab.tsx`
-- `src/components/dashboard/AlertsSummaryWidget.tsx`
-- Outras páginas com strings hardcoded
+5. **RLS**: Todos os autenticados visualizam; inserção por user_id; delete apenas admin
 
-### 3. Criar helper de locale dinâmico para date-fns
-Criar `src/utils/dateLocale.ts` com uma função que retorna o locale correto do date-fns baseado no idioma ativo do i18n (`ptBR`, `enUS`, `es`). Atualizar componentes que usam `formatDistanceToNow`, `format`, etc.
-
-### 4. Corrigir build error em main.tsx
-Resolver o erro de atributos duplicados `data-lov-id` no `src/main.tsx`.
+## Fluxo do usuário
+```text
+Modelos e Relatórios
+├── Pacotes de Inspeção  ← NOVA aba principal
+│   ├── [+ Novo Pacote]
+│   │   ├── TAG: LS BR 0269 (auto)
+│   │   ├── Cliente: Petrobras
+│   │   ├── Serviço JBR: JBR-2024-015 (opcional)
+│   │   ├── Upload Certificado (.docx/.pdf)
+│   │   ├── Upload SLB/MRT (.slb/.dat/.csv)
+│   │   └── Upload Outros
+│   └── Lista de pacotes (busca, filtro, download)
+├── Templates Digitais (existente)
+├── Modelos Disponíveis (existente)
+└── Upload de Modelo (existente)
+```
 
 ## Arquivos afetados
-- `src/i18n/locales/pt-BR/common.json` — expandir
-- `src/i18n/locales/en-US/common.json` — expandir
-- `src/i18n/locales/es-ES/common.json` — expandir
-- `src/utils/dateLocale.ts` — novo
-- `src/main.tsx` — fix build
-- ~10-15 componentes/páginas — substituir hardcoded por `t()`
+- **Nova migração SQL** — tabelas `inspection_packages` e `inspection_package_files` + RLS + storage
+- **Novo hook** `src/hooks/useInspectionPackages.ts` — CRUD + auto-tag
+- **Novo componente** `src/components/inspectionPackages/InspectionPackageForm.tsx` — formulário de criação
+- **Novo componente** `src/components/inspectionPackages/InspectionPackageList.tsx` — lista com busca e expansão
+- **Editar** `src/pages/ModelosRelatorios.tsx` — adicionar nova aba como default
+
+## Detalhes técnicos
+- O TAG auto-incrementa via query `SELECT tag_number FROM inspection_packages WHERE tag_number LIKE 'LS BR%' ORDER BY tag_number DESC LIMIT 1` e incrementa o número
+- Arquivos armazenados no bucket `documents` sob path `inspection_packages/{package_id}/{file_type}/{filename}`
+- Aceitar extensões: `.docx`, `.pdf`, `.slb`, `.dat`, `.csv`, `.xlsx`, `.jpg`, `.png`
+- Limite de 20MB por arquivo (consistente com o resto do app)
 
