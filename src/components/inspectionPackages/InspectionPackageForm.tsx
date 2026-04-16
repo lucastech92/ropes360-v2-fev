@@ -42,6 +42,8 @@ export const InspectionPackageForm = ({ onCreated }: Props) => {
   const [serviceId, setServiceId] = useState<string>("none");
   const [description, setDescription] = useState("");
   const [inspectionDate, setInspectionDate] = useState("");
+  const [application, setApplication] = useState("");
+  const [location, setLocation] = useState("");
   const [pending, setPending] = useState<PendingFile[]>([]);
   const [services, setServices] = useState<{ id: string; codigo_jbr: string; cliente: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
