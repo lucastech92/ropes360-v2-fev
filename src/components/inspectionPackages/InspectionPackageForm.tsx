@@ -176,6 +176,14 @@ export const InspectionPackageForm = ({ onCreated }: Props) => {
                 </PopoverContent>
               </Popover>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="application">Aplicação</Label>
+              <Input id="application" value={application} onChange={(e) => setApplication(e.target.value)} placeholder="Ex: Guincho de carga, Içamento..." />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="location">Local</Label>
+              <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Ex: Plataforma P-75, Base Macaé..." />
+            </div>
           </div>
 
           <div className="space-y-2">
