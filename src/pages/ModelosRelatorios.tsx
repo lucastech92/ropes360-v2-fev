@@ -29,12 +29,22 @@ const ModelosRelatorios = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="templates" className="space-y-6">
-          <TabsList>
+        <Tabs defaultValue="packages" className="space-y-6">
+          <TabsList className="flex-wrap h-auto">
+            <TabsTrigger value="packages" className="gap-2">
+              <Package className="h-4 w-4" /> Pacotes de Inspeção
+            </TabsTrigger>
             <TabsTrigger value="templates">Templates Digitais</TabsTrigger>
             <TabsTrigger value="documents">Modelos Disponíveis</TabsTrigger>
             <TabsTrigger value="upload">Upload de Modelo</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="packages" className="space-y-6">
+            <InspectionPackageForm onCreated={() => setPackageRefresh((p) => p + 1)} />
+            <div key={packageRefresh}>
+              <InspectionPackageList />
+            </div>
+          </TabsContent>
 
           <TabsContent value="templates" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
