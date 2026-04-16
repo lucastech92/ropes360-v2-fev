@@ -125,15 +125,50 @@ export const InspectionPackageForm = ({ onCreated }: Props) => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="service">Serviço JBR (opcional)</Label>
-              <Select value={serviceId} onValueChange={setServiceId}>
-                <SelectTrigger id="service"><SelectValue placeholder="Nenhum" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Nenhum</SelectItem>
-                  {services.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>{s.codigo_jbr} — {s.cliente}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="service"
+                    type="button"
+                    variant="outline"
+                    role="combobox"
+                    className="w-full justify-between font-normal"
+                  >
+                    <span className="truncate">
+                      {serviceId === "none"
+                        ? "Nenhum"
+                        : services.find((s) => s.id === serviceId)
+                        ? `${services.find((s) => s.id === serviceId)!.codigo_jbr} — ${services.find((s) => s.id === serviceId)!.cliente}`
+                        : "Selecionar serviço"}
+                    </span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Buscar por código JBR ou cliente..." />
+                    <CommandList>
+                      <CommandEmpty>Nenhum serviço encontrado.</CommandEmpty>
+                      <CommandGroup>
+                        <CommandItem value="none" onSelect={() => setServiceId("none")}>
+                          <Check className={cn("mr-2 h-4 w-4", serviceId === "none" ? "opacity-100" : "opacity-0")} />
+                          Nenhum
+                        </CommandItem>
+                        {services.map((s) => (
+                          <CommandItem
+                            key={s.id}
+                            value={`${s.codigo_jbr} ${s.cliente}`}
+                            onSelect={() => setServiceId(s.id)}
+                          >
+                            <Check className={cn("mr-2 h-4 w-4", serviceId === s.id ? "opacity-100" : "opacity-0")} />
+                            {s.codigo_jbr} — {s.cliente}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
 
