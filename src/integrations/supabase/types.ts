@@ -671,6 +671,91 @@ export type Database = {
           },
         ]
       }
+      inspection_package_files: {
+        Row: {
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: Database["public"]["Enums"]["inspection_file_type"]
+          id: string
+          package_id: string
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type: Database["public"]["Enums"]["inspection_file_type"]
+          id?: string
+          package_id: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: Database["public"]["Enums"]["inspection_file_type"]
+          id?: string
+          package_id?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspection_package_files_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "inspection_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inspection_packages: {
+        Row: {
+          client: string
+          created_at: string
+          description: string | null
+          id: string
+          inspection_date: string | null
+          service_id: string | null
+          tag_number: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          inspection_date?: string | null
+          service_id?: string | null
+          tag_number: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          inspection_date?: string | null
+          service_id?: string | null
+          tag_number?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspection_packages_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inspection_reports: {
         Row: {
           completed_at: string | null
@@ -1593,6 +1678,7 @@ export type Database = {
         | "maintenance"
         | "calibration"
         | "inactive"
+      inspection_file_type: "certificate" | "slb_mrt" | "report" | "other"
       item_type: "consumivel" | "equipamento"
     }
     CompositeTypes: {
@@ -1754,6 +1840,7 @@ export const Constants = {
         "calibration",
         "inactive",
       ],
+      inspection_file_type: ["certificate", "slb_mrt", "report", "other"],
       item_type: ["consumivel", "equipamento"],
     },
   },
