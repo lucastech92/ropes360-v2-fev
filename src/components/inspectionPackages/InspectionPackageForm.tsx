@@ -80,6 +80,8 @@ export const InspectionPackageForm = ({ onCreated }: Props) => {
       service_id: serviceId === "none" ? null : serviceId,
       description: description.trim() || null,
       inspection_date: inspectionDate || null,
+      application: application.trim() || null,
+      location: location.trim() || null,
       files: pending,
     });
     setSubmitting(false);
@@ -88,6 +90,8 @@ export const InspectionPackageForm = ({ onCreated }: Props) => {
       setServiceId("none");
       setDescription("");
       setInspectionDate("");
+      setApplication("");
+      setLocation("");
       setPending([]);
       await refreshTag();
       onCreated?.();
