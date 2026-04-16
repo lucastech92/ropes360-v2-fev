@@ -23,6 +23,8 @@ export interface InspectionPackage {
   service_id: string | null;
   description: string | null;
   inspection_date: string | null;
+  application: string | null;
+  location: string | null;
   created_at: string;
   updated_at: string;
   files?: InspectionPackageFile[];
@@ -97,6 +99,8 @@ export const useInspectionPackages = () => {
     service_id?: string | null;
     description?: string | null;
     inspection_date?: string | null;
+    application?: string | null;
+    location?: string | null;
     files: { file: File; type: InspectionFileType }[];
   }) => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -122,6 +126,8 @@ export const useInspectionPackages = () => {
         service_id: input.service_id || null,
         description: input.description || null,
         inspection_date: input.inspection_date || null,
+        application: input.application || null,
+        location: input.location || null,
       })
       .select()
       .single();

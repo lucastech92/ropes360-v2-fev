@@ -42,6 +42,8 @@ export const InspectionPackageForm = ({ onCreated }: Props) => {
   const [serviceId, setServiceId] = useState<string>("none");
   const [description, setDescription] = useState("");
   const [inspectionDate, setInspectionDate] = useState("");
+  const [application, setApplication] = useState("");
+  const [location, setLocation] = useState("");
   const [pending, setPending] = useState<PendingFile[]>([]);
   const [services, setServices] = useState<{ id: string; codigo_jbr: string; cliente: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -78,6 +80,8 @@ export const InspectionPackageForm = ({ onCreated }: Props) => {
       service_id: serviceId === "none" ? null : serviceId,
       description: description.trim() || null,
       inspection_date: inspectionDate || null,
+      application: application.trim() || null,
+      location: location.trim() || null,
       files: pending,
     });
     setSubmitting(false);
@@ -86,6 +90,8 @@ export const InspectionPackageForm = ({ onCreated }: Props) => {
       setServiceId("none");
       setDescription("");
       setInspectionDate("");
+      setApplication("");
+      setLocation("");
       setPending([]);
       await refreshTag();
       onCreated?.();
@@ -169,6 +175,14 @@ export const InspectionPackageForm = ({ onCreated }: Props) => {
                   </Command>
                 </PopoverContent>
               </Popover>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="application">Aplicação</Label>
+              <Input id="application" value={application} onChange={(e) => setApplication(e.target.value)} placeholder="Ex: Guincho de carga, Içamento..." />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="location">Local</Label>
+              <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Ex: Plataforma P-75, Base Macaé..." />
             </div>
           </div>
 

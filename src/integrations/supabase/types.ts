@@ -714,33 +714,39 @@ export type Database = {
       }
       inspection_packages: {
         Row: {
+          application: string | null
           client: string
           created_at: string
           description: string | null
           id: string
           inspection_date: string | null
+          location: string | null
           service_id: string | null
           tag_number: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          application?: string | null
           client: string
           created_at?: string
           description?: string | null
           id?: string
           inspection_date?: string | null
+          location?: string | null
           service_id?: string | null
           tag_number: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          application?: string | null
           client?: string
           created_at?: string
           description?: string | null
           id?: string
           inspection_date?: string | null
+          location?: string | null
           service_id?: string | null
           tag_number?: string
           updated_at?: string
