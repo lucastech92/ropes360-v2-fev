@@ -1,18 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
-import { FileText, ClipboardList, FolderOpen, Package } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DocumentUpload } from "@/components/DocumentUpload";
-import { DocumentList } from "@/components/DocumentList";
+import { FileText } from "lucide-react";
 import { InspectionPackageForm } from "@/components/inspectionPackages/InspectionPackageForm";
 import { InspectionPackageList } from "@/components/inspectionPackages/InspectionPackageList";
 
 const ModelosRelatorios = () => {
-  const navigate = useNavigate();
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [packageRefresh, setPackageRefresh] = useState(0);
 
   return (
@@ -25,72 +17,16 @@ const ModelosRelatorios = () => {
             Modelos e Relatórios
           </h1>
           <p className="text-muted-foreground">
-            Upload e download de modelos de check-lists para inspeções e procedimentos
+            Pacotes de inspeção: agrupe certificado, arquivo SLB/MRT e demais documentos.
           </p>
         </div>
 
-        <Tabs defaultValue="packages" className="space-y-6">
-          <TabsList className="flex-wrap h-auto">
-            <TabsTrigger value="packages" className="gap-2">
-              <Package className="h-4 w-4" /> Pacotes de Inspeção
-            </TabsTrigger>
-            <TabsTrigger value="templates">Templates Digitais</TabsTrigger>
-            <TabsTrigger value="documents">Modelos Disponíveis</TabsTrigger>
-            <TabsTrigger value="upload">Upload de Modelo</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="packages" className="space-y-6">
-            <InspectionPackageForm onCreated={() => setPackageRefresh((p) => p + 1)} />
-            <div key={packageRefresh}>
-              <InspectionPackageList />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="templates" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate("/wire-rope-inspection")}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <ClipboardList className="h-5 w-5" />
-                    Inspeção de Cabo de Aço
-                  </CardTitle>
-                  <CardDescription>
-                    Relatório de Inspeção Visual, Dimensional e Eletromagnética (MRT)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <Button className="w-full" onClick={(e) => { e.stopPropagation(); navigate("/wire-rope-inspection"); }}>
-                      Criar Novo Relatório
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="w-full" 
-                      onClick={(e) => { e.stopPropagation(); navigate("/saved-reports"); }}
-                    >
-                      <FolderOpen className="h-4 w-4 mr-2" />
-                      Ver Relatórios Salvos
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="documents" className="space-y-4">
-            <DocumentList 
-              category="modelos_relatorios" 
-              refreshTrigger={refreshTrigger}
-            />
-          </TabsContent>
-
-          <TabsContent value="upload">
-            <DocumentUpload 
-              category="modelos_relatorios"
-              onUploadComplete={() => setRefreshTrigger(prev => prev + 1)}
-            />
-          </TabsContent>
-        </Tabs>
+        <div className="space-y-6">
+          <InspectionPackageForm onCreated={() => setPackageRefresh((p) => p + 1)} />
+          <div key={packageRefresh}>
+            <InspectionPackageList />
+          </div>
+        </div>
       </main>
     </div>
   );
