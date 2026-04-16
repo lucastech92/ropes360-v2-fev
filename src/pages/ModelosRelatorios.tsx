@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
-import { FileText, ClipboardList, FolderOpen } from "lucide-react";
+import { FileText, ClipboardList, FolderOpen, Package } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { DocumentList } from "@/components/DocumentList";
+import { InspectionPackageForm } from "@/components/inspectionPackages/InspectionPackageForm";
+import { InspectionPackageList } from "@/components/inspectionPackages/InspectionPackageList";
 
 const ModelosRelatorios = () => {
   const navigate = useNavigate();
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [packageRefresh, setPackageRefresh] = useState(0);
 
   return (
     <div className="min-h-screen bg-background">
