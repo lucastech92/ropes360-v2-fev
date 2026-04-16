@@ -23,6 +23,8 @@ export interface InspectionPackage {
   service_id: string | null;
   description: string | null;
   inspection_date: string | null;
+  application: string | null;
+  location: string | null;
   created_at: string;
   updated_at: string;
   files?: InspectionPackageFile[];
