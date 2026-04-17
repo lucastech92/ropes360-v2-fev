@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { DocumentUpload } from "@/components/DocumentUpload";
 import { DocumentList } from "@/components/DocumentList";
 import { useToast } from "@/hooks/use-toast";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Employee {
@@ -26,6 +27,7 @@ const DuvidasFrequentes = () => {
   const [newEmployeeName, setNewEmployeeName] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { canDelete } = useUserRole();
 
   const fetchEmployees = async () => {
     setLoading(true);
@@ -233,17 +235,19 @@ const DuvidasFrequentes = () => {
                 key={employee.id}
                 className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-1 group relative"
               >
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deleteEmployee(employee.id, employee.folder_id);
-                  }}
-                >
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
+                {canDelete && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteEmployee(employee.id, employee.folder_id);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                )}
                 <div onClick={() => setSelectedEmployee(employee.folder_id)}>
                   <CardHeader>
                     <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Folder, Plus, Trash2, FolderOpen, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useUserRole } from "@/hooks/useUserRole";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,6 +40,7 @@ export const FolderManager = ({ category, onFolderSelect, selectedFolderId }: Fo
     { id: null, name: "Raiz" }
   ]);
   const { toast } = useToast();
+  const { canDelete } = useUserRole();
 
   useEffect(() => {
     fetchFolders();
