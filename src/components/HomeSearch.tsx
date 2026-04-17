@@ -169,10 +169,7 @@ export function HomeSearch() {
         documentsRes.data?.forEach((doc) => {
           const categoryRoutes: Record<string, string> = {
             procedimentos_oficiais: "/procedimentos-oficiais",
-            procedimentos_tecnicos: "/procedimentos-tecnicos",
-            treinamento: "/treinamento",
             modelos_relatorios: "/modelos-relatorios",
-            resolucao_problemas: "/resolucao-problemas",
             duvidas_frequentes: "/duvidas-frequentes",
             historico: "/historico",
           };
@@ -267,10 +264,7 @@ export function HomeSearch() {
         foldersRes.data?.forEach((folder) => {
           const categoryRoutes: Record<string, string> = {
             procedimentos_oficiais: "/procedimentos-oficiais",
-            procedimentos_tecnicos: "/procedimentos-tecnicos",
-            treinamento: "/treinamento",
             modelos_relatorios: "/modelos-relatorios",
-            resolucao_problemas: "/resolucao-problemas",
             duvidas_frequentes: "/duvidas-frequentes",
           };
           allResults.push({
