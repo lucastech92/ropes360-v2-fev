@@ -34,9 +34,6 @@ const Index = () => {
   const modulesByCategory = {
     knowledge: [
       { title: t('modules.procedimentosOficiais'), description: t('modules.descriptions.officialProcedures'), icon: FileCheck, href: "/procedimentos-oficiais", color: "primary" },
-      { title: t('modules.manuaisBridon'), description: t('modules.descriptions.technicalProcedures'), icon: Wrench, href: "/procedimentos-tecnicos", color: "primary" },
-      { title: t('modules.treinamento'), description: t('modules.descriptions.training'), icon: GraduationCap, href: "/treinamento", color: "primary" },
-      { title: t('modules.troubleshooting'), description: t('modules.descriptions.troubleshooting'), icon: AlertTriangle, href: "/resolucao-problemas", color: "primary" },
       { title: t('modules.duvidasFrequentes'), description: t('modules.descriptions.faq'), icon: HelpCircle, href: "/duvidas-frequentes", color: "primary" },
     ],
     operations: [

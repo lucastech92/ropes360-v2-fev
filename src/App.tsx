@@ -11,11 +11,8 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ProcedimentosOficiais from "./pages/ProcedimentosOficiais";
-import ProcedimentosTecnicos from "./pages/ProcedimentosTecnicos";
-import Treinamento from "./pages/Treinamento";
 import TreinamentoISO4309 from "./pages/TreinamentoISO4309";
 import ModelosRelatorios from "./pages/ModelosRelatorios";
-import ResolucaoProblemas from "./pages/ResolucaoProblemas";
 import DuvidasFrequentes from "./pages/DuvidasFrequentes";
 import Historico from "./pages/Historico";
 import CheckList from "./pages/CheckList";
@@ -63,12 +60,9 @@ const App = () => {
               <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/procedimentos-oficiais" element={<ProtectedRoute><ProcedimentosOficiais /></ProtectedRoute>} />
-              <Route path="/procedimentos-tecnicos" element={<ProtectedRoute><ProcedimentosTecnicos /></ProtectedRoute>} />
-              <Route path="/treinamento" element={<ProtectedRoute><Treinamento /></ProtectedRoute>} />
               <Route path="/modelos-relatorios" element={<ProtectedRoute><ModelosRelatorios /></ProtectedRoute>} />
               <Route path="/wire-rope-inspection" element={<ProtectedRoute><WireRopeInspection /></ProtectedRoute>} />
               <Route path="/saved-reports" element={<ProtectedRoute><SavedReports /></ProtectedRoute>} />
-              <Route path="/resolucao-problemas" element={<ProtectedRoute><ResolucaoProblemas /></ProtectedRoute>} />
               <Route path="/duvidas-frequentes" element={<ProtectedRoute><DuvidasFrequentes /></ProtectedRoute>} />
               <Route path="/historico" element={<ProtectedRoute><Historico /></ProtectedRoute>} />
               <Route path="/checklist" element={<ProtectedRoute><CheckList /></ProtectedRoute>} />
