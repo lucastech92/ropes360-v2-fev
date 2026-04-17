@@ -92,7 +92,7 @@ const Certificacoes = () => {
                   <CardDescription>{t("certifications.uploadDescription")}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <CertificationUpload isAdmin={isAdmin} profiles={profiles ?? []} />
+                  <CertificationUpload isAdmin={isAdminOrMod} profiles={profiles ?? []} />
                 </CardContent>
               </Card>
 
@@ -107,7 +107,7 @@ const Certificacoes = () => {
                       </CardDescription>
                     </div>
                     <div className="flex gap-2 flex-wrap">
-                      {isAdmin && certUserIds.length > 0 && (
+                      {isAdminOrMod && certUserIds.length > 0 && (
                         <Select value={userFilter} onValueChange={setUserFilter}>
                           <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder={t("certifications.allTechnicians")} />
@@ -148,9 +148,9 @@ const Certificacoes = () => {
                         <CertificationCard
                           key={cert.id}
                           cert={cert}
-                          canDelete={isAdmin}
+                          canDelete={canDelete}
                           onDelete={(c) => deleteCertification.mutate(c)}
-                          showUser={isAdmin}
+                          showUser={isAdminOrMod}
                           userName={getUserName(cert.user_id)}
                         />
                       ))
@@ -169,7 +169,7 @@ const Certificacoes = () => {
                 <CardDescription>{t("certifications.competencyDescription")}</CardDescription>
               </CardHeader>
               <CardContent>
-                <CompetencyMatrix canEdit={isAdmin} />
+                <CompetencyMatrix canEdit={isAdminOrMod} />
               </CardContent>
             </Card>
           </TabsContent>
@@ -220,7 +220,7 @@ const Certificacoes = () => {
                         <CertificationCard
                           key={cert.id}
                           cert={cert}
-                          showUser={isAdmin}
+                          showUser={isAdminOrMod}
                           userName={getUserName(cert.user_id)}
                         />
                       ))}
