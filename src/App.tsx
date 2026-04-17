@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useLanguagePreference } from "./hooks/useLanguagePreference";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { RoleRoute } from "./components/RoleRoute";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
@@ -59,26 +60,26 @@ const App = () => {
               <Route path="/install" element={<Install />} />
               <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/procedimentos-oficiais" element={<ProtectedRoute><ProcedimentosOficiais /></ProtectedRoute>} />
+              <Route path="/procedimentos-oficiais" element={<ProtectedRoute><RoleRoute allowedRoles={['admin','moderator']}><ProcedimentosOficiais /></RoleRoute></ProtectedRoute>} />
               <Route path="/modelos-relatorios" element={<ProtectedRoute><ModelosRelatorios /></ProtectedRoute>} />
               <Route path="/wire-rope-inspection" element={<ProtectedRoute><WireRopeInspection /></ProtectedRoute>} />
               <Route path="/saved-reports" element={<ProtectedRoute><SavedReports /></ProtectedRoute>} />
-              <Route path="/duvidas-frequentes" element={<ProtectedRoute><DuvidasFrequentes /></ProtectedRoute>} />
-              <Route path="/historico" element={<ProtectedRoute><Historico /></ProtectedRoute>} />
+              <Route path="/duvidas-frequentes" element={<ProtectedRoute><RoleRoute allowedRoles={['admin','moderator']}><DuvidasFrequentes /></RoleRoute></ProtectedRoute>} />
+              <Route path="/historico" element={<ProtectedRoute><RoleRoute allowedRoles={['admin','moderator']}><Historico /></RoleRoute></ProtectedRoute>} />
               <Route path="/checklist" element={<ProtectedRoute><CheckList /></ProtectedRoute>} />
               <Route path="/inventario" element={<ProtectedRoute><Inventario /></ProtectedRoute>} />
               <Route path="/manutencao" element={<Navigate to="/inventario?tab=maintenance" replace />} />
               <Route path="/equipamentos" element={<Navigate to="/inventario?tab=items&type=equipamento" replace />} />
-              <Route path="/gerenciar-usuarios" element={<ProtectedRoute><GerenciarUsuarios /></ProtectedRoute>} />
+              <Route path="/gerenciar-usuarios" element={<ProtectedRoute><RoleRoute allowedRoles={['admin','moderator']}><GerenciarUsuarios /></RoleRoute></ProtectedRoute>} />
               <Route path="/servicos" element={<ProtectedRoute><Servicos /></ProtectedRoute>} />
               <Route path="/novo-servico" element={<ProtectedRoute><NovoServico /></ProtectedRoute>} />
               <Route path="/editar-servico/:id" element={<ProtectedRoute><NovoServico /></ProtectedRoute>} />
               <Route path="/assistente-tecnico" element={<ProtectedRoute><AssistenteTecnico /></ProtectedRoute>} />
-              <Route path="/folha-ponto" element={<ProtectedRoute><FolhaPonto /></ProtectedRoute>} />
+              <Route path="/folha-ponto" element={<ProtectedRoute><RoleRoute allowedRoles={['admin','moderator']}><FolhaPonto /></RoleRoute></ProtectedRoute>} />
               <Route path="/meus-downloads" element={<ProtectedRoute><MeusDownloads /></ProtectedRoute>} />
               <Route path="/treinamento-iso4309" element={<ProtectedRoute><TreinamentoISO4309 /></ProtectedRoute>} />
-              <Route path="/calendario" element={<ProtectedRoute><Calendario /></ProtectedRoute>} />
-              <Route path="/certificacoes" element={<ProtectedRoute><Certificacoes /></ProtectedRoute>} />
+              <Route path="/calendario" element={<ProtectedRoute><RoleRoute allowedRoles={['admin','moderator']}><Calendario /></RoleRoute></ProtectedRoute>} />
+              <Route path="/certificacoes" element={<ProtectedRoute><RoleRoute allowedRoles={['admin','moderator']}><Certificacoes /></RoleRoute></ProtectedRoute>} />
               <Route path="/servico/:id/timeline" element={<ProtectedRoute><ServiceTimeline /></ProtectedRoute>} />
               <Route path="/relatorio-executivo" element={<ProtectedRoute><RelatorioExecutivo /></ProtectedRoute>} />
               <Route path="/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
