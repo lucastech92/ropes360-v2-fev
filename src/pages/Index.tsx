@@ -140,23 +140,24 @@ const Index = () => {
 
         {/* Modules Sections */}
         <div className="container px-4 space-y-10 md:space-y-14 pb-12">
-          {/* Knowledge Section */}
-          <section ref={knowledgeRef} className="scroll-mt-20 space-y-5">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                <BookOpen className="h-5 w-5 text-primary" />
+          {!isInspector && (
+            <section ref={knowledgeRef} className="scroll-mt-20 space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                  <BookOpen className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold">{t('modules.knowledge')}</h2>
+                  <p className="text-sm text-muted-foreground">{t('modules.descriptions.knowledgeSubtitle')}</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl md:text-2xl font-bold">{t('modules.knowledge')}</h2>
-                <p className="text-sm text-muted-foreground">{t('modules.descriptions.knowledgeSubtitle')}</p>
+              <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                {modulesByCategory.knowledge.map((module) => (
+                  <ModuleCard key={module.href} {...module} />
+                ))}
               </div>
-            </div>
-            <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {modulesByCategory.knowledge.map((module) => (
-                <ModuleCard key={module.href} {...module} />
-              ))}
-            </div>
-          </section>
+            </section>
+          )}
 
           {/* Operations Section */}
           <section ref={operationsRef} className="scroll-mt-20 space-y-5">
@@ -176,74 +177,76 @@ const Index = () => {
             </div>
           </section>
 
-          {/* Management Section */}
-          <section ref={managementRef} className="scroll-mt-20 space-y-5">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                <BarChart3 className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-xl md:text-2xl font-bold">{t('modules.management')}</h2>
-                <p className="text-sm text-muted-foreground">{t('modules.descriptions.managementSubtitle')}</p>
-              </div>
-            </div>
-            <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {modulesByCategory.management.map((module) => (
-                <ModuleCard key={module.href} {...module} />
-              ))}
-            </div>
-          </section>
-
-          {/* My Folders Section */}
-          <section ref={foldersRef} className="scroll-mt-20 space-y-6">
-            <Card className="border-border/50 shadow-card overflow-hidden">
-              <CardHeader className="pb-4 bg-gradient-to-r from-muted/50 to-transparent">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                    <FolderOpen className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg md:text-xl">{t('home.myFolders')}</CardTitle>
-                    <CardDescription>{t('home.myFoldersDescription')}</CardDescription>
-                  </div>
+          {!isInspector && (
+            <section ref={managementRef} className="scroll-mt-20 space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                  <BarChart3 className="h-5 w-5 text-primary" />
                 </div>
-              </CardHeader>
-              <CardContent className="pt-4">
-                <FolderManager category="home" onFolderSelect={handleFolderSelect} selectedFolderId={selectedFolderId} />
-              </CardContent>
-            </Card>
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold">{t('modules.management')}</h2>
+                  <p className="text-sm text-muted-foreground">{t('modules.descriptions.managementSubtitle')}</p>
+                </div>
+              </div>
+              <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                {modulesByCategory.management.map((module) => (
+                  <ModuleCard key={module.href} {...module} />
+                ))}
+              </div>
+            </section>
+          )}
 
-            {selectedFolderId && (
-              <Card className="border-border/50 shadow-card animate-fade-in">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-lg md:text-xl flex items-center gap-2">
-                        <FolderOpen className="h-5 w-5 text-primary" />
-                        {selectedFolderName}
-                      </CardTitle>
-                      <CardDescription>{t('home.manageDocumentsSubfolders')}</CardDescription>
+          {!isInspector && (
+            <section ref={foldersRef} className="scroll-mt-20 space-y-6">
+              <Card className="border-border/50 shadow-card overflow-hidden">
+                <CardHeader className="pb-4 bg-gradient-to-r from-muted/50 to-transparent">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                      <FolderOpen className="h-5 w-5 text-primary" />
                     </div>
-                    <Badge variant="secondary" className="hidden sm:flex">{t('home.selectedFolder')}</Badge>
+                    <div>
+                      <CardTitle className="text-lg md:text-xl">{t('home.myFolders')}</CardTitle>
+                      <CardDescription>{t('home.myFoldersDescription')}</CardDescription>
+                    </div>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <Tabs defaultValue="documents">
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="documents">{t('home.documentsTab')}</TabsTrigger>
-                      <TabsTrigger value="upload">{t('home.uploadTab')}</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="documents" className="mt-6">
-                      <DocumentListWithTags folderId={selectedFolderId} category="home" refreshTrigger={refreshTrigger} />
-                    </TabsContent>
-                    <TabsContent value="upload" className="mt-6">
-                      <DocumentUploadWithTags folderId={selectedFolderId} category="home" onUploadComplete={() => setRefreshTrigger((prev) => prev + 1)} />
-                    </TabsContent>
-                  </Tabs>
+                <CardContent className="pt-4">
+                  <FolderManager category="home" onFolderSelect={handleFolderSelect} selectedFolderId={selectedFolderId} />
                 </CardContent>
               </Card>
-            )}
-          </section>
+
+              {selectedFolderId && (
+                <Card className="border-border/50 shadow-card animate-fade-in">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-lg md:text-xl flex items-center gap-2">
+                          <FolderOpen className="h-5 w-5 text-primary" />
+                          {selectedFolderName}
+                        </CardTitle>
+                        <CardDescription>{t('home.manageDocumentsSubfolders')}</CardDescription>
+                      </div>
+                      <Badge variant="secondary" className="hidden sm:flex">{t('home.selectedFolder')}</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <Tabs defaultValue="documents">
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="documents">{t('home.documentsTab')}</TabsTrigger>
+                        <TabsTrigger value="upload">{t('home.uploadTab')}</TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="documents" className="mt-6">
+                        <DocumentListWithTags folderId={selectedFolderId} category="home" refreshTrigger={refreshTrigger} />
+                      </TabsContent>
+                      <TabsContent value="upload" className="mt-6">
+                        <DocumentUploadWithTags folderId={selectedFolderId} category="home" onUploadComplete={() => setRefreshTrigger((prev) => prev + 1)} />
+                      </TabsContent>
+                    </Tabs>
+                  </CardContent>
+                </Card>
+              )}
+            </section>
+          )}
 
           {/* Help Footer */}
           <section className="relative overflow-hidden rounded-2xl border bg-gradient-to-r from-primary/5 via-card to-accent/5 p-6 md:p-8">
