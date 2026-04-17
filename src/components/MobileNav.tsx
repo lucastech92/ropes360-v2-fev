@@ -27,6 +27,7 @@ import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ThemeToggle } from "./ThemeToggle";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface NavItem {
   label: string;
@@ -39,6 +40,7 @@ export const MobileNav = () => {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const { isInspector } = useUserRole();
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -57,7 +59,7 @@ export const MobileNav = () => {
     }
   };
 
-  const navItems: { section: string; items: NavItem[] }[] = [
+  const allNavSections: { section: string; items: NavItem[]; restricted?: boolean }[] = [
     {
       section: t('nav.main'),
       items: [
@@ -70,6 +72,7 @@ export const MobileNav = () => {
     },
     {
       section: t('modules.knowledge'),
+      restricted: true,
       items: [
         { label: t('modules.procedimentosOficiais'), href: "/procedimentos-oficiais", icon: FileText },
         { label: t('nav.iso4309'), href: "/treinamento-iso4309", icon: Gamepad2 },
@@ -87,6 +90,7 @@ export const MobileNav = () => {
     },
     {
       section: t('modules.management'),
+      restricted: true,
       items: [
         { label: t('modules.historico'), href: "/historico", icon: History },
         { label: t('modules.folhaPonto'), href: "/folha-ponto", icon: Calendar },
@@ -95,6 +99,8 @@ export const MobileNav = () => {
       ]
     },
   ];
+
+  const navItems = isInspector ? allNavSections.filter((s) => !s.restricted) : allNavSections;
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

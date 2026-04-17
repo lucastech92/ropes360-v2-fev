@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/EmptyState";
 import { Download, Trash2, FileText, Calendar, FolderOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useUserRole } from "@/hooks/useUserRole";
 import { logActivity } from "@/utils/activityLogger";
 import { OfflineDocumentButton } from "@/components/OfflineDocumentButton";
 import {
@@ -47,6 +48,7 @@ export const DocumentListWithTags = ({
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { canDelete } = useUserRole();
 
   useEffect(() => {
     fetchDocuments();
@@ -286,31 +288,33 @@ export const DocumentListWithTags = ({
               >
                 <Download className="h-4 w-4" />
               </Button>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Deletar documento?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Tem certeza que deseja deletar "{doc.title}"? Esta ação não pode
-                      ser desfeita.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => handleDelete(doc.id, doc.file_path, doc.title)}
-                      className="bg-destructive hover:bg-destructive/90"
-                    >
-                      Deletar
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              {canDelete && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Deletar documento?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Tem certeza que deseja deletar "{doc.title}"? Esta ação não pode
+                        ser desfeita.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDelete(doc.id, doc.file_path, doc.title)}
+                        className="bg-destructive hover:bg-destructive/90"
+                      >
+                        Deletar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
             </div>
           </div>
         </div>

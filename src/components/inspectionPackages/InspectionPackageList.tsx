@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, Download, FileText, Package, Search, Trash2, CheckCircle2, Calendar } from "lucide-react";
 import { useInspectionPackages, InspectionFileType } from "@/hooks/useInspectionPackages";
+import { useUserRole } from "@/hooks/useUserRole";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -25,6 +26,7 @@ const FILE_TYPE_VARIANTS: Record<InspectionFileType, "default" | "secondary" | "
 
 export const InspectionPackageList = () => {
   const { packages, loading, downloadFile, deletePackage } = useInspectionPackages();
+  const { canDelete } = useUserRole();
   const [search, setSearch] = useState("");
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
 
@@ -150,16 +152,18 @@ export const InspectionPackageList = () => {
                           <Button size="sm" variant="outline" onClick={() => downloadAll(pkg.id)}>
                             <Download className="h-4 w-4 mr-2" /> Baixar todos
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => {
-                              if (confirm(`Excluir pacote ${pkg.tag_number}?`)) deletePackage(pkg.id);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" /> Excluir
-                          </Button>
+                          {canDelete && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => {
+                                if (confirm(`Excluir pacote ${pkg.tag_number}?`)) deletePackage(pkg.id);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" /> Excluir
+                            </Button>
+                          )}
                         </div>
                       </>
                     ) : (

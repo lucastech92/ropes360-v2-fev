@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Folder, Plus, Trash2, FolderOpen, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useUserRole } from "@/hooks/useUserRole";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,6 +40,7 @@ export const FolderManager = ({ category, onFolderSelect, selectedFolderId }: Fo
     { id: null, name: "Raiz" }
   ]);
   const { toast } = useToast();
+  const { canDelete } = useUserRole();
 
   useEffect(() => {
     fetchFolders();
@@ -209,31 +211,33 @@ export const FolderManager = ({ category, onFolderSelect, selectedFolderId }: Fo
                     <span className="font-medium">{folder.name}</span>
                   </button>
                   
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Deletar pasta?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Tem certeza que deseja deletar a pasta "{folder.name}"? 
-                          Todos os arquivos e subpastas serão removidos permanentemente.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => deleteFolder(folder.id, folder.name)}
-                          className="bg-destructive hover:bg-destructive/90"
-                        >
-                          Deletar
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  {canDelete && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Deletar pasta?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Tem certeza que deseja deletar a pasta "{folder.name}"? 
+                            Todos os arquivos e subpastas serão removidos permanentemente.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => deleteFolder(folder.id, folder.name)}
+                            className="bg-destructive hover:bg-destructive/90"
+                          >
+                            Deletar
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
                 </div>
               </CardContent>
             </Card>
