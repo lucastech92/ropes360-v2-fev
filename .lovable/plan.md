@@ -1,59 +1,78 @@
 
 
-# Pacotes de Inspeção — Reorganização de Modelos e Relatórios
+# Sistema de Permissões por Cargo (Admin / Moderador / Inspetor)
 
-## Problema Atual
-A página "Modelos e Relatórios" é genérica — apenas lista documentos avulsos. Não existe o conceito de **pacote de inspeção** que agrupe os arquivos relacionados a uma mesma inspeção (certificado Word com TAG incremental tipo "LS BR 001", arquivo SLB do MRT, e o relatório digital).
+## Objetivo
+
+Aplicar consistentemente as três regras de cargo em todo o app:
+
+| Cargo | Visibilidade | Download | Upload | Editar | Excluir |
+|---|---|---|---|---|---|
+| **Admin** | Todos os módulos | ✅ | ✅ | ✅ | ✅ |
+| **Moderador** | Todos os módulos | ✅ | ✅ | ✅ | ❌ |
+| **Inspetor** | Apenas **Operações** (Serviços, Checklists, Modelos e Relatórios, Inventário) | ✅ | ✅ | ✅ | ❌ |
+
+## Estado atual
+
+- Tabela `user_roles` já existe com enum `app_role` (`admin`, `moderator`, `inspector`, `viewer`) e função `has_role` (security definer).
+- RLS no banco já está configurado: `DELETE` quase sempre restrito a admin; `UPDATE/INSERT` aberto para autenticados na maioria das tabelas. Isso já cobre o backend.
+- Frontend é inconsistente: cada página faz seu próprio fetch de role (Inventário, Certificações, Folha de Ponto, Assistente Técnico). Não há gate central por role na home.
 
 ## O que será construído
 
-Uma nova aba **"Pacotes de Inspeção"** na página Modelos e Relatórios, com:
+### 1. Hook central de permissões `src/hooks/useUserRole.ts`
+Retorna `{ role, isAdmin, isModerator, isInspector, canDelete, canEdit, canUpload, isLoading }`. Faz uma única chamada ao montar e cacheia via React Query, eliminando os múltiplos fetches espalhados.
 
-1. **Tabela `inspection_packages`** no banco de dados:
-   - `id`, `user_id`, `tag_number` (ex: "LS BR 0268"), `client`, `service_id` (FK opcional para services), `description`, `inspection_date`, `created_at`
-   - Auto-incremento do número sequencial baseado no prefixo
+### 2. Filtro de módulos na Home (`src/pages/Index.tsx`)
+- Admin/Moderador → vê **Knowledge + Operations + Management** (como hoje).
+- Inspetor → vê **apenas Operations** (Serviços, Checklists, Modelos e Relatórios, Inventário). As seções Knowledge, Management e My Folders ficam ocultas, e a barra de navegação rápida é ajustada.
 
-2. **Tabela `inspection_package_files`** para os arquivos de cada pacote:
-   - `id`, `package_id`, `file_type` (enum: `certificate`, `slb_mrt`, `report`, `other`), `file_name`, `file_path`, `file_size`, `uploaded_at`
+### 3. Filtro do menu lateral mobile (`src/components/MobileNav.tsx`)
+Mesma lógica: inspetor só enxerga "Principal" (Home, Assistente, Downloads, Install) + "Operações". Knowledge e Management ocultos.
 
-3. **UI do Pacote de Inspeção:**
-   - Card de criação de novo pacote com campo para TAG (auto-sugerido com próximo número), cliente, data, descrição
-   - Zona de upload multi-arquivo com labels por tipo (Certificado Word, Arquivo SLB/MRT, Outros)
-   - Lista de pacotes com busca por TAG, cliente, data
-   - Visualização expandida mostrando todos os arquivos do pacote com download individual ou em lote
-   - Badge indicando quantos arquivos cada pacote tem e se está completo (certificado + SLB)
+### 4. Filtro de rotas (`src/App.tsx`)
+Wrapper `<RoleRoute allowedRoles={['admin','moderator']}>` para bloquear acesso direto a `/historico`, `/folha-ponto`, `/calendario`, `/certificacoes`, `/gerenciar-usuarios`, `/duvidas-frequentes`, `/procedimentos-oficiais` quando for inspetor (redireciona para `/`).
 
-4. **Vinculação opcional ao Serviço JBR** — dropdown para associar o pacote a uma ordem de serviço existente
+### 5. Esconder botões "Excluir" para Moderador e Inspetor
+Nos componentes onde existem ações de delete na UI:
+- `src/components/inventory/InventoryItemCard.tsx` — esconder item "Excluir" do dropdown
+- `src/components/inspectionPackages/InspectionPackageList.tsx` — esconder botão delete
+- `src/components/checklist/*` — esconder botões delete de checklists/itens
+- `src/components/certifications/CertificationCard.tsx` — `canDelete` só se admin
+- `src/pages/DuvidasFrequentes.tsx` — esconder Trash2
+- `src/pages/Servicos.tsx`, `src/components/FolderManager.tsx`, `src/components/DocumentListWithTags.tsx` — esconder delete
 
-5. **RLS**: Todos os autenticados visualizam; inserção por user_id; delete apenas admin
+Tudo passa a usar `useUserRole().canDelete` (= `isAdmin`).
 
-## Fluxo do usuário
+### 6. RLS — sem mudanças
+O banco já reflete a regra ("Only admins can delete..."). Confirmado nas policies de `inventory`, `inspection_packages`, `checklists`, `documents`, `services`, `certifications`, `folders`, etc.
+
+## Fluxo visual
+
 ```text
-Modelos e Relatórios
-├── Pacotes de Inspeção  ← NOVA aba principal
-│   ├── [+ Novo Pacote]
-│   │   ├── TAG: LS BR 0269 (auto)
-│   │   ├── Cliente: Petrobras
-│   │   ├── Serviço JBR: JBR-2024-015 (opcional)
-│   │   ├── Upload Certificado (.docx/.pdf)
-│   │   ├── Upload SLB/MRT (.slb/.dat/.csv)
-│   │   └── Upload Outros
-│   └── Lista de pacotes (busca, filtro, download)
-├── Templates Digitais (existente)
-├── Modelos Disponíveis (existente)
-└── Upload de Modelo (existente)
+Login
+  ├─ ADMIN     → Home completa (3 seções) + todos os botões
+  ├─ MODERATOR → Home completa (3 seções) + botões SEM "Excluir"
+  └─ INSPECTOR → Home só com "Operações" (4 cards) + botões SEM "Excluir"
+                 Rotas bloqueadas: /historico, /folha-ponto, /certificacoes,
+                                   /gerenciar-usuarios, /duvidas-frequentes,
+                                   /procedimentos-oficiais, /calendario
 ```
 
 ## Arquivos afetados
-- **Nova migração SQL** — tabelas `inspection_packages` e `inspection_package_files` + RLS + storage
-- **Novo hook** `src/hooks/useInspectionPackages.ts` — CRUD + auto-tag
-- **Novo componente** `src/components/inspectionPackages/InspectionPackageForm.tsx` — formulário de criação
-- **Novo componente** `src/components/inspectionPackages/InspectionPackageList.tsx` — lista com busca e expansão
-- **Editar** `src/pages/ModelosRelatorios.tsx` — adicionar nova aba como default
 
-## Detalhes técnicos
-- O TAG auto-incrementa via query `SELECT tag_number FROM inspection_packages WHERE tag_number LIKE 'LS BR%' ORDER BY tag_number DESC LIMIT 1` e incrementa o número
-- Arquivos armazenados no bucket `documents` sob path `inspection_packages/{package_id}/{file_type}/{filename}`
-- Aceitar extensões: `.docx`, `.pdf`, `.slb`, `.dat`, `.csv`, `.xlsx`, `.jpg`, `.png`
-- Limite de 20MB por arquivo (consistente com o resto do app)
+- **Novo**: `src/hooks/useUserRole.ts`
+- **Novo**: `src/components/RoleRoute.tsx`
+- **Editar**: `src/pages/Index.tsx`, `src/components/MobileNav.tsx`, `src/App.tsx`
+- **Editar (esconder delete)**: `src/components/inventory/InventoryItemCard.tsx`, `src/components/inspectionPackages/InspectionPackageList.tsx`, `src/components/FolderManager.tsx`, `src/components/DocumentListWithTags.tsx`, `src/pages/Servicos.tsx`, `src/pages/DuvidasFrequentes.tsx`, `src/pages/Certificacoes.tsx`, e demais pontos com `Trash2` identificados
+- **Refatorar (opcional)**: substituir os fetches manuais de role em `Inventario.tsx`, `Certificacoes.tsx`, `FolhaPonto.tsx`, `AssistenteTecnico.tsx` para usar o novo hook (consistência)
+
+## Observação importante
+
+A regra "Inspetor só vê Operações" remove o módulo **Certificações** da visão dele. Como inspetores normalmente precisam ver as próprias certificações vencendo, vale confirmar:
+
+- Opção A: Inspetor **não** vê `/certificacoes` (regra estrita, como descrito).
+- Opção B: Inspetor vê `/certificacoes` apenas das próprias (RLS já permite isso).
+
+Vou seguir com a **Opção A** (regra estrita conforme solicitado). Se preferir B, basta dizer antes da implementação.
 
