@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,13 +12,15 @@ import { useCertifications, getCertStatus } from "@/hooks/useCertifications";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const Certificacoes = () => {
   const { t } = useTranslation();
   const { certifications, isLoadingCerts, deleteCertification } = useCertifications();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [userFilter, setUserFilter] = useState<string>("all");
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin, isModerator, canDelete } = useUserRole();
+  const isAdminOrMod = isAdmin || isModerator;
 
   const { data: profiles } = useQuery({
     queryKey: ["user_profiles_for_certs"],
@@ -30,21 +32,6 @@ const Certificacoes = () => {
       return data;
     },
   });
-
-  useEffect(() => {
-    const checkRole = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .in("role", ["admin", "moderator"])
-        .maybeSingle();
-      setIsAdmin(!!data);
-    };
-    checkRole();
-  }, []);
 
   const getUserName = (userId: string) => {
     const p = profiles?.find((pr) => pr.user_id === userId);
