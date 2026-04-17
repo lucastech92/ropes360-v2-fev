@@ -15,9 +15,11 @@ import { DocumentListWithTags } from "@/components/DocumentListWithTags";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const Index = () => {
   const { t } = useTranslation();
+  const { isInspector } = useUserRole();
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [selectedFolderName, setSelectedFolderName] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -51,12 +53,13 @@ const Index = () => {
     ],
   };
 
-  const navItems = [
-    { label: t('modules.knowledge'), icon: BookOpen, ref: knowledgeRef, color: "bg-primary/10 text-primary" },
-    { label: t('modules.operations'), icon: Briefcase, ref: operationsRef, color: "bg-accent/10 text-accent-foreground" },
-    { label: t('modules.management'), icon: BarChart3, ref: managementRef, color: "bg-primary/10 text-primary" },
-    { label: t('home.myFolders'), icon: FolderOpen, ref: foldersRef, color: "bg-primary/10 text-primary" },
+  const allNavItems = [
+    { label: t('modules.knowledge'), icon: BookOpen, ref: knowledgeRef, color: "bg-primary/10 text-primary", key: "knowledge" },
+    { label: t('modules.operations'), icon: Briefcase, ref: operationsRef, color: "bg-accent/10 text-accent-foreground", key: "operations" },
+    { label: t('modules.management'), icon: BarChart3, ref: managementRef, color: "bg-primary/10 text-primary", key: "management" },
+    { label: t('home.myFolders'), icon: FolderOpen, ref: foldersRef, color: "bg-primary/10 text-primary", key: "folders" },
   ];
+  const navItems = isInspector ? allNavItems.filter((n) => n.key === "operations") : allNavItems;
 
   const handleFolderSelect = (folderId: string | null, folderName: string | null) => {
     setSelectedFolderId(folderId);
