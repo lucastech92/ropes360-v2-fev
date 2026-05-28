@@ -38,6 +38,7 @@ export const DocumentList = ({ category, employeeFolder, refreshTrigger }: Docum
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { canDelete } = useUserRole();
 
   const fetchDocuments = async () => {
     setLoading(true);
@@ -210,13 +211,15 @@ export const DocumentList = ({ category, employeeFolder, refreshTrigger }: Docum
             >
               <Download className="h-4 w-4" />
             </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handleDelete(doc.id, doc.file_path, doc.file_name)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            {canDelete && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleDelete(doc.id, doc.file_path, doc.file_name)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </div>
       ))}
