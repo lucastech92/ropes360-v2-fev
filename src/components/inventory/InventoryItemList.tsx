@@ -17,11 +17,14 @@ interface InventoryItemListProps {
   items: UnifiedInventoryItem[];
   onAdd: () => void;
   onEdit: (item: UnifiedInventoryItem) => void;
+  onAdd: () => void;
+  onEdit: (item: UnifiedInventoryItem) => void;
   onDelete: (id: string) => void;
   onCheckout?: (item: UnifiedInventoryItem) => void;
   onCheckin?: (item: UnifiedInventoryItem) => void;
   onViewDetails?: (item: UnifiedInventoryItem) => void;
   canManage: boolean;
+  canDelete?: boolean;
 }
 
 export default function InventoryItemList({
@@ -33,6 +36,7 @@ export default function InventoryItemList({
   onCheckin,
   onViewDetails,
   canManage,
+  canDelete = false,
 }: InventoryItemListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
@@ -169,6 +173,7 @@ export default function InventoryItemList({
               onCheckin={onCheckin}
               onViewDetails={onViewDetails}
               canManage={canManage}
+              canDelete={canDelete}
             />
           ))}
         </div>

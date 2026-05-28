@@ -59,6 +59,7 @@ export default function InventoryItemCard({
   onCheckin,
   onViewDetails,
   canManage,
+  canDelete = false,
 }: InventoryItemCardProps) {
   const isEquipment = item.item_type === "equipamento";
   const isLowStock = !isEquipment && item.min_quantity && item.quantity <= item.min_quantity;
