@@ -42,6 +42,7 @@ interface InspectionReport {
 const SavedReports = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { canDelete } = useUserRole();
   const [reports, setReports] = useState<InspectionReport[]>([]);
   const [filteredReports, setFilteredReports] = useState<InspectionReport[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -213,13 +214,15 @@ const SavedReports = () => {
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setDeleteReportId(report.id)}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
+                            {canDelete && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setDeleteReportId(report.id)}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>

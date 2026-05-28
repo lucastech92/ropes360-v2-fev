@@ -24,6 +24,7 @@ import {
 // Equipment suggestions removed - now managed in unified inventory module
 import { ServiceCollaboratorsSelect } from "@/components/service/ServiceCollaboratorsSelect";
 import { ServiceChecklistsSelect } from "@/components/service/ServiceChecklistsSelect";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const ESCOPO_OPTIONS = [
   "MRT - Eletromagnético",
