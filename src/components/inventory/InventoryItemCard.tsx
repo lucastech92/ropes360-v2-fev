@@ -32,6 +32,7 @@ interface InventoryItemCardProps {
   onCheckin?: (item: UnifiedInventoryItem) => void;
   onViewDetails?: (item: UnifiedInventoryItem) => void;
   canManage: boolean;
+  canDelete?: boolean;
 }
 
 const statusConfig: Record<EquipmentStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; className: string }> = {
@@ -152,13 +153,15 @@ export default function InventoryItemCard({
                       <Edit className="h-4 w-4 mr-2" />
                       Editar
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => onDelete(item.id)}
-                      className="text-destructive focus:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Excluir
-                    </DropdownMenuItem>
+                    {canDelete && (
+                      <DropdownMenuItem
+                        onClick={() => onDelete(item.id)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Excluir
+                      </DropdownMenuItem>
+                    )}
                   </>
                 )}
               </DropdownMenuContent>
