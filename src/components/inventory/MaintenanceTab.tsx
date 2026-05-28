@@ -348,9 +348,11 @@ export default function MaintenanceTab({
                             <Button size="sm" variant="ghost" onClick={() => handleEdit(record)}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={() => handleDelete(record.id)}>
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            {canDelete && (
+                              <Button size="sm" variant="ghost" onClick={() => handleDelete(record.id)}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
                           </>
                         )}
                       </div>
