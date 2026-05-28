@@ -27,6 +27,7 @@ import { InventoryAuditTrail } from "@/components/inventory/InventoryAuditTrail"
 import CalibrationTab from "@/components/inventory/CalibrationTab";
 import EquipmentCheckout from "@/components/equipment/EquipmentCheckout";
 import EquipmentCheckin from "@/components/equipment/EquipmentCheckin";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const Inventario = () => {
   const { t } = useTranslation();

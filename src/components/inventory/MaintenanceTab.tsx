@@ -49,6 +49,17 @@ interface MaintenanceRecord {
 interface MaintenanceTabProps {
   equipmentItems: UnifiedInventoryItem[];
   canManage: boolean;
+  canDelete?: boolean;
+  preSelectedItemId?: string | null;
+  onClearPreselection?: () => void;
+}
+
+const MaintenanceTab = ({
+  equipmentItems,
+  canManage,
+  canDelete = false,
+  equipmentItems: UnifiedInventoryItem[];
+  canManage: boolean;
   preSelectedItemId?: string | null;
   onClearPreselection?: () => void;
 }
