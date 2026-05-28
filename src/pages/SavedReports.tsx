@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { FileText, Search, Pencil, Trash2, Clock, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useUserRole } from "@/hooks/useUserRole";
 import { format } from "date-fns";
 
 interface InspectionReport {
