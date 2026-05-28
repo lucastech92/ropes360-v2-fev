@@ -17,8 +17,6 @@ interface InventoryItemListProps {
   items: UnifiedInventoryItem[];
   onAdd: () => void;
   onEdit: (item: UnifiedInventoryItem) => void;
-  onAdd: () => void;
-  onEdit: (item: UnifiedInventoryItem) => void;
   onDelete: (id: string) => void;
   onCheckout?: (item: UnifiedInventoryItem) => void;
   onCheckin?: (item: UnifiedInventoryItem) => void;
