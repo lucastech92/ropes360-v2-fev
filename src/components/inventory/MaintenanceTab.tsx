@@ -54,21 +54,12 @@ interface MaintenanceTabProps {
   onClearPreselection?: () => void;
 }
 
-const MaintenanceTab = ({
+export default function MaintenanceTab({
   equipmentItems,
   canManage,
   canDelete = false,
-  equipmentItems: UnifiedInventoryItem[];
-  canManage: boolean;
-  preSelectedItemId?: string | null;
-  onClearPreselection?: () => void;
-}
-
-export default function MaintenanceTab({ 
-  equipmentItems, 
-  canManage, 
-  preSelectedItemId, 
-  onClearPreselection 
+  preSelectedItemId,
+  onClearPreselection
 }: MaintenanceTabProps) {
   const [records, setRecords] = useState<MaintenanceRecord[]>([]);
   const [filteredRecords, setFilteredRecords] = useState<MaintenanceRecord[]>([]);
