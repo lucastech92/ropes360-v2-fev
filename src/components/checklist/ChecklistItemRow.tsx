@@ -2,6 +2,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { MinusCircle, PlusCircle, Trash2 } from "lucide-react";
 import { ChecklistItem } from "@/hooks/useChecklistData";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface ChecklistItemRowProps {
   item: ChecklistItem;
@@ -10,6 +11,7 @@ interface ChecklistItemRowProps {
 }
 
 export const ChecklistItemRow = ({ item, onQuantityChange, onDelete }: ChecklistItemRowProps) => {
+  const { canDelete } = useUserRole();
   return (
     <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50">
       <Checkbox
@@ -44,14 +46,16 @@ export const ChecklistItemRow = ({ item, onQuantityChange, onDelete }: Checklist
           <PlusCircle className="h-4 w-4" />
         </Button>
       </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 text-destructive hover:text-destructive"
-        onClick={() => onDelete(item.id)}
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
+      {canDelete && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-destructive hover:text-destructive"
+          onClick={() => onDelete(item.id)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      )}
     </div>
   );
 };

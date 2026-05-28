@@ -49,15 +49,17 @@ interface MaintenanceRecord {
 interface MaintenanceTabProps {
   equipmentItems: UnifiedInventoryItem[];
   canManage: boolean;
+  canDelete?: boolean;
   preSelectedItemId?: string | null;
   onClearPreselection?: () => void;
 }
 
-export default function MaintenanceTab({ 
-  equipmentItems, 
-  canManage, 
-  preSelectedItemId, 
-  onClearPreselection 
+export default function MaintenanceTab({
+  equipmentItems,
+  canManage,
+  canDelete = false,
+  preSelectedItemId,
+  onClearPreselection
 }: MaintenanceTabProps) {
   const [records, setRecords] = useState<MaintenanceRecord[]>([]);
   const [filteredRecords, setFilteredRecords] = useState<MaintenanceRecord[]>([]);
@@ -337,9 +339,11 @@ export default function MaintenanceTab({
                             <Button size="sm" variant="ghost" onClick={() => handleEdit(record)}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={() => handleDelete(record.id)}>
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            {canDelete && (
+                              <Button size="sm" variant="ghost" onClick={() => handleDelete(record.id)}>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
                           </>
                         )}
                       </div>

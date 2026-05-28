@@ -27,6 +27,7 @@ import { InventoryAuditTrail } from "@/components/inventory/InventoryAuditTrail"
 import CalibrationTab from "@/components/inventory/CalibrationTab";
 import EquipmentCheckout from "@/components/equipment/EquipmentCheckout";
 import EquipmentCheckin from "@/components/equipment/EquipmentCheckin";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const Inventario = () => {
   const { t } = useTranslation();
@@ -46,7 +47,8 @@ const Inventario = () => {
     fetchItems,
   } = useUnifiedInventory();
 
-  const [canManage, setCanManage] = useState(false);
+  const { isAdmin, isModerator, canDelete } = useUserRole();
+  const canManage = isAdmin || isModerator;
   const [formOpen, setFormOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<UnifiedInventoryItem | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -59,23 +61,6 @@ const Inventario = () => {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [preselectedMaintenanceItem, setPreselectedMaintenanceItem] = useState<string | null>(null);
   const [preselectedCalibrationItem, setPreselectedCalibrationItem] = useState<string | null>(null);
-
-  useEffect(() => {
-    const checkRole = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return;
-
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userData.user.id);
-
-      const userRoles = roles?.map((r) => r.role) || [];
-      setCanManage(userRoles.includes("admin") || userRoles.includes("moderator"));
-    };
-
-    checkRole();
-  }, []);
 
   const handleAdd = () => {
     setSelectedItem(null);
@@ -230,6 +215,7 @@ const Inventario = () => {
                   onCheckin={handleCheckin}
                   onViewDetails={handleViewDetails}
                   canManage={canManage}
+                  canDelete={canDelete}
                 />
               )}
             </TabsContent>
@@ -247,6 +233,7 @@ const Inventario = () => {
               <MaintenanceTab 
                 equipmentItems={equipmentItems} 
                 canManage={canManage}
+                canDelete={canDelete}
                 preSelectedItemId={preselectedMaintenanceItem}
                 onClearPreselection={() => setPreselectedMaintenanceItem(null)}
               />

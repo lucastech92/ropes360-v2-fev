@@ -24,6 +24,7 @@ import {
 // Equipment suggestions removed - now managed in unified inventory module
 import { ServiceCollaboratorsSelect } from "@/components/service/ServiceCollaboratorsSelect";
 import { ServiceChecklistsSelect } from "@/components/service/ServiceChecklistsSelect";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const ESCOPO_OPTIONS = [
   "MRT - Eletromagnético",
@@ -39,6 +40,7 @@ const NovoServico = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { toast } = useToast();
+  const { canDelete } = useUserRole();
   const [loading, setLoading] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>([]);
@@ -491,7 +493,7 @@ const NovoServico = () => {
               </div>
 
               <div className="flex justify-between gap-4">
-                {id && (
+                {id && canDelete && (
                   <Button
                     type="button"
                     variant="outline"
