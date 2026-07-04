@@ -134,9 +134,16 @@ const Index = () => {
         </nav>
 
         {/* Health Score + Metrics Section */}
+        {/* Personalized Dashboard */}
         <section className="container py-8 md:py-10 px-4 space-y-6">
-          <HealthScoreGauge compact />
-          <DashboardMetrics />
+          {isInspector ? (
+            <InspectorHome />
+          ) : (
+            <>
+              <HealthScoreGauge compact />
+              <DashboardMetrics />
+            </>
+          )}
         </section>
 
         {/* Modules Sections */}
