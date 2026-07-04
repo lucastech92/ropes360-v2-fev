@@ -10,6 +10,7 @@ import { MobileNav } from "./MobileNav";
 import { ThemeToggle } from "./ThemeToggle";
 import { NavigationBreadcrumb } from "./NavigationBreadcrumb";
 import { ForceUpdateButton } from "./ForceUpdateButton";
+import { CommandPaletteHeaderButton } from "./CommandPalette";
 import {
   Tooltip,
   TooltipContent,
@@ -128,7 +129,10 @@ const Header = () => {
 
             {/* Divider */}
             <div className="hidden md:block h-6 w-px bg-border mx-1" />
-            
+
+            {/* Global search trigger */}
+            <CommandPaletteHeaderButton />
+
             {/* Actions */}
             <div className="flex items-center gap-0.5 md:gap-1">
               <ForceUpdateButton />

@@ -5,7 +5,8 @@ import Header from "@/components/Header";
 import ModuleCard from "@/components/ModuleCard";
 import { DashboardMetrics } from "@/components/DashboardMetrics";
 import { HealthScoreGauge } from "@/components/dashboard/HealthScoreGauge";
-import { HomeSearch } from "@/components/HomeSearch";
+import { CommandPaletteTrigger } from "@/components/CommandPalette";
+import { InspectorHome } from "@/components/dashboard/InspectorHome";
 import { FileCheck, Wrench, GraduationCap, FileText, AlertTriangle, HelpCircle, History, ClipboardList, Package, FolderOpen, Shield, Calendar, CalendarDays, Sparkles, ArrowRight, BookOpen, Briefcase, BarChart3, Download, ChevronDown, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -98,7 +99,7 @@ const Index = () => {
               </p>
 
               <div className="flex justify-center pt-2 animate-fade-in">
-                <HomeSearch />
+                <CommandPaletteTrigger />
               </div>
 
               <div className="flex justify-center pt-1 animate-fade-in">
@@ -133,9 +134,16 @@ const Index = () => {
         </nav>
 
         {/* Health Score + Metrics Section */}
+        {/* Personalized Dashboard */}
         <section className="container py-8 md:py-10 px-4 space-y-6">
-          <HealthScoreGauge compact />
-          <DashboardMetrics />
+          {isInspector ? (
+            <InspectorHome />
+          ) : (
+            <>
+              <HealthScoreGauge compact />
+              <DashboardMetrics />
+            </>
+          )}
         </section>
 
         {/* Modules Sections */}
@@ -249,7 +257,7 @@ const Index = () => {
           )}
 
           {/* Help Footer */}
-          <section className="relative overflow-hidden rounded-2xl border bg-gradient-to-r from-primary/5 via-card to-accent/5 p-6 md:p-8">
+          <section className="relative overflow-hidden rounded-2xl border bg-gradient-to-r from-primary/10 via-card to-accent/10 dark:from-primary/15 dark:via-card dark:to-accent/15 p-6 md:p-8">
             <div className="absolute inset-0 bg-gradient-mesh opacity-50" />
             <div className="relative flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
               <div className="space-y-1">

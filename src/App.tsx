@@ -37,8 +37,16 @@ import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import { NotificationPermissionPrompt } from "./components/NotificationPermissionPrompt";
 import { PWAUpdatePrompt } from "./components/PWAUpdatePrompt";
 import { VersionIndicator } from "./components/VersionIndicator";
+import { CommandPaletteProvider, CommandPaletteFab } from "./components/CommandPalette";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => {
   useLanguagePreference();
@@ -55,7 +63,9 @@ const App = () => {
           <PWAUpdatePrompt />
           <VersionIndicator />
           <BrowserRouter>
-            <Routes>
+            <CommandPaletteProvider>
+              <CommandPaletteFab />
+              <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/install" element={<Install />} />
               <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
@@ -85,7 +95,8 @@ const App = () => {
               <Route path="/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
-            </Routes>
+              </Routes>
+            </CommandPaletteProvider>
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
