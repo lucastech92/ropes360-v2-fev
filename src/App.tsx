@@ -63,7 +63,9 @@ const App = () => {
           <PWAUpdatePrompt />
           <VersionIndicator />
           <BrowserRouter>
-            <Routes>
+            <CommandPaletteProvider>
+              <CommandPaletteFab />
+              <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/install" element={<Install />} />
               <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
@@ -93,7 +95,8 @@ const App = () => {
               <Route path="/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
-            </Routes>
+              </Routes>
+            </CommandPaletteProvider>
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
