@@ -257,7 +257,7 @@ const Index = () => {
           )}
 
           {/* Help Footer */}
-          <section className="relative overflow-hidden rounded-2xl border bg-gradient-to-r from-primary/5 via-card to-accent/5 p-6 md:p-8">
+          <section className="relative overflow-hidden rounded-2xl border bg-gradient-to-r from-primary/10 via-card to-accent/10 dark:from-primary/15 dark:via-card dark:to-accent/15 p-6 md:p-8">
             <div className="absolute inset-0 bg-gradient-mesh opacity-50" />
             <div className="relative flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
               <div className="space-y-1">
