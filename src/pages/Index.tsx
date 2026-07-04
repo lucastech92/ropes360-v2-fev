@@ -99,7 +99,7 @@ const Index = () => {
               </p>
 
               <div className="flex justify-center pt-2 animate-fade-in">
-                <HomeSearch />
+                <CommandPaletteTrigger />
               </div>
 
               <div className="flex justify-center pt-1 animate-fade-in">
