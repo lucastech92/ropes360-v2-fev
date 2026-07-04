@@ -33,7 +33,7 @@ export const InspectorHome = () => {
 
       const { data, error } = await supabase
         .from("services")
-        .select("id, codigo_jbr, cliente, local, data_inicio, data_termino, status")
+        .select("id, codigo_jbr, cliente, local, data_inicio, data_termino")
         .or(filters.join(","))
         .lte("data_inicio", today)
         .gte("data_termino", today)
@@ -103,7 +103,7 @@ export const InspectorHome = () => {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-sm">JBR {s.codigo_jbr}</span>
-                      {s.status && <Badge variant="secondary" className="text-[10px]">{s.status}</Badge>}
+                      <Badge variant="secondary" className="text-[10px]">Em andamento</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground truncate">{s.cliente}</p>
                     {s.local && (
