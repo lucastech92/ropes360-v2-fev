@@ -37,8 +37,16 @@ import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import { NotificationPermissionPrompt } from "./components/NotificationPermissionPrompt";
 import { PWAUpdatePrompt } from "./components/PWAUpdatePrompt";
 import { VersionIndicator } from "./components/VersionIndicator";
+import { CommandPaletteProvider, CommandPaletteFab } from "./components/CommandPalette";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => {
   useLanguagePreference();
