@@ -9,6 +9,7 @@ import { formatDistanceToNow, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { FileText, ClipboardList, Package, Settings, Wrench, Clock, Download, Upload, Trash2, Filter } from "lucide-react";
 import { useState } from "react";
+import { ListSkeleton } from "@/components/skeletons/AppSkeletons";
 
 type ActivityLog = {
   id: string;
@@ -188,9 +189,7 @@ const Historico = () => {
           <CardContent>
             <ScrollArea className="h-[600px] pr-4">
               {isLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <p className="text-muted-foreground">Carregando histórico...</p>
-                </div>
+                <ListSkeleton rows={8} />
               ) : filteredActivities.length === 0 ? (
                 <div className="flex items-center justify-center py-8">
                   <p className="text-muted-foreground">
