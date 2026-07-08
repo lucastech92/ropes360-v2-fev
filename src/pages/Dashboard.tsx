@@ -157,14 +157,7 @@ const Dashboard = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container mx-auto py-8 px-4">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-muted rounded w-64" />
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                <div key={i} className="h-32 bg-muted rounded" />
-              ))}
-            </div>
-          </div>
+          <DashboardSkeleton />
         </div>
       </div>
     );
