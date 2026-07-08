@@ -188,9 +188,7 @@ const Historico = () => {
           <CardContent>
             <ScrollArea className="h-[600px] pr-4">
               {isLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <p className="text-muted-foreground">Carregando histórico...</p>
-                </div>
+                <ListSkeleton rows={8} />
               ) : filteredActivities.length === 0 ? (
                 <div className="flex items-center justify-center py-8">
                   <p className="text-muted-foreground">
