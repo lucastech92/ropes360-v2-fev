@@ -9,6 +9,7 @@ import { formatDistanceToNow, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { FileText, ClipboardList, Package, Settings, Wrench, Clock, Download, Upload, Trash2, Filter } from "lucide-react";
 import { useState } from "react";
+import { ListSkeleton } from "@/components/skeletons/AppSkeletons";
 
 type ActivityLog = {
   id: string;
