@@ -31,6 +31,7 @@ import { InventoryTrendsChart } from "@/components/dashboard/InventoryTrendsChar
 import { HealthScoreGauge } from "@/components/dashboard/HealthScoreGauge";
 import { AlertsSummaryWidget } from "@/components/dashboard/AlertsSummaryWidget";
 import { DashboardSkeleton } from "@/components/skeletons/AppSkeletons";
+import { StatCard } from "@/components/ui/stat-card";
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -212,89 +213,62 @@ const Dashboard = () => {
 
         {/* Métricas Principais */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          <Card className="hover:shadow-lg transition-all cursor-pointer border-primary/20" onClick={() => {}}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {t('dashboard.totalDocuments')}
-              </CardTitle>
-              <FileText className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{dashboardData.documents.total}</div>
-              {dashboardData.documents.expiring > 0 && (
-                <p className="text-xs text-destructive flex items-center gap-1 mt-2">
+          <StatCard
+            tone="primary"
+            title={t('dashboard.totalDocuments')}
+            value={dashboardData.documents.total}
+            icon={FileText}
+            hint={
+              dashboardData.documents.expiring > 0 ? (
+                <span className="text-destructive flex items-center gap-1">
                   <AlertTriangle className="h-3 w-3" />
                   {dashboardData.documents.expiring} {t('dashboard.expiringSoon')}
-                </p>
-              )}
-            </CardContent>
-          </Card>
+                </span>
+              ) : null
+            }
+          />
 
-          <Card 
-            className="hover:shadow-xl transition-all cursor-pointer border-accent/30 hover:border-accent group" 
+          <StatCard
+            tone="accent"
             onClick={() => setServicesDialogOpen(true)}
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {t('dashboard.servicesJBR')}
-              </CardTitle>
-              <ClipboardList className="h-4 w-4 text-accent group-hover:scale-110 transition-transform" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{dashboardData.services.total}</div>
-              <div className="flex items-center justify-between mt-2">
-                <p className="text-xs text-muted-foreground">
-                  {dashboardData.services.thisMonth} {t('dashboard.thisMonth')}
-                </p>
-                <ArrowRight className="h-3 w-3 text-accent opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            </CardContent>
-          </Card>
+            showArrow
+            title={t('dashboard.servicesJBR')}
+            value={dashboardData.services.total}
+            icon={ClipboardList}
+            hint={`${dashboardData.services.thisMonth} ${t('dashboard.thisMonth')}`}
+          />
 
-          <Card 
-            className="hover:shadow-xl transition-all cursor-pointer border-primary/30 hover:border-primary group" 
+          <StatCard
+            tone="primary"
             onClick={() => setInventoryDialogOpen(true)}
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {t('inventory.title')}
-              </CardTitle>
-              <Package className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{dashboardData.inventory.total}</div>
-              <div className="flex items-center justify-between mt-2">
-                {dashboardData.inventory.lowStock > 0 ? (
-                  <p className="text-xs text-yellow-600 flex items-center gap-1">
-                    <AlertTriangle className="h-3 w-3" />
-                    {dashboardData.inventory.lowStock} {t('dashboard.lowItems')}
-                  </p>
-                ) : (
-                  <p className="text-xs text-green-600 flex items-center gap-1">
-                    <CheckCircle2 className="h-3 w-3" />
-                    {t('dashboard.stockOk')}
-                  </p>
-                )}
-                <ArrowRight className="h-3 w-3 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            </CardContent>
-          </Card>
+            showArrow
+            title={t('inventory.title')}
+            value={dashboardData.inventory.total}
+            icon={Package}
+            hint={
+              dashboardData.inventory.lowStock > 0 ? (
+                <span className="text-yellow-600 flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" />
+                  {dashboardData.inventory.lowStock} {t('dashboard.lowItems')}
+                </span>
+              ) : (
+                <span className="text-green-600 flex items-center gap-1">
+                  <CheckCircle2 className="h-3 w-3" />
+                  {t('dashboard.stockOk')}
+                </span>
+              )
+            }
+          />
 
-          <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {t('dashboard.weeklyActivity')}
-              </CardTitle>
-              <TrendingUp className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{dashboardData.activity.weekly}</div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {t('dashboard.last7Days')}
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            tone="success"
+            title={t('dashboard.weeklyActivity')}
+            value={dashboardData.activity.weekly}
+            icon={TrendingUp}
+            hint={t('dashboard.last7Days')}
+          />
         </div>
+
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
           {/* Status de Manutenção */}
