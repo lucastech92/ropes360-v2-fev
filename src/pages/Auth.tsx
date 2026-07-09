@@ -42,15 +42,20 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const rawNext = params.get("next");
+    // Only accept same-origin relative paths so an attacker can't redirect off-site.
+    const next = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/");
+        window.location.href = next;
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
-        navigate("/");
+        window.location.href = next;
       }
     });
 
