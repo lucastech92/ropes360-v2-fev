@@ -19,9 +19,18 @@ self.skipWaiting();
 clientsClaim();
 cleanupOutdatedCaches();
 
+// OAuth broker + managed OAuth consent must always hit the network — never cache or fall back.
+registerRoute(
+  ({ url }) => url.pathname.startsWith("/~oauth") || url.pathname.startsWith("/.lovable/oauth"),
+  new NetworkOnly()
+);
+
 // App Shell (SPA) navigation: prefer network to avoid stale versions; fall back to cache when offline.
 registerRoute(
-  ({ request }) => request.mode === "navigate",
+  ({ request, url }) =>
+    request.mode === "navigate" &&
+    !url.pathname.startsWith("/~oauth") &&
+    !url.pathname.startsWith("/.lovable/oauth"),
   new NetworkFirst({
     cacheName: "html-cache",
     networkTimeoutSeconds: 3,

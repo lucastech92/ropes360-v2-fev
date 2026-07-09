@@ -32,6 +32,7 @@ import Certificacoes from "./pages/Certificacoes";
 import ServiceTimeline from "./pages/ServiceTimeline";
 import RelatorioExecutivo from "./pages/RelatorioExecutivo";
 import Notificacoes from "./pages/Notificacoes";
+import OAuthConsent from "./pages/OAuthConsent";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import { NotificationPermissionPrompt } from "./components/NotificationPermissionPrompt";
@@ -67,6 +68,7 @@ const App = () => {
               <CommandPaletteFab />
               <Routes>
               <Route path="/auth" element={<Auth />} />
+              <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
               <Route path="/install" element={<Install />} />
               <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
