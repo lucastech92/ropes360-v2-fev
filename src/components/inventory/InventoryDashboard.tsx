@@ -1,5 +1,6 @@
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Wrench, AlertTriangle, CheckCircle, Clock, Calendar } from "lucide-react";
+import { Package, Wrench, AlertTriangle, CheckCircle, Calendar } from "lucide-react";
 import type { InventoryStats } from "@/hooks/useUnifiedInventory";
 
 interface InventoryDashboardProps {
@@ -7,43 +8,48 @@ interface InventoryDashboardProps {
 }
 
 export default function InventoryDashboard({ stats }: InventoryDashboardProps) {
+  const { t } = useTranslation();
+
   const statCards = [
     {
-      title: "Total de Itens",
+      title: t("inventory.dashboard.totalItems"),
       value: stats.total,
       icon: Package,
-      description: `${stats.consumiveis} consumíveis, ${stats.equipamentos} equipamentos`,
+      description: t("inventory.dashboard.consumablesAndEquipment", {
+        consumables: stats.consumiveis,
+        equipment: stats.equipamentos,
+      }),
       className: "bg-card",
     },
     {
-      title: "Equipamentos Disponíveis",
+      title: t("inventory.dashboard.availableEquipment"),
       value: stats.available,
       icon: CheckCircle,
-      description: `${stats.inService} em serviço`,
+      description: t("inventory.dashboard.inService", { count: stats.inService }),
       className: "bg-green-500/10 border-green-500/20",
       iconClass: "text-green-600",
     },
     {
-      title: "Em Manutenção",
+      title: t("inventory.dashboard.inMaintenance"),
       value: stats.maintenance,
       icon: Wrench,
-      description: "Equipamentos em manutenção",
+      description: t("inventory.dashboard.equipmentInMaintenance"),
       className: "bg-orange-500/10 border-orange-500/20",
       iconClass: "text-orange-600",
     },
     {
-      title: "Estoque Baixo",
+      title: t("inventory.dashboard.lowStock"),
       value: stats.lowStock,
       icon: AlertTriangle,
-      description: "Itens abaixo do mínimo",
+      description: t("inventory.dashboard.itemsBelowMinimum"),
       className: stats.lowStock > 0 ? "bg-destructive/10 border-destructive/20" : "bg-card",
       iconClass: stats.lowStock > 0 ? "text-destructive" : "text-muted-foreground",
     },
     {
-      title: "Calibração Próxima",
+      title: t("inventory.dashboard.calibrationDue"),
       value: stats.calibrationDue,
       icon: Calendar,
-      description: "Nos próximos 30 dias",
+      description: t("inventory.dashboard.next30Days"),
       className: stats.calibrationDue > 0 ? "bg-purple-500/10 border-purple-500/20" : "bg-card",
       iconClass: stats.calibrationDue > 0 ? "text-purple-600" : "text-muted-foreground",
     },

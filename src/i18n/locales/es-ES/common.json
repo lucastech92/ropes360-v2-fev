@@ -1,7 +1,7 @@
 {
   "header": {
-    "title": "Hub de Inspectores",
-    "subtitle": "Centro de Inteligencia",
+    "title": "Ropes 360",
+    "subtitle": "Plataforma de Inteligencia Operacional",
     "dashboard": "Panel",
     "documents": "Principal",
     "logout": "Salir"
@@ -92,22 +92,22 @@
       "services": "Gestione todos los servicios registrados con código JBR, cliente, alcance y equipos.",
       "checklists": "Listas de verificación rellenables para montaje de contenedores y verificación de herramientas (JBR).",
       "reportTemplates": "Carga y descarga de plantillas de informes para inspecciones y procedimientos.",
-      "inventory": "Gestión unificada de consumibles, equipos, mantenimientos y calibraciones.",
+      "inventory": "Gestión inteligente de activos: consumibles, equipos, mantenimientos preventivos y calibraciones con alertas de conformidad.",
       "calendar": "Vista unificada de servicios, mantenimientos, calibraciones y hoja de asistencia.",
       "certifications": "Gestión de certificados de técnicos con alertas de vencimiento y matriz de competencias.",
       "history": "Registros de inspecciones anteriores, trazabilidad y seguimiento de mantenimientos.",
       "timesheet": "Control de asistencia con calendario interactivo y tipos de registro.",
       "manageUsers": "Aprobar nuevos usuarios y gestionar niveles de acceso al sistema (Admin).",
       "knowledgeSubtitle": "Base de conocimiento y documentación técnica",
-      "operationsSubtitle": "Gestión de servicios y operaciones en campo",
-      "managementSubtitle": "Control administrativo y gestión de recursos"
+      "operationsSubtitle": "Ejecución de servicios y operaciones en campo con trazabilidad y eficiencia",
+      "managementSubtitle": "Control administrativo, recursos y toma de decisiones estratégicas de la operación"
     }
   },
   "home": {
-    "heroBadge": "Centro de Inteligencia Técnica",
-    "heroDescription": "Portal completo de conocimiento técnico para inspectores de campo y centralización para el equipo de soporte.",
-    "heroHighlight": "Documentación, procedimientos, certificados, inventario y proyectos",
-    "heroHighlightSuffix": "en un solo lugar.",
+    "heroBadge": "Plataforma de Inteligencia Operacional",
+    "heroDescription": "Conecte personas, equipos, activos, inspecciones, logística y conocimiento técnico en un solo entorno. Convierta datos operativos en información estratégica para decisiones más seguras y eficientes.",
+    "heroHighlight": "Gestión operacional e inteligencia",
+    "heroHighlightSuffix": "para equipos de campo.",
     "installAppButton": "Instalar App en el Celular",
     "myFolders": "Mis Carpetas",
     "myFoldersDescription": "Cree y gestione sus propias carpetas y documentos",
@@ -229,8 +229,8 @@
     }
   },
   "inventory": {
-    "title": "Inventario/Almacén",
-    "subtitle": "Gestión unificada de consumibles, equipos y mantenimientos",
+    "title": "Gestión de Activos y Equipos",
+    "subtitle": "Disponibilidad, mantenimiento y conformidad de los activos de campo.",
     "addItem": "Agregar Artículo",
     "itemName": "Nombre del Artículo",
     "category": "Categoría",
@@ -249,7 +249,19 @@
       "history": "Historial",
       "ai": "IA"
     },
-    "loadingItems": "Cargando artículos..."
+    "loadingItems": "Cargando artículos...",
+    "dashboard": {
+      "totalItems": "Total de Artículos",
+      "consumablesAndEquipment": "{consumables} consumibles, {equipment} equipos",
+      "availableEquipment": "Equipos Disponibles",
+      "inService": "{count} en servicio",
+      "inMaintenance": "En Mantenimiento",
+      "equipmentInMaintenance": "Equipos en mantenimiento",
+      "lowStock": "Stock Bajo",
+      "itemsBelowMinimum": "Artículos por debajo del mínimo",
+      "calibrationDue": "Calibración Próxima",
+      "next30Days": "Próximos 30 días"
+    }
   },
   "maintenance": {
     "title": "Control de Mantenimiento",
