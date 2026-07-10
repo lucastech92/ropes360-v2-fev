@@ -1,7 +1,7 @@
 {
   "header": {
-    "title": "Inspector Hub",
-    "subtitle": "Intelligence Center",
+    "title": "Ropes 360",
+    "subtitle": "Operational Intelligence Platform",
     "dashboard": "Dashboard",
     "documents": "Main",
     "logout": "Logout"
@@ -92,22 +92,22 @@
       "services": "Manage all registered services with JBR code, client, scope and equipment.",
       "checklists": "Fillable checklists for container assembly and tool verification (JBR).",
       "reportTemplates": "Upload and download report templates for inspections and procedures.",
-      "inventory": "Unified management of consumables, equipment, maintenance and calibrations.",
+      "inventory": "Smart asset management: consumables, equipment, preventive maintenance, and calibrations with compliance alerts.",
       "calendar": "Unified view of services, maintenance, calibrations and timesheet.",
       "certifications": "Technician certificate management with expiry alerts and competency matrix.",
       "history": "Previous inspection records, traceability and maintenance tracking.",
       "timesheet": "Employee time tracking with interactive calendar and check-in types.",
       "manageUsers": "Approve new users and manage system access levels (Admin).",
       "knowledgeSubtitle": "Knowledge base and technical documentation",
-      "operationsSubtitle": "Service management and field operations",
-      "managementSubtitle": "Administrative control and resource management"
+      "operationsSubtitle": "Field service execution and operations with traceability and efficiency",
+      "managementSubtitle": "Administrative control, resources, and strategic decision-making for operations"
     }
   },
   "home": {
-    "heroBadge": "Technical Intelligence Center",
-    "heroDescription": "Complete technical knowledge portal for field inspectors and centralization for the support team.",
-    "heroHighlight": "Documentation, procedures, certificates, inventory and projects",
-    "heroHighlightSuffix": "in one place.",
+    "heroBadge": "Operational Intelligence Platform",
+    "heroDescription": "Connect people, equipment, assets, inspections, logistics, and technical knowledge in one environment. Turn operational data into strategic insights for safer, more efficient decisions.",
+    "heroHighlight": "Operational management and intelligence",
+    "heroHighlightSuffix": "for field teams.",
     "installAppButton": "Install App on Phone",
     "myFolders": "My Folders",
     "myFoldersDescription": "Create and manage your own folders and documents",
@@ -229,8 +229,8 @@
     }
   },
   "inventory": {
-    "title": "Inventory/Warehouse",
-    "subtitle": "Unified management of consumables, equipment and maintenance",
+    "title": "Asset & Equipment Management",
+    "subtitle": "Availability, maintenance, and compliance of field assets.",
     "addItem": "Add Item",
     "itemName": "Item Name",
     "category": "Category",
@@ -249,7 +249,19 @@
       "history": "History",
       "ai": "AI"
     },
-    "loadingItems": "Loading items..."
+    "loadingItems": "Loading items...",
+    "dashboard": {
+      "totalItems": "Total Items",
+      "consumablesAndEquipment": "{consumables} consumables, {equipment} equipment",
+      "availableEquipment": "Available Equipment",
+      "inService": "{count} in service",
+      "inMaintenance": "In Maintenance",
+      "equipmentInMaintenance": "Equipment in maintenance",
+      "lowStock": "Low Stock",
+      "itemsBelowMinimum": "Items below minimum",
+      "calibrationDue": "Calibration Due",
+      "next30Days": "Next 30 days"
+    }
   },
   "maintenance": {
     "title": "Maintenance Control",
