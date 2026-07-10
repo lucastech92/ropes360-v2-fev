@@ -229,8 +229,8 @@
     }
   },
   "inventory": {
-    "title": "Inventario/Almacén",
-    "subtitle": "Gestión unificada de consumibles, equipos y mantenimientos",
+    "title": "Gestión de Activos y Equipos",
+    "subtitle": "Disponibilidad, mantenimiento y conformidad de los activos de campo.",
     "addItem": "Agregar Artículo",
     "itemName": "Nombre del Artículo",
     "category": "Categoría",
@@ -249,7 +249,19 @@
       "history": "Historial",
       "ai": "IA"
     },
-    "loadingItems": "Cargando artículos..."
+    "loadingItems": "Cargando artículos...",
+    "dashboard": {
+      "totalItems": "Total de Artículos",
+      "consumablesAndEquipment": "{consumables} consumibles, {equipment} equipos",
+      "availableEquipment": "Equipos Disponibles",
+      "inService": "{count} en servicio",
+      "inMaintenance": "En Mantenimiento",
+      "equipmentInMaintenance": "Equipos en mantenimiento",
+      "lowStock": "Stock Bajo",
+      "itemsBelowMinimum": "Artículos por debajo del mínimo",
+      "calibrationDue": "Calibración Próxima",
+      "next30Days": "Próximos 30 días"
+    }
   },
   "maintenance": {
     "title": "Control de Mantenimiento",
