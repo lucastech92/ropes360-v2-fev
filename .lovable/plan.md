@@ -1,78 +1,65 @@
-
-
-# Sistema de Permissões por Cargo (Admin / Moderador / Inspetor)
+# Plano: Consolidar o Core do Ropes360
 
 ## Objetivo
+Alinhar a identidade do produto, a home e a primeira experiência tangível com o novo posicionamento de **plataforma de gestão operacional e inteligência para equipes de serviços de campo**. O foco imediato é documentar o core e traduzi-lo na home, metadados e no primeiro pilar prioritário: **Equipamentos**.
 
-Aplicar consistentemente as três regras de cargo em todo o app:
+---
 
-| Cargo | Visibilidade | Download | Upload | Editar | Excluir |
-|---|---|---|---|---|---|
-| **Admin** | Todos os módulos | ✅ | ✅ | ✅ | ✅ |
-| **Moderador** | Todos os módulos | ✅ | ✅ | ✅ | ❌ |
-| **Inspetor** | Apenas **Operações** (Serviços, Checklists, Modelos e Relatórios, Inventário) | ✅ | ✅ | ✅ | ❌ |
+## 1. Memória do projeto: registrar o core
+**Arquivo:** `mem://index.md`
 
-## Estado atual
+- Adicionar ao `Core` a definição de plataforma: conecta pessoas, equipamentos, ativos, inspeções, logística e conhecimento técnico; transforma dados operacionais em informação estratégica para decisão, redução de risco, conformidade e eficiência.
+- Registrar o **pilar prioritário**: Equipamentos (inventário, manutenção, calibração) é o primeiro domínio a refletir a nova plataforma, por ser o ativo mais crítico e visível em campo.
+- Registrar o **tom de voz**: corporativo/estratégico para admin/moderadores, mantendo a praticidade operacional para inspetores de campo.
 
-- Tabela `user_roles` já existe com enum `app_role` (`admin`, `moderator`, `inspector`, `viewer`) e função `has_role` (security definer).
-- RLS no banco já está configurado: `DELETE` quase sempre restrito a admin; `UPDATE/INSERT` aberto para autenticados na maioria das tabelas. Isso já cobre o backend.
-- Frontend é inconsistente: cada página faz seu próprio fetch de role (Inventário, Certificações, Folha de Ponto, Assistente Técnico). Não há gate central por role na home.
+---
 
-## O que será construído
+## 2. Metadados e head estático
+**Arquivo:** `index.html`
 
-### 1. Hook central de permissões `src/hooks/useUserRole.ts`
-Retorna `{ role, isAdmin, isModerator, isInspector, canDelete, canEdit, canUpload, isLoading }`. Faz uma única chamada ao montar e cacheia via React Query, eliminando os múltiplos fetches espalhados.
+- Atualizar `<title>` para posicionar o app como plataforma de inteligência operacional (ex: "Ropes 360 — Plataforma de Inteligência Operacional").
+- Atualizar `<meta name="description">` e `og:description` para reforçar: gestão de equipipes de campo, equipamentos, ativos, inspeções e conhecimento técnico.
+- Ajustar `og:title` e `twitter:title` para o novo posicionamento.
+- Remover/rever a `og:image` genérica do Lovable (a menos que seja gerada uma imagem própria, o hosting injetará preview automaticamente).
 
-### 2. Filtro de módulos na Home (`src/pages/Index.tsx`)
-- Admin/Moderador → vê **Knowledge + Operations + Management** (como hoje).
-- Inspetor → vê **apenas Operations** (Serviços, Checklists, Modelos e Relatórios, Inventário). As seções Knowledge, Management e My Folders ficam ocultas, e a barra de navegação rápida é ajustada.
+---
 
-### 3. Filtro do menu lateral mobile (`src/components/MobileNav.tsx`)
-Mesma lógica: inspetor só enxerga "Principal" (Home, Assistente, Downloads, Install) + "Operações". Knowledge e Management ocultos.
+## 3. Home page e hero
+**Arquivo:** `src/pages/Index.tsx` (textos via i18n)
 
-### 4. Filtro de rotas (`src/App.tsx`)
-Wrapper `<RoleRoute allowedRoles={['admin','moderator']}>` para bloquear acesso direto a `/historico`, `/folha-ponto`, `/calendario`, `/certificacoes`, `/gerenciar-usuarios`, `/duvidas-frequentes`, `/procedimentos-oficiais` quando for inspetor (redireciona para `/`).
+- Alterar o badge do hero de "Centro de Inteligência Técnica" para algo que reflita a plataforma estratégica (ex: "Plataforma de Gestão Operacional").
+- Reescrever `heroDescription` e `heroHighlight` para comunicar a nova proposta: conectar pessoas, equipamentos, inspeções e conhecimento; transformar dados operacionais em decisão estratégica.
+- Manter a estrutura visual existente — mudança apenas de copy e tom.
 
-### 5. Esconder botões "Excluir" para Moderador e Inspetor
-Nos componentes onde existem ações de delete na UI:
-- `src/components/inventory/InventoryItemCard.tsx` — esconder item "Excluir" do dropdown
-- `src/components/inspectionPackages/InspectionPackageList.tsx` — esconder botão delete
-- `src/components/checklist/*` — esconder botões delete de checklists/itens
-- `src/components/certifications/CertificationCard.tsx` — `canDelete` só se admin
-- `src/pages/DuvidasFrequentes.tsx` — esconder Trash2
-- `src/pages/Servicos.tsx`, `src/components/FolderManager.tsx`, `src/components/DocumentListWithTags.tsx` — esconder delete
+---
 
-Tudo passa a usar `useUserRole().canDelete` (= `isAdmin`).
+## 4. Internacionalização
+**Arquivos:** `src/i18n/locales/pt-BR/common.json`, `src/i18n/locales/en-US/common.json`, `src/i18n/locales/es-ES/common.json`
 
-### 6. RLS — sem mudanças
-O banco já reflete a regra ("Only admins can delete..."). Confirmado nas policies de `inventory`, `inspection_packages`, `checklists`, `documents`, `services`, `certifications`, `folders`, etc.
+- Atualizar chaves `home.heroBadge`, `home.heroDescription`, `home.heroHighlight`, `home.heroHighlightSuffix` nos três idiomas para o tom corporativo/estratégico.
+- Atualizar `header.title` e `header.subtitle` (ex: "Ropes 360" / "Plataforma de Inteligência Operacional").
+- Atualizar `modules.descriptions.inventory` e `inventory.subtitle` para destacar o pilar Equipamentos como gestão inteligente de ativos: disponibilidade, conformidade e manutenção preventiva.
+- Ajustar `modules.descriptions.operationsSubtitle` e `managementSubtitle` para ecoar a nova narrativa (operações em campo, decisão e eficiência).
 
-## Fluxo visual
+---
 
-```text
-Login
-  ├─ ADMIN     → Home completa (3 seções) + todos os botões
-  ├─ MODERATOR → Home completa (3 seções) + botões SEM "Excluir"
-  └─ INSPECTOR → Home só com "Operações" (4 cards) + botões SEM "Excluir"
-                 Rotas bloqueadas: /historico, /folha-ponto, /certificacoes,
-                                   /gerenciar-usuarios, /duvidas-frequentes,
-                                   /procedimentos-oficiais, /calendario
-```
+## 5. Pilar prioritário: Equipamentos
+**Arquivo:** `src/pages/Inventario.tsx` e componentes de inventário
 
-## Arquivos afetados
+- Ajustar título e subtítulo da página de inventário para reforçar o posicionamento de ativos operacionais (ex: "Gestão de Ativos e Equipamentos" / "Disponibilidade, manutenção e conformidade dos ativos de campo").
+- Garantir que `src/components/inventory/InventoryDashboard.tsx` use chaves de i18n para os rótulos dos cards (hoje estão hardcoded em português).
+- Opcionalmente, adicionar uma breve mensagem de contexto no topo da aba de Itens comunicando o valor estratégico do pilar (operational readiness).
 
-- **Novo**: `src/hooks/useUserRole.ts`
-- **Novo**: `src/components/RoleRoute.tsx`
-- **Editar**: `src/pages/Index.tsx`, `src/components/MobileNav.tsx`, `src/App.tsx`
-- **Editar (esconder delete)**: `src/components/inventory/InventoryItemCard.tsx`, `src/components/inspectionPackages/InspectionPackageList.tsx`, `src/components/FolderManager.tsx`, `src/components/DocumentListWithTags.tsx`, `src/pages/Servicos.tsx`, `src/pages/DuvidasFrequentes.tsx`, `src/pages/Certificacoes.tsx`, e demais pontos com `Trash2` identificados
-- **Refatorar (opcional)**: substituir os fetches manuais de role em `Inventario.tsx`, `Certificacoes.tsx`, `FolhaPonto.tsx`, `AssistenteTecnico.tsx` para usar o novo hook (consistência)
+---
 
-## Observação importante
+## Fora de escopo nesta entrega
+- Reorganização completa da navegação ou criação de novas páginas.
+- Novo dashboard executivo/BI (pode ser próximo passo após validação do pilar Equipamentos).
+- Geração de imagem de social preview.
 
-A regra "Inspetor só vê Operações" remove o módulo **Certificações** da visão dele. Como inspetores normalmente precisam ver as próprias certificações vencendo, vale confirmar:
+---
 
-- Opção A: Inspetor **não** vê `/certificacoes` (regra estrita, como descrito).
-- Opção B: Inspetor vê `/certificacoes` apenas das próprias (RLS já permite isso).
-
-Vou seguir com a **Opção A** (regra estrita conforme solicitado). Se preferir B, basta dizer antes da implementação.
-
+## Validação
+- Build do Vite sem erros de TypeScript/i18n.
+- Verificação visual da home e da página de inventário no preview.
+- Revisão das três localizações para consistência de tom.
