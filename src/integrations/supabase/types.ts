@@ -1173,6 +1173,47 @@ export type Database = {
         }
         Relationships: []
       }
+      operation_containers: {
+        Row: {
+          assigned_service_id: string | null
+          code: string | null
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_service_id?: string | null
+          code?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_service_id?: string | null
+          code?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operation_containers_assigned_service_id_fkey"
+            columns: ["assigned_service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_subscriptions: {
         Row: {
           auth: string
@@ -1354,6 +1395,210 @@ export type Database = {
           },
         ]
       }
+      service_document_review_feedback: {
+        Row: {
+          created_at: string
+          created_by: string
+          feedback_type: string
+          finding_key: string
+          id: string
+          note: string | null
+          service_document_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          feedback_type: string
+          finding_key: string
+          id?: string
+          note?: string | null
+          service_document_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          feedback_type?: string
+          finding_key?: string
+          id?: string
+          note?: string | null
+          service_document_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_document_review_feedback_service_document_id_fkey"
+            columns: ["service_document_id"]
+            isOneToOne: false
+            referencedRelation: "service_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_documents: {
+        Row: {
+          document_type: string
+          file_path: string
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          original_file_name: string
+          review_error: string | null
+          review_result: Json | null
+          review_score: number | null
+          review_status: string
+          reviewed_at: string | null
+          service_id: string
+          title: string
+          updated_at: string
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          document_type: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          original_file_name: string
+          review_error?: string | null
+          review_result?: Json | null
+          review_score?: number | null
+          review_status?: string
+          reviewed_at?: string | null
+          service_id: string
+          title: string
+          updated_at?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          document_type?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          original_file_name?: string
+          review_error?: string | null
+          review_result?: Json | null
+          review_score?: number | null
+          review_status?: string
+          reviewed_at?: string | null
+          service_id?: string
+          title?: string
+          updated_at?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_documents_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_phase_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_status: string
+          note: string | null
+          previous_status: string | null
+          service_id: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status: string
+          note?: string | null
+          previous_status?: string | null
+          service_id: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status?: string
+          note?: string | null
+          previous_status?: string | null
+          service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_phase_history_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_resource_manifest_items: {
+        Row: {
+          consumed_quantity: number
+          created_at: string
+          created_by: string | null
+          dispatched_quantity: number
+          id: string
+          inventory_item_id: string
+          notes: string | null
+          planned_quantity: number
+          returned_quantity: number | null
+          service_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          consumed_quantity?: number
+          created_at?: string
+          created_by?: string | null
+          dispatched_quantity?: number
+          id?: string
+          inventory_item_id: string
+          notes?: string | null
+          planned_quantity: number
+          returned_quantity?: number | null
+          service_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          consumed_quantity?: number
+          created_at?: string
+          created_by?: string | null
+          dispatched_quantity?: number
+          id?: string
+          inventory_item_id?: string
+          notes?: string | null
+          planned_quantity?: number
+          returned_quantity?: number | null
+          service_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_resource_manifest_items_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_resource_manifest_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           aplicacao: string | null
@@ -1367,7 +1612,15 @@ export type Database = {
           escopo: string[] | null
           id: string
           local: string | null
+          logistics_checklist_approved_at: string | null
+          logistics_checklist_approved_by: string | null
+          logistics_container_id: string | null
+          logistics_released_at: string | null
+          logistics_released_by: string | null
+          operational_status: string
+          operational_status_updated_at: string
           outros_escopo: string | null
+          responsible_user_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1382,7 +1635,15 @@ export type Database = {
           escopo?: string[] | null
           id?: string
           local?: string | null
+          logistics_checklist_approved_at?: string | null
+          logistics_checklist_approved_by?: string | null
+          logistics_container_id?: string | null
+          logistics_released_at?: string | null
+          logistics_released_by?: string | null
+          operational_status?: string
+          operational_status_updated_at?: string
           outros_escopo?: string | null
+          responsible_user_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1397,10 +1658,26 @@ export type Database = {
           escopo?: string[] | null
           id?: string
           local?: string | null
+          logistics_checklist_approved_at?: string | null
+          logistics_checklist_approved_by?: string | null
+          logistics_container_id?: string | null
+          logistics_released_at?: string | null
+          logistics_released_by?: string | null
+          operational_status?: string
+          operational_status_updated_at?: string
           outros_escopo?: string | null
+          responsible_user_id?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "services_logistics_container_id_fkey"
+            columns: ["logistics_container_id"]
+            isOneToOne: false
+            referencedRelation: "operation_containers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tags: {
         Row: {
@@ -1591,6 +1868,38 @@ export type Database = {
       }
     }
     Functions: {
+      assign_service_container: {
+        Args: { p_container_id: string; p_service_id: string }
+        Returns: {
+          aplicacao: string | null
+          cliente: string
+          codigo_jbr: string
+          created_at: string | null
+          created_by: string | null
+          data_inicio: string | null
+          data_termino: string | null
+          equipamentos: string | null
+          escopo: string[] | null
+          id: string
+          local: string | null
+          logistics_checklist_approved_at: string | null
+          logistics_checklist_approved_by: string | null
+          logistics_container_id: string | null
+          logistics_released_at: string | null
+          logistics_released_by: string | null
+          operational_status: string
+          operational_status_updated_at: string
+          outros_escopo: string | null
+          responsible_user_id: string | null
+          updated_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "services"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       calculate_health_score: { Args: never; Returns: Json }
       check_expiring_calibrations: { Args: never; Returns: undefined }
       check_expiring_certifications: { Args: never; Returns: undefined }
@@ -1606,6 +1915,29 @@ export type Database = {
           p_user_id: string
         }
         Returns: string
+      }
+      dispatch_service_resource_manifest: {
+        Args: { p_dispatched_quantity: number; p_manifest_id: string }
+        Returns: {
+          consumed_quantity: number
+          created_at: string
+          created_by: string | null
+          dispatched_quantity: number
+          id: string
+          inventory_item_id: string
+          notes: string | null
+          planned_quantity: number
+          returned_quantity: number | null
+          service_id: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "service_resource_manifest_items"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_service_timeline: {
         Args: { p_service_id: string }
@@ -1634,7 +1966,9 @@ export type Database = {
           escopo: string[]
           id: string
           local: string
+          operational_status: string
           outros_escopo: string
+          responsible_user_id: string
         }[]
       }
       has_role: {
@@ -1644,6 +1978,66 @@ export type Database = {
         }
         Returns: boolean
       }
+      release_service_logistics: {
+        Args: { p_service_id: string }
+        Returns: {
+          aplicacao: string | null
+          cliente: string
+          codigo_jbr: string
+          created_at: string | null
+          created_by: string | null
+          data_inicio: string | null
+          data_termino: string | null
+          equipamentos: string | null
+          escopo: string[] | null
+          id: string
+          local: string | null
+          logistics_checklist_approved_at: string | null
+          logistics_checklist_approved_by: string | null
+          logistics_container_id: string | null
+          logistics_released_at: string | null
+          logistics_released_by: string | null
+          operational_status: string
+          operational_status_updated_at: string
+          outros_escopo: string | null
+          responsible_user_id: string | null
+          updated_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "services"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      return_service_resource_manifest: {
+        Args: {
+          p_consumed_quantity: number
+          p_manifest_id: string
+          p_notes?: string
+          p_returned_quantity: number
+        }
+        Returns: {
+          consumed_quantity: number
+          created_at: string
+          created_by: string | null
+          dispatched_quantity: number
+          id: string
+          inventory_item_id: string
+          notes: string | null
+          planned_quantity: number
+          returned_quantity: number | null
+          service_id: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "service_resource_manifest_items"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       search_document_content: {
         Args: { match_count?: number; search_query: string }
         Returns: {
@@ -1652,6 +2046,34 @@ export type Database = {
           id: string
           metadata: Json
         }[]
+      }
+      upsert_service_resource_manifest: {
+        Args: {
+          p_inventory_item_id: string
+          p_notes?: string
+          p_planned_quantity: number
+          p_service_id: string
+        }
+        Returns: {
+          consumed_quantity: number
+          created_at: string
+          created_by: string | null
+          dispatched_quantity: number
+          id: string
+          inventory_item_id: string
+          notes: string | null
+          planned_quantity: number
+          returned_quantity: number | null
+          service_id: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "service_resource_manifest_items"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
