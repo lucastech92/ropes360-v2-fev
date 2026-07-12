@@ -1395,6 +1395,74 @@ export type Database = {
           },
         ]
       }
+      service_dispatch_items: {
+        Row: {
+          checklist_name: string
+          created_at: string
+          created_by: string | null
+          dispatched_quantity: number
+          id: string
+          inventory_item_id: string | null
+          item_name: string
+          service_id: string
+          source_checklist_id: string
+          source_checklist_item_id: string
+        }
+        Insert: {
+          checklist_name: string
+          created_at?: string
+          created_by?: string | null
+          dispatched_quantity: number
+          id?: string
+          inventory_item_id?: string | null
+          item_name: string
+          service_id: string
+          source_checklist_id: string
+          source_checklist_item_id: string
+        }
+        Update: {
+          checklist_name?: string
+          created_at?: string
+          created_by?: string | null
+          dispatched_quantity?: number
+          id?: string
+          inventory_item_id?: string | null
+          item_name?: string
+          service_id?: string
+          source_checklist_id?: string
+          source_checklist_item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_dispatch_items_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_dispatch_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_dispatch_items_source_checklist_id_fkey"
+            columns: ["source_checklist_id"]
+            isOneToOne: false
+            referencedRelation: "checklists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_dispatch_items_source_checklist_item_id_fkey"
+            columns: ["source_checklist_item_id"]
+            isOneToOne: false
+            referencedRelation: "checklist_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_document_review_feedback: {
         Row: {
           created_at: string
@@ -1494,6 +1562,70 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "service_documents_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_inventory_movements: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          inventory_item_id: string
+          movement_type: string
+          new_quantity: number
+          notes: string | null
+          previous_quantity: number
+          quantity: number
+          return_session_id: string | null
+          service_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          inventory_item_id: string
+          movement_type: string
+          new_quantity: number
+          notes?: string | null
+          previous_quantity: number
+          quantity: number
+          return_session_id?: string | null
+          service_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          inventory_item_id?: string
+          movement_type?: string
+          new_quantity?: number
+          notes?: string | null
+          previous_quantity?: number
+          quantity?: number
+          return_session_id?: string | null
+          service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_inventory_movements_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_inventory_movements_return_session_id_fkey"
+            columns: ["return_session_id"]
+            isOneToOne: false
+            referencedRelation: "service_return_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_inventory_movements_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "services"
@@ -1691,6 +1823,8 @@ export type Database = {
           completed_by: string | null
           created_at: string
           id: string
+          inventory_applied_at: string | null
+          inventory_applied_by: string | null
           notes: string | null
           service_id: string
           started_at: string
@@ -1703,6 +1837,8 @@ export type Database = {
           completed_by?: string | null
           created_at?: string
           id?: string
+          inventory_applied_at?: string | null
+          inventory_applied_by?: string | null
           notes?: string | null
           service_id: string
           started_at?: string
@@ -1715,6 +1851,8 @@ export type Database = {
           completed_by?: string | null
           created_at?: string
           id?: string
+          inventory_applied_at?: string | null
+          inventory_applied_by?: string | null
           notes?: string | null
           service_id?: string
           started_at?: string
@@ -1748,6 +1886,8 @@ export type Database = {
           logistics_checklist_approved_at: string | null
           logistics_checklist_approved_by: string | null
           logistics_container_id: string | null
+          logistics_inventory_dispatched_at: string | null
+          logistics_inventory_dispatched_by: string | null
           logistics_released_at: string | null
           logistics_released_by: string | null
           operational_status: string
@@ -1771,6 +1911,8 @@ export type Database = {
           logistics_checklist_approved_at?: string | null
           logistics_checklist_approved_by?: string | null
           logistics_container_id?: string | null
+          logistics_inventory_dispatched_at?: string | null
+          logistics_inventory_dispatched_by?: string | null
           logistics_released_at?: string | null
           logistics_released_by?: string | null
           operational_status?: string
@@ -1794,6 +1936,8 @@ export type Database = {
           logistics_checklist_approved_at?: string | null
           logistics_checklist_approved_by?: string | null
           logistics_container_id?: string | null
+          logistics_inventory_dispatched_at?: string | null
+          logistics_inventory_dispatched_by?: string | null
           logistics_released_at?: string | null
           logistics_released_by?: string | null
           operational_status?: string
@@ -2018,6 +2162,8 @@ export type Database = {
           logistics_checklist_approved_at: string | null
           logistics_checklist_approved_by: string | null
           logistics_container_id: string | null
+          logistics_inventory_dispatched_at: string | null
+          logistics_inventory_dispatched_by: string | null
           logistics_released_at: string | null
           logistics_released_by: string | null
           operational_status: string
@@ -2045,6 +2191,8 @@ export type Database = {
           completed_by: string | null
           created_at: string
           id: string
+          inventory_applied_at: string | null
+          inventory_applied_by: string | null
           notes: string | null
           service_id: string
           started_at: string
@@ -2181,6 +2329,8 @@ export type Database = {
           logistics_checklist_approved_at: string | null
           logistics_checklist_approved_by: string | null
           logistics_container_id: string | null
+          logistics_inventory_dispatched_at: string | null
+          logistics_inventory_dispatched_by: string | null
           logistics_released_at: string | null
           logistics_released_by: string | null
           operational_status: string
@@ -2240,6 +2390,8 @@ export type Database = {
           completed_by: string | null
           created_at: string
           id: string
+          inventory_applied_at: string | null
+          inventory_applied_by: string | null
           notes: string | null
           service_id: string
           started_at: string
