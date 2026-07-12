@@ -1599,6 +1599,139 @@ export type Database = {
           },
         ]
       }
+      service_return_items: {
+        Row: {
+          checked_at: string | null
+          checked_by: string | null
+          checklist_name: string
+          consumed_quantity: number
+          created_at: string
+          dispatched_quantity: number
+          id: string
+          inventory_item_id: string | null
+          item_name: string
+          notes: string | null
+          return_condition: string | null
+          return_session_id: string
+          returned_quantity: number | null
+          source_checklist_id: string
+          source_checklist_item_id: string
+          updated_at: string
+        }
+        Insert: {
+          checked_at?: string | null
+          checked_by?: string | null
+          checklist_name: string
+          consumed_quantity?: number
+          created_at?: string
+          dispatched_quantity: number
+          id?: string
+          inventory_item_id?: string | null
+          item_name: string
+          notes?: string | null
+          return_condition?: string | null
+          return_session_id: string
+          returned_quantity?: number | null
+          source_checklist_id: string
+          source_checklist_item_id: string
+          updated_at?: string
+        }
+        Update: {
+          checked_at?: string | null
+          checked_by?: string | null
+          checklist_name?: string
+          consumed_quantity?: number
+          created_at?: string
+          dispatched_quantity?: number
+          id?: string
+          inventory_item_id?: string | null
+          item_name?: string
+          notes?: string | null
+          return_condition?: string | null
+          return_session_id?: string
+          returned_quantity?: number | null
+          source_checklist_id?: string
+          source_checklist_item_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_return_items_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_return_items_return_session_id_fkey"
+            columns: ["return_session_id"]
+            isOneToOne: false
+            referencedRelation: "service_return_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_return_items_source_checklist_id_fkey"
+            columns: ["source_checklist_id"]
+            isOneToOne: false
+            referencedRelation: "checklists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_return_items_source_checklist_item_id_fkey"
+            columns: ["source_checklist_item_id"]
+            isOneToOne: false
+            referencedRelation: "checklist_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_return_sessions: {
+        Row: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          service_id: string
+          started_at: string
+          started_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          service_id: string
+          started_at?: string
+          started_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          service_id?: string
+          started_at?: string
+          started_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_return_sessions_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: true
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           aplicacao: string | null
@@ -1905,6 +2038,27 @@ export type Database = {
       check_expiring_certifications: { Args: never; Returns: undefined }
       check_expiring_documents: { Args: never; Returns: undefined }
       check_maintenance_due: { Args: never; Returns: undefined }
+      complete_service_return: {
+        Args: { p_notes?: string; p_return_session_id: string }
+        Returns: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          service_id: string
+          started_at: string
+          started_by: string | null
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "service_return_sessions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       create_notification_with_push: {
         Args: {
           p_message: string
@@ -1978,6 +2132,38 @@ export type Database = {
         }
         Returns: boolean
       }
+      record_service_return_item: {
+        Args: {
+          p_notes?: string
+          p_return_condition: string
+          p_return_item_id: string
+          p_returned_quantity: number
+        }
+        Returns: {
+          checked_at: string | null
+          checked_by: string | null
+          checklist_name: string
+          consumed_quantity: number
+          created_at: string
+          dispatched_quantity: number
+          id: string
+          inventory_item_id: string | null
+          item_name: string
+          notes: string | null
+          return_condition: string | null
+          return_session_id: string
+          returned_quantity: number | null
+          source_checklist_id: string
+          source_checklist_item_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "service_return_items"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       release_service_logistics: {
         Args: { p_service_id: string }
         Returns: {
@@ -2046,6 +2232,27 @@ export type Database = {
           id: string
           metadata: Json
         }[]
+      }
+      start_service_return: {
+        Args: { p_service_id: string }
+        Returns: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          service_id: string
+          started_at: string
+          started_by: string | null
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "service_return_sessions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       upsert_service_resource_manifest: {
         Args: {
