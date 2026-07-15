@@ -61,3 +61,4 @@ export const ServicesScopeChart = ({ services }: ServicesScopeChartProps) => {
     </ResponsiveContainer>
   );
 };
+

@@ -2,344 +2,210 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const priorities = new Set(["critical", "review", "info"]);
+const categories = new Set([
+  "document_control",
+  "technical_consistency",
+  "inspection_scope",
+  "normative_compliance",
+  "completeness",
+]);
+const outcomes = new Set([
+  "routine_normal",
+  "reinforced_monitoring",
+  "corrective_action",
+  "remove_from_service",
+]);
+
+const textList = (value: unknown, limit = 8) =>
+  (Array.isArray(value) ? value : [])
+    .filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+    .map((item) => item.trim())
+    .slice(0, limit);
+
+const sanitizeAnalysis = (raw: Record<string, unknown>) => {
+  const score = Number(raw.quality_score);
+  const rawFindings = Array.isArray(raw.review_findings) ? raw.review_findings : [];
+  const reviewFindings = rawFindings
+    .filter((item): item is Record<string, unknown> => !!item && typeof item === "object")
+    .map((item) => ({
+      priority: priorities.has(String(item.priority)) ? String(item.priority) : "review",
+      category: categories.has(String(item.category)) ? String(item.category) : "technical_consistency",
+      evidence: typeof item.evidence === "string" ? item.evidence.trim() : "",
+      recommendation: typeof item.recommendation === "string" ? item.recommendation.trim() : "",
+    }))
+    .filter((item) => item.evidence && item.recommendation)
+    .slice(0, 12);
+
+  return {
+    quality_score: Number.isFinite(score) ? Math.round(Math.max(0, Math.min(100, score))) : 0,
+    review_outcome: outcomes.has(String(raw.review_outcome)) ? raw.review_outcome : "routine_normal",
+    strengths: textList(raw.strengths),
+    improvements: textList(raw.improvements),
+    review_findings: reviewFindings,
+    extracted_data: raw.extracted_data && typeof raw.extracted_data === "object" ? raw.extracted_data : {},
+    limitations: textList(raw.limitations, 5),
+  };
 };
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    console.log('📥 Request received for analyze-report');
-    
-    const authHeader = req.headers.get('Authorization');
-    console.log('📋 Auth header present:', !!authHeader);
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) throw new Error("Autenticação necessária para revisar documentos.");
 
-    // Client for reading data (uses anon key with optional auth)
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: authHeader ? { Authorization: authHeader } : {},
-        },
-      }
-    );
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const supabaseClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY") ?? "", {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const adminClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    if (userError || !user) throw new Error("Sessão inválida ou expirada.");
 
-    // Admin client for writing data (uses service role)
-    const adminClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    const body = await req.json();
+    const { reportId, fileBase64, fileContent, fileName = "documento", scopeType, client, profileContext } = body;
+    let documentContent = "";
 
-    // Try to get user, but don't fail if not authenticated
-    let userId: string | null = null;
-    try {
-      const { data: { user } } = await supabaseClient.auth.getUser();
-      userId = user?.id || null;
-      console.log('👤 User ID:', userId || 'anonymous');
-    } catch (e) {
-      console.log('⚠️ Auth check failed, continuing as anonymous');
-    }
-
-    const { reportId, fileBase64, fileContent, fileName, scopeType, client } = await req.json();
-    console.log('📄 Processing:', { reportId, fileName, scopeType, client, hasBase64: !!fileBase64, hasContent: !!fileContent });
-
-    let reportData: any = null;
-    let documentContent = '';
-
-    // Get report data from database or file
     if (reportId) {
-      const { data, error } = await supabaseClient
-        .from('inspection_reports')
-        .select('*')
-        .eq('id', reportId)
-        .single();
-      
+      const { data, error } = await supabaseClient.from("inspection_reports").select("*").eq("id", reportId).single();
       if (error) throw error;
-      reportData = data;
       documentContent = JSON.stringify(data.report_data, null, 2);
-    } else if (fileContent) {
-      // Text extracted from DOCX/XLSX
+    } else if (typeof fileContent === "string" && fileContent.trim()) {
       documentContent = fileContent;
-    } else if (fileBase64) {
-      // For PDFs, we'll use visual analysis (no text content needed here)
-      documentContent = `Arquivo PDF: ${fileName}`;
+    } else if (!fileBase64) {
+      throw new Error("Nenhum conteúdo foi recebido para análise.");
     }
 
-    // Get existing patterns for this scope type
-    const { data: patterns } = await supabaseClient
-      .from('report_patterns')
-      .select('*')
-      .eq('scope_type', scopeType || 'general');
-
-    const bestPractices = patterns?.filter(p => p.pattern_type === 'best_practice') || [];
-    const commonIssues = patterns?.filter(p => p.pattern_type === 'common_issue') || [];
-
-    // Call Lovable AI to analyze the report
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+    if (fileBase64 && !String(fileName).toLowerCase().endsWith(".pdf")) {
+      throw new Error("Para DOCX/XLSX, envie o texto extraído do documento.");
     }
 
-    // Prepare system prompt with context
-    const systemPrompt = `Você é um especialista em análise de qualidade de relatórios de inspeção técnica.
+    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+    if (!lovableKey) throw new Error("Serviço de IA não configurado.");
 
-ESCOPO: ${scopeType || 'Geral'}
-CLIENTE: ${client || 'Não especificado'}
+    const domainRules = `
+Você é um revisor técnico conservador de relatórios de inspeção de cabos de aço.
+A referência usual é a ISO 4309. Sua função é revisar e aconselhar; nunca alterar o documento nem substituir a decisão do responsável técnico.
 
-MELHORES PRÁTICAS CONHECIDAS PARA ESTE ESCOPO:
-${bestPractices.map(bp => `- ${bp.description} (frequência: ${bp.frequency}x)`).join('\n')}
+REGRAS OBRIGATÓRIAS:
+- Baseie cada apontamento em evidência textual ou visual presente no documento. Não invente campos, imagens, assinaturas ou requisitos.
+- Não trate uma faixa de diâmetros medidos como divergência por si só. Variação ao longo do cabo é normal; sinalize apenas se houver conflito interno explícito, redução relevante frente ao diâmetro de referência ou critério documentado.
+- "Not informed" ou equivalente pode ser uma declaração válida. Não classifique automaticamente como campo vazio.
+- Não critique ausência, qualidade ou quantidade de fotos quando as imagens não estiverem acessíveis à análise. Registre isso em limitations.
+- Diferencie comprimento total do cabo e extensão efetivamente inspecionada. Inspeção parcial não é automaticamente erro; a conclusão deve deixar o escopo claro.
+- Compare número do relatório no nome do arquivo, cabeçalho e conteúdo. Divergência ou aparente duplicidade deve ser destacada em document_control.
+- Diferencie diâmetro nominal, diâmetro de referência e diâmetros medidos.
+- Verifique contradições entre tabelas, versões em idiomas diferentes, conclusão, severidade e recomendação.
+- Não recomende retirada de serviço sem evidência explícita de critério de descarte. Use remove_from_service somente quando o próprio relatório sustentar essa decisão.
+- Não transforme um único relatório em padrão permanente e não alegue conformidade integral com a ISO 4309 quando faltarem dados para comprová-la.
+- Prioridade critical: contradição ou falha com potencial de mudar a conclusão/decisão. review: requer confirmação humana. info: melhoria documental sem impacto técnico imediato.
+- O score mede qualidade e consistência do relatório, não a condição física do cabo.
+${typeof profileContext === "string" ? profileContext : ""}`;
 
-PROBLEMAS COMUNS IDENTIFICADOS EM OUTROS RELATÓRIOS:
-${commonIssues.map(ci => `- ${ci.description} (frequência: ${ci.frequency}x)`).join('\n')}
+    const content: unknown[] = [{
+      type: "text",
+      text: `Revise o documento ${fileName}. Escopo informado: ${scopeType || "geral"}. Cliente: ${client || "não informado"}.\n\n${documentContent ? `=== CONTEÚDO EXTRAÍDO ===\n${documentContent}\n=== FIM ===` : "Analise o PDF anexado visualmente."}`,
+    }];
+    if (fileBase64) content.push({ type: "image_url", image_url: { url: `data:application/pdf;base64,${fileBase64}` } });
 
-Analise o relatório fornecido e retorne uma avaliação estruturada.`;
-
-    const userPrompt = `Por favor, analise este relatório de inspeção técnica e forneça:
-
-1. SCORE DE QUALIDADE (0-100): Baseado em:
-   - Completude das informações
-   - Clareza e objetividade
-   - Qualidade técnica
-   - Aderência às normas
-   - Organização e formatação
-
-2. PONTOS FORTES (3-5 itens): O que está bem feito no relatório
-
-3. ÁREAS DE MELHORIA (3-5 itens): Sugestões concretas e acionáveis
-
-4. PADRÕES IDENTIFICADOS: Novos padrões que podem ser aprendidos deste relatório (tipo e descrição)
-
-5. DADOS EXTRAÍDOS: Informações estruturadas importantes do relatório`;
-
-    // Prepare content array for multimodal request
-    const contentArray: any[] = [
-      { type: 'text', text: userPrompt }
-    ];
-
-    // Add document content - use multimodal only for PDFs, text for everything else
-    if (fileBase64 && fileName.toLowerCase().endsWith('.pdf')) {
-      // Only PDFs support visual analysis with Gemini
-      contentArray.push({
-        type: 'image_url',
-        image_url: { url: `data:application/pdf;base64,${fileBase64}` }
-      });
-      console.log('📎 Sending PDF for visual analysis:', fileName);
-    } else if (documentContent) {
-      // For extracted text from DOCX/XLSX or JSON data from database
-      contentArray[0].text += `\n\n=== CONTEÚDO DO RELATÓRIO ===\n${documentContent}\n=== FIM DO CONTEÚDO ===`;
-      console.log('📄 Sending extracted text for analysis');
-    } else if (fileBase64) {
-      // DOCX/XLSX sent as base64 - should have been extracted on client
-      console.error('⚠️ Received non-PDF binary file - text extraction should happen on client');
-      throw new Error('Arquivos DOCX/XLSX devem ter o texto extraído antes do envio. Por favor, tente novamente.');
-    }
-
-    console.log('🤖 Calling AI with tool calling for structured output...');
-
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
+    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: contentArray }
-        ],
+        model: "google/gemini-2.5-flash",
+        messages: [{ role: "system", content: domainRules }, { role: "user", content }],
         tools: [{
           type: "function",
           function: {
-            name: "analyze_report",
-            description: "Analisar relatório de inspeção técnica e retornar dados estruturados",
+            name: "review_wire_rope_report",
+            description: "Retorna parecer técnico estruturado e fundamentado do relatório.",
             parameters: {
               type: "object",
               properties: {
-                quality_score: {
-                  type: "number",
-                  description: "Score de qualidade geral de 0-100 baseado em completude, precisão e clareza"
-                },
-                strengths: {
-                  type: "array",
-                  items: { type: "string" },
-                  description: "Lista de pontos fortes específicos encontrados no relatório"
-                },
-                improvements: {
-                  type: "array",
-                  items: { type: "string" },
-                  description: "Lista de sugestões concretas para melhorar o relatório"
-                },
-                extracted_data: {
-                  type: "object",
-                  description: "Dados estruturados extraídos do relatório (IDs de equipamentos, datas, medições, etc.)"
-                },
-                new_patterns: {
+                quality_score: { type: "number", description: "Qualidade documental de 0 a 100." },
+                review_outcome: { type: "string", enum: [...outcomes] },
+                strengths: { type: "array", items: { type: "string" } },
+                improvements: { type: "array", items: { type: "string" } },
+                review_findings: {
                   type: "array",
                   items: {
                     type: "object",
                     properties: {
-                      type: { 
-                        type: "string", 
-                        enum: ["best_practice", "common_issue"],
-                        description: "Tipo de padrão identificado" 
-                      },
-                      description: { 
-                        type: "string", 
-                        description: "Descrição detalhada do padrão" 
-                      }
+                      priority: { type: "string", enum: [...priorities] },
+                      category: { type: "string", enum: [...categories] },
+                      evidence: { type: "string", description: "Trecho, valor ou localização que sustenta o apontamento." },
+                      recommendation: { type: "string", description: "Ação objetiva de revisão ou confirmação." },
                     },
-                    required: ["type", "description"]
+                    required: ["priority", "category", "evidence", "recommendation"],
+                    additionalProperties: false,
                   },
-                  description: "Padrões ou temas recorrentes identificados"
-                }
+                },
+                extracted_data: {
+                  type: "object",
+                  properties: {
+                    report_number: { type: "string" }, jbr: { type: "string" },
+                    client: { type: "string" }, vessel_or_site: { type: "string" },
+                    application: { type: "string" }, nominal_diameter: { type: "string" },
+                    reference_diameter: { type: "string" }, measured_min: { type: "string" },
+                    measured_max: { type: "string" }, total_length: { type: "string" },
+                    inspected_length: { type: "string" }, standard: { type: "string" },
+                    conclusion: { type: "string" },
+                  },
+                  additionalProperties: false,
+                },
+                limitations: { type: "array", items: { type: "string" } },
               },
-              required: ["quality_score", "strengths", "improvements"],
-              additionalProperties: false
-            }
-          }
+              required: ["quality_score", "review_outcome", "strengths", "improvements", "review_findings", "extracted_data", "limitations"],
+              additionalProperties: false,
+            },
+          },
         }],
-        tool_choice: { type: "function", function: { name: "analyze_report" } }
+        tool_choice: { type: "function", function: { name: "review_wire_rope_report" } },
       }),
     });
 
     if (!aiResponse.ok) {
-      const errorText = await aiResponse.text();
-      console.error('❌ AI API error:', aiResponse.status, errorText);
-      throw new Error(`AI API error: ${aiResponse.statusText}`);
+      console.error("AI gateway failure", aiResponse.status);
+      throw new Error(`A revisão por IA falhou (${aiResponse.status}).`);
     }
-
     const aiData = await aiResponse.json();
-    console.log('🤖 AI raw response:', JSON.stringify(aiData, null, 2));
+    const args = aiData.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+    if (!args) throw new Error("A IA não retornou um parecer estruturado.");
+    const analysis = sanitizeAnalysis(JSON.parse(args));
 
-    // Extract analysis from tool call
-    const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall || !toolCall.function?.arguments) {
-      console.error('❌ No tool call in AI response:', aiData);
-      throw new Error('AI não retornou análise estruturada');
-    }
+    const { data: knowledge, error: knowledgeError } = await adminClient.from("report_knowledge").insert({
+      report_id: reportId || null,
+      uploaded_file_path: fileName,
+      scope_type: scopeType || "general",
+      client: client || null,
+      extracted_data: { ...analysis.extracted_data, review_outcome: analysis.review_outcome, review_findings: analysis.review_findings, limitations: analysis.limitations },
+      quality_score: analysis.quality_score,
+      strengths: analysis.strengths,
+      improvements: analysis.improvements,
+      created_by: user.id,
+    }).select().single();
+    if (knowledgeError) console.error("Could not persist review knowledge", knowledgeError.code);
 
-    const analysis = JSON.parse(toolCall.function.arguments);
-    console.log('✅ AI analysis complete. Score:', analysis.quality_score);
+    const { data: history } = await supabaseClient.from("report_knowledge").select("quality_score").eq("scope_type", scopeType || "general");
+    const validScores = (history || []).map((item) => Number(item.quality_score)).filter(Number.isFinite);
+    const average = validScores.length ? Math.round(validScores.reduce((sum, value) => sum + value, 0) / validScores.length) : null;
 
-    // Validate required fields
-    if (typeof analysis.quality_score !== 'number' || !Array.isArray(analysis.strengths) || !Array.isArray(analysis.improvements)) {
-      console.error('❌ AI response missing required fields:', analysis);
-      throw new Error('Análise incompleta da IA - campos obrigatórios ausentes');
-    }
-
-    // Ensure quality_score is in valid range
-    if (analysis.quality_score < 0 || analysis.quality_score > 100) {
-      console.warn('⚠️ Quality score out of range, clamping:', analysis.quality_score);
-      analysis.quality_score = Math.max(0, Math.min(100, analysis.quality_score));
-    }
-
-    // Store the knowledge using admin client
-    const { data: knowledge, error: knowledgeError } = await adminClient
-      .from('report_knowledge')
-      .insert({
-        report_id: reportId,
-        uploaded_file_path: fileName,
-        scope_type: scopeType || 'general',
-        client: client,
-        extracted_data: analysis.extracted_data || {},
-        quality_score: analysis.quality_score,
-        strengths: analysis.strengths || [],
-        improvements: analysis.improvements || [],
-        created_by: userId,
-      })
-      .select()
-      .single();
-
-    if (knowledgeError) {
-      console.error('❌ Error storing knowledge:', knowledgeError);
-    } else {
-      console.log('💾 Knowledge stored with ID:', knowledge?.id);
-    }
-
-    // Update or create patterns using admin client
-    if (analysis.new_patterns && Array.isArray(analysis.new_patterns)) {
-      console.log('🔄 Processing', analysis.new_patterns.length, 'new patterns');
-      for (const pattern of analysis.new_patterns) {
-        const { data: existing } = await adminClient
-          .from('report_patterns')
-          .select('*')
-          .eq('scope_type', scopeType || 'general')
-          .eq('pattern_type', pattern.type)
-          .ilike('description', pattern.description)
-          .single();
-
-        if (existing) {
-          // Update frequency and average score
-          await adminClient
-            .from('report_patterns')
-            .update({
-              frequency: existing.frequency + 1,
-              average_score: ((existing.average_score || 0) * existing.frequency + analysis.quality_score) / (existing.frequency + 1),
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', existing.id);
-          console.log('📈 Updated pattern:', pattern.type);
-        } else {
-          // Create new pattern
-          await adminClient
-            .from('report_patterns')
-            .insert({
-              scope_type: scopeType || 'general',
-              pattern_type: pattern.type,
-              description: pattern.description,
-              frequency: 1,
-              average_score: analysis.quality_score,
-              examples: [{ report_id: reportId, knowledge_id: knowledge?.id }],
-            });
-          console.log('✨ Created new pattern:', pattern.type);
-        }
-      }
-    }
-
-    // Get comparison with average
-    const { data: allKnowledge } = await supabaseClient
-      .from('report_knowledge')
-      .select('quality_score')
-      .eq('scope_type', scopeType || 'general');
-
-    const avgScore = allKnowledge && allKnowledge.length > 0
-      ? allKnowledge.reduce((sum, k) => sum + (k.quality_score || 0), 0) / allKnowledge.length
-      : null;
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        analysis: {
-          ...analysis,
-          knowledge_id: knowledge?.id,
-          comparison: {
-            your_score: analysis.quality_score,
-            average_score: avgScore ? Math.round(avgScore) : null,
-            total_reports_analyzed: allKnowledge?.length || 0,
-          }
-        }
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
-
+    return new Response(JSON.stringify({ success: true, analysis: {
+      ...analysis,
+      knowledge_id: knowledge?.id,
+      comparison: { your_score: analysis.quality_score, average_score: average, total_reports_analyzed: validScores.length },
+    } }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
-    console.error('Error in analyze-report:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error',
-        details: error 
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
+    const message = error instanceof Error ? error.message : "Erro desconhecido na revisão.";
+    console.error("analyze-report failed", message);
+    return new Response(JSON.stringify({ error: message }), {
+      status: message.includes("Autenticação") || message.includes("Sessão") ? 401 : 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });

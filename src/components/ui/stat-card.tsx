@@ -74,3 +74,4 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
 StatCard.displayName = "StatCard";
 
 export { statCardVariants };
+

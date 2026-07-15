@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Copy, FileText, PackageMinus, PackagePlus, Archive } from "lucide-react";
+import { Copy, FileText, PackageMinus, PackagePlus, Archive, MoreHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Checklist, ChecklistItem } from "@/hooks/useChecklistData";
 import { ChecklistItemRow } from "./ChecklistItemRow";
 import { AddItemForm } from "./AddItemForm";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface InventoryItem {
   id: string;
@@ -45,7 +46,7 @@ export const ChecklistDetails = ({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <div className="flex items-center gap-2 mb-2">
               {checklist.is_template && <FileText className="h-5 w-5 text-primary" />}
@@ -90,12 +91,9 @@ export const ChecklistDetails = ({
               </div>
             )}
           </div>
-          <div className="text-right space-y-2">
-            <div className="text-2xl font-bold">{progress}%</div>
-            <div className="text-sm text-muted-foreground">
-              {completedCount}/{totalCount} completos
-            </div>
-            <div className="flex flex-col gap-1">
+          <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end">
+            <div className="text-left sm:text-right"><div className="text-2xl font-semibold">{progress}%</div><div className="text-sm text-muted-foreground">{completedCount}/{totalCount} completos</div></div>
+            <div className="flex gap-2">
               {checklist.is_template && (
                 <Button
                   size="sm"
@@ -106,29 +104,21 @@ export const ChecklistDetails = ({
                 </Button>
               )}
               {onSaveClick && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={onSaveClick}
-                  className="text-amber-600 border-amber-500/30 hover:bg-amber-500/10"
-                >
-                  <Archive className="h-4 w-4 mr-1" />
-                  Salvar
-                </Button>
+                <DropdownMenu><DropdownMenuTrigger asChild><Button size="sm" variant="outline"><MoreHorizontal className="h-4 w-4" /><span className="sr-only">Mais ações</span></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onClick={onSaveClick}><Archive className="mr-2 h-4 w-4" />Arquivar checklist</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
               )}
             </div>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {items.map((item) => (
+        <div className="overflow-hidden rounded-lg border">{items.length ? items.map((item) => (
           <ChecklistItemRow
             key={item.id}
             item={item}
             onQuantityChange={onQuantityChange}
             onDelete={onDeleteItem}
           />
-        ))}
+        )) : <p className="p-6 text-center text-sm text-muted-foreground">Nenhum item neste checklist.</p>}</div>
 
         <AddItemForm
           inventoryItems={inventoryItems}

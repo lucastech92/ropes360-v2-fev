@@ -13,12 +13,12 @@ interface ChecklistItemRowProps {
 export const ChecklistItemRow = ({ item, onQuantityChange, onDelete }: ChecklistItemRowProps) => {
   const { canDelete } = useUserRole();
   return (
-    <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50">
+    <div className={`flex items-center gap-3 border-b px-3 py-2.5 last:border-b-0 ${item.is_checked ? "bg-muted/30" : ""}`}>
       <Checkbox
         checked={item.is_checked}
         className="pointer-events-none"
       />
-      <div className="flex-1">
+      <div className="min-w-0 flex-1">
         <span className={item.is_checked ? "line-through text-muted-foreground" : ""}>
           {item.item_text}
         </span>
@@ -33,7 +33,7 @@ export const ChecklistItemRow = ({ item, onQuantityChange, onDelete }: Checklist
         >
           <MinusCircle className="h-4 w-4" />
         </Button>
-        <span className="w-16 text-center font-mono">
+        <span className="w-16 text-center font-mono text-sm">
           {item.current_quantity}/{item.target_quantity}
         </span>
         <Button

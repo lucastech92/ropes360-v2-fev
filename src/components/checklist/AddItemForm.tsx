@@ -265,3 +265,4 @@ export const AddItemForm = ({ inventoryItems, onAddItem }: AddItemFormProps) => 
     </>
   );
 };
+

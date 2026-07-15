@@ -252,3 +252,4 @@ Use a função report_cable_analysis para retornar sua análise.`
     );
   }
 });
+

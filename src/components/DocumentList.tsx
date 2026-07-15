@@ -226,3 +226,4 @@ export const DocumentList = ({ category, employeeFolder, refreshTrigger }: Docum
     </div>
   );
 };
+

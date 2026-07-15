@@ -244,3 +244,4 @@ export const CalendarView = ({ onEventClick }: CalendarViewProps) => {
     </div>
   );
 };
+

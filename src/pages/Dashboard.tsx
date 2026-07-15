@@ -1,470 +1,474 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
-import { supabase } from "@/integrations/supabase/client";
-import Header from "@/components/Header";
-import ModuleCard from "@/components/ModuleCard";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  FileText, 
-  AlertTriangle, 
-  Package, 
-  Settings, 
-  TrendingUp,
-  ClipboardList,
-  Activity,
-  CheckCircle2,
-  Clock,
+import { useNavigate } from "react-router-dom";
+import {
+  AlertTriangle,
   ArrowRight,
-  Bot,
-  FileBarChart
+  Boxes,
+  BriefcaseBusiness,
+  CheckCircle2,
+  ClipboardCheck,
+  Clock3,
+  Container,
+  PackageX,
+  ShieldAlert,
+  Users,
+  Wrench,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { InventoryDetailsDialog } from "@/components/dashboard/InventoryDetailsDialog";
-import { ServicesDetailsDialog } from "@/components/dashboard/ServicesDetailsDialog";
-import { MaintenanceDetailsDialog } from "@/components/dashboard/MaintenanceDetailsDialog";
-import { ServicesEvolutionChart } from "@/components/dashboard/ServicesEvolutionChart";
-import { MaintenanceTypeChart } from "@/components/dashboard/MaintenanceTypeChart";
-import { InventoryTrendsChart } from "@/components/dashboard/InventoryTrendsChart";
-import { HealthScoreGauge } from "@/components/dashboard/HealthScoreGauge";
-import { AlertsSummaryWidget } from "@/components/dashboard/AlertsSummaryWidget";
+import Header from "@/components/Header";
 import { DashboardSkeleton } from "@/components/skeletons/AppSkeletons";
-import { StatCard } from "@/components/ui/stat-card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { getServicePhase, SERVICE_PHASES } from "@/lib/serviceLifecycle";
+
+const PHASE_STYLE: Record<string, string> = {
+  planning: "border-slate-300 text-slate-700",
+  preparation: "border-amber-300 text-amber-700",
+  logistics: "border-violet-300 text-violet-700",
+  field: "border-blue-300 text-blue-700",
+  documentation: "border-cyan-300 text-cyan-700",
+  technical_review: "border-orange-300 text-orange-700",
+  return: "border-fuchsia-300 text-fuchsia-700",
+  completed: "border-emerald-300 text-emerald-700",
+};
+
+const MOVEMENT_LABEL: Record<string, string> = {
+  dispatch: "Embarque",
+  return: "Retorno",
+  consumption: "Consumo",
+  missing: "Ausente",
+  damaged: "Danificado",
+  maintenance: "Manutenção",
+};
 
 const Dashboard = () => {
-  const { t } = useTranslation();
-  const [inventoryDialogOpen, setInventoryDialogOpen] = useState(false);
-  const [servicesDialogOpen, setServicesDialogOpen] = useState(false);
-  const [maintenanceDialogOpen, setMaintenanceDialogOpen] = useState(false);
-  const { data: dashboardData, isLoading } = useQuery({
-    queryKey: ["dashboard-complete"],
+  const navigate = useNavigate();
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["operational-dashboard"],
+    refetchInterval: 60_000,
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+      const now = new Date();
+      const inThirtyDays = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-      // Documentos
-      const { count: totalDocs } = await supabase
-        .from("documents")
-        .select("*", { count: "exact", head: true });
+      const [
+        servicesResult,
+        containersResult,
+        inventoryResult,
+        certificationsResult,
+        checklistsResult,
+        returnsResult,
+        returnItemsResult,
+        movementsResult,
+        maintenanceResult,
+      ] = await Promise.all([
+        supabase
+          .from("services")
+          .select("id, codigo_jbr, cliente, local, escopo, data_inicio, data_termino, created_at, operational_status, logistics_released_at")
+          .order("created_at", { ascending: false }),
+        supabase.from("operation_containers").select("id, name, status, assigned_service_id"),
+        supabase.from("inventory").select("id, item_name, item_type, quantity, min_quantity, status, next_calibration"),
+        supabase.from("certifications").select("id, certification_name, expiry_date, user_id"),
+        supabase
+          .from("service_checklists")
+          .select("service_id, checklists:checklist_id(checklist_items(id, is_checked))"),
+        supabase.from("service_return_sessions").select("id, service_id, status, inventory_applied_at"),
+        supabase.from("service_return_items").select("return_session_id, dispatched_quantity, returned_quantity, return_condition, checked_at"),
+        supabase
+          .from("service_inventory_movements")
+          .select("id, service_id, movement_type, quantity, created_at, services:service_id(codigo_jbr), inventory:inventory_item_id(item_name, unit)")
+          .order("created_at", { ascending: false })
+          .limit(12),
+        supabase.from("maintenance_records").select("id, equipment_name, status, scheduled_date, priority"),
+      ]);
 
-      const { count: expiringDocs } = await supabase
-        .from("documents_expiring_soon")
-        .select("*", { count: "exact", head: true });
+      const firstError = [
+        servicesResult.error,
+        containersResult.error,
+        inventoryResult.error,
+        certificationsResult.error,
+        checklistsResult.error,
+        returnsResult.error,
+        returnItemsResult.error,
+        movementsResult.error,
+        maintenanceResult.error,
+      ].find(Boolean);
+      if (firstError) throw firstError;
 
-      // Serviços
-      const { data: services } = await supabase
-        .from("services")
-        .select("*")
-        .throwOnError();
+      const services = servicesResult.data ?? [];
+      const containers = containersResult.data ?? [];
+      const inventory = inventoryResult.data ?? [];
+      const certifications = certificationsResult.data ?? [];
+      const returns = returnsResult.data ?? [];
+      const returnItems = returnItemsResult.data ?? [];
+      const movements = movementsResult.data ?? [];
+      const maintenance = maintenanceResult.data ?? [];
 
-      const servicesThisMonth = services?.filter(s => {
-        if (!s.data_inicio) return false;
-        const start = new Date(s.data_inicio);
-        const now = new Date();
-        return start.getMonth() === now.getMonth() && start.getFullYear() === now.getFullYear();
-      }).length || 0;
+      const activeServices = services.filter((service) => service.operational_status !== "completed");
+      const phaseCounts = Object.fromEntries(
+        SERVICE_PHASES.map((phase) => [phase.value, services.filter((service) => service.operational_status === phase.value).length]),
+      );
 
-      // Manutenção
-      const { count: totalMaintenance } = await supabase
-        .from("maintenance_records")
-        .select("*", { count: "exact", head: true });
+      const pendingChecklistServiceIds = new Set<string>();
+      (checklistsResult.data ?? []).forEach((link: any) => {
+        const items = link.checklists?.checklist_items ?? [];
+        if (items.length === 0 || items.some((item: { is_checked: boolean }) => !item.is_checked)) {
+          pendingChecklistServiceIds.add(link.service_id);
+        }
+      });
 
-      const { count: pendingMaintenance } = await supabase
-        .from("maintenance_records")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "pendente");
+      const returnItemsBySession = new Map<string, typeof returnItems>();
+      returnItems.forEach((item) => {
+        returnItemsBySession.set(item.return_session_id, [...(returnItemsBySession.get(item.return_session_id) ?? []), item]);
+      });
+      const pendingReturns = returns.filter((session) => {
+        const items = returnItemsBySession.get(session.id) ?? [];
+        return session.status !== "completed" || !session.inventory_applied_at || items.some((item) => !item.checked_at);
+      });
+      const divergentReturns = returnItems.filter((item) =>
+        item.checked_at && (
+          (item.returned_quantity ?? 0) < item.dispatched_quantity
+          || ["damaged", "maintenance", "missing"].includes(item.return_condition ?? "")
+        ),
+      );
 
-      const { count: inProgressMaintenance } = await supabase
-        .from("maintenance_records")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "em andamento");
-
-      const { count: completedMaintenance } = await supabase
-        .from("maintenance_records")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "concluído");
-
-      // Inventário
-      const { data: inventory } = await supabase
-        .from("inventory")
-        .select("*")
-        .throwOnError();
-
-      const lowStockItems = inventory?.filter(item => 
-        item.min_quantity && item.quantity < item.min_quantity
-      ).length || 0;
-
-      const totalItems = inventory?.length || 0;
-
-      // Manutenção detalhada
-      const { data: allMaintenance } = await supabase
-        .from("maintenance_records")
-        .select("*")
-        .throwOnError();
-
-      // Atividades
-      const { count: weeklyActivity } = await supabase
-        .from("activity_log")
-        .select("*", { count: "exact", head: true })
-        .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
-
-      const { data: recentActivities } = await supabase
-        .from("activity_log")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(5);
-
-      // Checklists
-      const { count: totalChecklists } = await supabase
-        .from("checklists")
-        .select("*", { count: "exact", head: true });
+      const lowStock = inventory.filter((item) =>
+        item.min_quantity !== null && (item.quantity ?? 0) <= item.min_quantity,
+      );
+      const unavailableEquipment = inventory.filter((item) =>
+        item.item_type === "equipamento" && (item.status !== "available" || (item.quantity ?? 0) <= 0),
+      );
+      const expiringCertifications = certifications.filter((certification) => {
+        const expiry = new Date(`${certification.expiry_date}T12:00:00`);
+        return expiry <= inThirtyDays;
+      });
+      const expiredCertifications = expiringCertifications.filter((certification) =>
+        new Date(`${certification.expiry_date}T12:00:00`) < now,
+      );
+      const pendingMaintenance = maintenance.filter((record) =>
+        !["concluído", "completed"].includes(record.status?.toLowerCase() ?? ""),
+      );
+      const urgentMaintenance = pendingMaintenance.filter((record) =>
+        record.scheduled_date && new Date(`${record.scheduled_date}T12:00:00`) <= inThirtyDays,
+      );
+      const consumptionLast30Days = movements
+        .filter((movement) => movement.movement_type === "consumption" && new Date(movement.created_at) >= thirtyDaysAgo)
+        .reduce((sum, movement) => sum + movement.quantity, 0);
 
       return {
-        documents: {
-          total: totalDocs || 0,
-          expiring: expiringDocs || 0,
-        },
-        services: {
-          total: services?.length || 0,
-          thisMonth: servicesThisMonth,
-          data: services || [],
-        },
-        maintenance: {
-          total: totalMaintenance || 0,
-          pending: pendingMaintenance || 0,
-          inProgress: inProgressMaintenance || 0,
-          completed: completedMaintenance || 0,
-          data: allMaintenance || [],
-        },
-        inventory: {
-          total: totalItems,
-          lowStock: lowStockItems,
-          data: inventory || [],
-        },
-        activity: {
-          weekly: weeklyActivity || 0,
-          recent: recentActivities || [],
-        },
-        checklists: {
-          total: totalChecklists || 0,
-        },
+        services,
+        activeServices,
+        phaseCounts,
+        containers,
+        inventory,
+        certifications,
+        pendingChecklistServiceIds,
+        pendingReturns,
+        divergentReturns,
+        lowStock,
+        unavailableEquipment,
+        expiringCertifications,
+        expiredCertifications,
+        urgentMaintenance,
+        movements,
+        consumptionLast30Days,
       };
     },
   });
 
-  if (isLoading || !dashboardData) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto py-8 px-4">
-          <DashboardSkeleton />
+        <div className="container mx-auto px-4 py-8"><DashboardSkeleton /></div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-12">
+          <Card className="mx-auto max-w-xl border-destructive/40">
+            <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
+              <AlertTriangle className="h-8 w-8 text-destructive" />
+              <h1 className="text-xl font-semibold">Não foi possível carregar o dashboard</h1>
+              <p className="text-sm text-muted-foreground">Atualize a página. Se o erro continuar, verifique se todas as migrações foram aplicadas no Lovable Cloud.</p>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
   }
 
-  const maintenanceProgress = dashboardData.maintenance.total > 0
-    ? (dashboardData.maintenance.completed / dashboardData.maintenance.total) * 100
-    : 0;
+  const attentionCount = data.lowStock.length
+    + data.unavailableEquipment.length
+    + data.expiredCertifications.length
+    + data.pendingReturns.length
+    + data.pendingChecklistServiceIds.size
+    + data.divergentReturns.length;
+
+  const alerts = [
+    data.pendingReturns.length > 0 && {
+      title: `${data.pendingReturns.length} retorno(s) exigem fechamento`,
+      description: "Existem conferências pendentes ou ainda não aplicadas ao estoque.",
+      href: "/servicos",
+      tone: "text-fuchsia-700",
+      icon: ClipboardCheck,
+    },
+    data.pendingChecklistServiceIds.size > 0 && {
+      title: `${data.pendingChecklistServiceIds.size} JBR(s) com checklist pendente`,
+      description: "Há itens ainda não conferidos nos checklists vinculados.",
+      href: "/servicos",
+      tone: "text-amber-700",
+      icon: ClipboardCheck,
+    },
+    data.divergentReturns.length > 0 && {
+      title: `${data.divergentReturns.length} divergência(s) de retorno`,
+      description: "Materiais consumidos, ausentes, danificados ou enviados para manutenção.",
+      href: "/servicos",
+      tone: "text-red-700",
+      icon: PackageX,
+    },
+    data.lowStock.length > 0 && {
+      title: `${data.lowStock.length} item(ns) abaixo do mínimo`,
+      description: data.lowStock.slice(0, 3).map((item) => item.item_name).join(" · "),
+      href: "/inventario",
+      tone: "text-amber-700",
+      icon: PackageX,
+    },
+    data.unavailableEquipment.length > 0 && {
+      title: `${data.unavailableEquipment.length} equipamento(s) indisponíveis`,
+      description: "Em campo, manutenção, inativos ou sem saldo disponível.",
+      href: "/inventario?tab=items&type=equipamento",
+      tone: "text-red-700",
+      icon: Wrench,
+    },
+    data.expiringCertifications.length > 0 && {
+      title: `${data.expiringCertifications.length} certificação(ões) vencidas ou vencendo`,
+      description: `${data.expiredCertifications.length} já estão vencidas.`,
+      href: "/certificacoes",
+      tone: "text-orange-700",
+      icon: ShieldAlert,
+    },
+    data.urgentMaintenance.length > 0 && {
+      title: `${data.urgentMaintenance.length} manutenção(ões) próximas ou atrasadas`,
+      description: "Verifique prioridade e disponibilidade antes dos próximos JBRs.",
+      href: "/inventario?tab=maintenance",
+      tone: "text-violet-700",
+      icon: Clock3,
+    },
+  ].filter(Boolean) as Array<{ title: string; description: string; href: string; tone: string; icon: typeof AlertTriangle }>;
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto py-8 px-4">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">{t('dashboard.title')}</h1>
-          <p className="text-muted-foreground">
-            {t('dashboard.overview')}
-          </p>
+      <main className="container mx-auto space-y-8 px-4 py-8">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-primary">Visão do coordenador</p>
+            <h1 className="mt-1 text-3xl font-bold">Operação Ropes360</h1>
+            <p className="mt-2 text-muted-foreground">O que está acontecendo, o que exige atenção e onde agir agora.</p>
+          </div>
+          <Button onClick={() => navigate("/novo-servico")}>
+            <BriefcaseBusiness className="mr-2 h-4 w-4" /> Criar JBR
+          </Button>
         </div>
 
-        {/* Alertas Ativos */}
-        <div className="mb-8">
-          <AlertsSummaryWidget />
-        </div>
-
-        {/* Assistente Técnico */}
-        <div className="mb-8">
-          <ModuleCard
-            title={t('modules.assistenteTecnico')}
-            description={t('dashboard.assistantDescription')}
-            icon={Bot}
-            href="/assistente-tecnico"
-            color="primary"
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <MetricCard
+            title="JBRs ativos"
+            value={data.activeServices.length}
+            description={`${data.phaseCounts.field ?? 0} em campo`}
+            icon={BriefcaseBusiness}
+            onClick={() => navigate("/servicos")}
           />
-        </div>
-
-        {/* Relatório Executivo */}
-        <div className="mb-8">
-          <ModuleCard
-            title="Relatório Executivo"
-            description="Resumo operacional com IA e recomendações estratégicas para diretoria"
-            icon={FileBarChart}
-            href="/relatorio-executivo"
-            color="accent"
+          <MetricCard
+            title="Containers"
+            value={data.containers.filter((container) => container.status === "available").length}
+            description={`${data.containers.filter((container) => container.status !== "available").length} reservados ou indisponíveis`}
+            icon={Container}
+            onClick={() => navigate("/servicos")}
           />
-        </div>
-
-        <div className="mb-8">
-          <HealthScoreGauge />
-        </div>
-
-        {/* Métricas Principais */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          <StatCard
-            tone="primary"
-            title={t('dashboard.totalDocuments')}
-            value={dashboardData.documents.total}
-            icon={FileText}
-            hint={
-              dashboardData.documents.expiring > 0 ? (
-                <span className="text-destructive flex items-center gap-1">
-                  <AlertTriangle className="h-3 w-3" />
-                  {dashboardData.documents.expiring} {t('dashboard.expiringSoon')}
-                </span>
-              ) : null
-            }
+          <MetricCard
+            title="Atenções operacionais"
+            value={attentionCount}
+            description="Estoque, equipamentos, certificados e retornos"
+            icon={AlertTriangle}
+            tone={attentionCount > 0 ? "text-amber-600" : "text-emerald-600"}
           />
-
-          <StatCard
-            tone="accent"
-            onClick={() => setServicesDialogOpen(true)}
-            showArrow
-            title={t('dashboard.servicesJBR')}
-            value={dashboardData.services.total}
-            icon={ClipboardList}
-            hint={`${dashboardData.services.thisMonth} ${t('dashboard.thisMonth')}`}
+          <MetricCard
+            title="Consumo em 30 dias"
+            value={data.consumptionLast30Days}
+            description="Unidades consolidadas nos retornos"
+            icon={Boxes}
+            onClick={() => navigate("/inventario")}
           />
+        </section>
 
-          <StatCard
-            tone="primary"
-            onClick={() => setInventoryDialogOpen(true)}
-            showArrow
-            title={t('inventory.title')}
-            value={dashboardData.inventory.total}
-            icon={Package}
-            hint={
-              dashboardData.inventory.lowStock > 0 ? (
-                <span className="text-yellow-600 flex items-center gap-1">
-                  <AlertTriangle className="h-3 w-3" />
-                  {dashboardData.inventory.lowStock} {t('dashboard.lowItems')}
-                </span>
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">Fluxo dos JBRs</h2>
+              <p className="text-sm text-muted-foreground">Distribuição atual dos serviços pelas etapas operacionais.</p>
+            </div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {SERVICE_PHASES.filter((phase) => phase.value !== "completed").map((phase) => (
+              <button
+                key={phase.value}
+                type="button"
+                onClick={() => navigate("/servicos")}
+                className="rounded-xl border bg-card p-4 text-left transition hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <Badge variant="outline" className={PHASE_STYLE[phase.value]}>{phase.label}</Badge>
+                  <span className="text-2xl font-bold">{data.phaseCounts[phase.value] ?? 0}</span>
+                </div>
+                <p className="mt-3 text-xs text-muted-foreground">{phase.description}</p>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><AlertTriangle className="h-5 w-5" /> Exige atenção</CardTitle>
+              <CardDescription>Alertas priorizados com acesso direto à ação necessária.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {alerts.length === 0 ? (
+                <div className="flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-emerald-800">
+                  <CheckCircle2 className="h-5 w-5" /> Nenhuma pendência crítica identificada.
+                </div>
               ) : (
-                <span className="text-green-600 flex items-center gap-1">
-                  <CheckCircle2 className="h-3 w-3" />
-                  {t('dashboard.stockOk')}
-                </span>
-              )
-            }
-          />
-
-          <StatCard
-            tone="success"
-            title={t('dashboard.weeklyActivity')}
-            value={dashboardData.activity.weekly}
-            icon={TrendingUp}
-            hint={t('dashboard.last7Days')}
-          />
-        </div>
-
-
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
-          {/* Status de Manutenção */}
-          <Card 
-            className="lg:col-span-2 hover:shadow-xl transition-all cursor-pointer border-muted hover:border-primary/50 group"
-            onClick={() => setMaintenanceDialogOpen(true)}
-          >
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5" />
-                    {t('dashboard.maintenanceStatus')}
-                  </CardTitle>
-                  <CardDescription>
-                    {t('dashboard.maintenanceOverview')}
-                  </CardDescription>
+                <div className="space-y-3">
+                  {alerts.map((alert) => {
+                    const Icon = alert.icon;
+                    return (
+                      <button
+                        key={alert.title}
+                        type="button"
+                        onClick={() => navigate(alert.href)}
+                        className="flex w-full items-center gap-3 rounded-lg border p-3 text-left transition hover:border-primary/50 hover:bg-muted/40"
+                      >
+                        <Icon className={`h-5 w-5 shrink-0 ${alert.tone}`} />
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium">{alert.title}</p>
+                          <p className="mt-1 truncate text-xs text-muted-foreground">{alert.description}</p>
+                        </div>
+                        <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                      </button>
+                    );
+                  })}
                 </div>
-                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  {t('dashboard.viewDetails')}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{t('dashboard.overallProgress')}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {Math.round(maintenanceProgress)}%
-                  </span>
-                </div>
-                <Progress value={maintenanceProgress} className="h-2" />
-                
-                <div className="grid grid-cols-3 gap-4 mt-6">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-yellow-600">
-                      <Clock className="h-4 w-4" />
-                      <span className="text-xs font-medium">{t('maintenance.statusOptions.pending')}</span>
-                    </div>
-                    <p className="text-2xl font-bold">{dashboardData.maintenance.pending}</p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-blue-600">
-                      <Activity className="h-4 w-4" />
-                      <span className="text-xs font-medium">{t('maintenance.statusOptions.inProgress')}</span>
-                    </div>
-                    <p className="text-2xl font-bold">{dashboardData.maintenance.inProgress}</p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-green-600">
-                      <CheckCircle2 className="h-4 w-4" />
-                      <span className="text-xs font-medium">{t('maintenance.statusOptions.completed')}</span>
-                    </div>
-                    <p className="text-2xl font-bold">{dashboardData.maintenance.completed}</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Checklists */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ClipboardList className="h-5 w-5" />
-                {t('modules.checkLists')}
-              </CardTitle>
-              <CardDescription>
-                {t('dashboard.availableTemplates')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <div className="text-4xl font-bold text-primary mb-2">
-                  {dashboardData.checklists.total}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {t('dashboard.templatesCreated')}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Gráficos Analíticos */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5" />
-                Evolução de Serviços
-              </CardTitle>
-              <CardDescription>
-                Serviços executados nos últimos 6 meses
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ServicesEvolutionChart services={dashboardData.services.data} />
+              )}
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Tipos de Manutenção
-              </CardTitle>
-              <CardDescription>
-                Distribuição por tipo
-              </CardDescription>
+              <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5" /> JBRs em andamento</CardTitle>
+              <CardDescription>Serviços mais recentes que ainda não foram concluídos.</CardDescription>
             </CardHeader>
             <CardContent>
-              <MaintenanceTypeChart maintenanceRecords={dashboardData.maintenance.data} />
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5" />
-                Análise de Inventário
-              </CardTitle>
-              <CardDescription>
-                Itens por categoria e status de estoque
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <InventoryTrendsChart inventory={dashboardData.inventory.data} />
-            </CardContent>
-          </Card>
-
-          {/* Atividades Recentes */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5" />
-                {t('dashboard.recentActivities')}
-              </CardTitle>
-              <CardDescription>
-                {t('dashboard.last5Actions')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {dashboardData.activity.recent.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
-                  {t('dashboard.noActivity')}
-                </p>
+              {data.activeServices.length === 0 ? (
+                <p className="py-8 text-center text-sm text-muted-foreground">Nenhum JBR ativo.</p>
               ) : (
-                <div className="space-y-4">
-                  {dashboardData.activity.recent.map((activity) => (
-                    <div key={activity.id} className="flex items-start gap-4 pb-4 border-b last:border-0">
-                      <div className="mt-1">
-                        <Badge variant="outline" className="capitalize">
-                          {activity.module}
-                        </Badge>
-                      </div>
-                      <div className="flex-1 space-y-1">
-                        <p className="text-sm font-medium">{activity.description}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(activity.created_at).toLocaleString("pt-BR")}
+                <div className="space-y-3">
+                  {data.activeServices.slice(0, 6).map((service) => {
+                    const phase = getServicePhase(service.operational_status);
+                    return (
+                      <button
+                        key={service.id}
+                        type="button"
+                        onClick={() => navigate(`/servico/${service.id}/timeline`)}
+                        className="flex w-full items-center justify-between gap-3 rounded-lg border p-3 text-left transition hover:border-primary/50 hover:bg-muted/40"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate font-medium">{service.codigo_jbr}</p>
+                          <p className="truncate text-xs text-muted-foreground">{service.cliente}{service.local ? ` · ${service.local}` : ""}</p>
+                        </div>
+                        <Badge variant="outline" className={PHASE_STYLE[phase.value]}>{phase.label}</Badge>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </section>
+
+        <section>
+          <Card>
+            <CardHeader className="flex flex-row items-start justify-between gap-4">
+              <div>
+                <CardTitle className="flex items-center gap-2"><Boxes className="h-5 w-5" /> Últimas movimentações</CardTitle>
+                <CardDescription>Embarques, retornos, consumos e divergências consolidados por JBR.</CardDescription>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => navigate("/inventario")}>Abrir estoque</Button>
+            </CardHeader>
+            <CardContent>
+              {data.movements.length === 0 ? (
+                <p className="py-8 text-center text-sm text-muted-foreground">Nenhuma movimentação operacional registrada.</p>
+              ) : (
+                <div className="grid gap-3 md:grid-cols-2">
+                  {data.movements.map((movement: any) => (
+                    <button
+                      key={movement.id}
+                      type="button"
+                      onClick={() => navigate(`/servico/${movement.service_id}/timeline`)}
+                      className="flex items-center justify-between gap-3 rounded-lg border p-3 text-left transition hover:border-primary/50 hover:bg-muted/40"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate font-medium">{movement.inventory?.item_name || "Item de estoque"}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {movement.services?.codigo_jbr || "JBR"} · {movement.quantity} {movement.inventory?.unit || "un"}
                         </p>
                       </div>
-                    </div>
+                      <Badge variant="outline">{MOVEMENT_LABEL[movement.movement_type] || movement.movement_type}</Badge>
+                    </button>
                   ))}
                 </div>
               )}
             </CardContent>
           </Card>
-        </div>
-
-        {/* Dialogs */}
-        <InventoryDetailsDialog
-          open={inventoryDialogOpen}
-          onOpenChange={setInventoryDialogOpen}
-          inventory={dashboardData.inventory.data}
-        />
-
-        <ServicesDetailsDialog
-          open={servicesDialogOpen}
-          onOpenChange={setServicesDialogOpen}
-          services={dashboardData.services.data}
-        />
-
-        <MaintenanceDetailsDialog
-          open={maintenanceDialogOpen}
-          onOpenChange={setMaintenanceDialogOpen}
-          maintenanceRecords={dashboardData.maintenance.data}
-        />
-      </div>
+        </section>
+      </main>
     </div>
   );
 };
+
+const MetricCard = ({
+  title,
+  value,
+  description,
+  icon: Icon,
+  tone = "text-primary",
+  onClick,
+}: {
+  title: string;
+  value: number;
+  description: string;
+  icon: typeof AlertTriangle;
+  tone?: string;
+  onClick?: () => void;
+}) => (
+  <Card className={onClick ? "cursor-pointer transition hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md" : ""} onClick={onClick}>
+    <CardContent className="p-5">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm text-muted-foreground">{title}</p>
+          <p className="mt-2 text-3xl font-bold">{value}</p>
+        </div>
+        <div className="rounded-xl bg-muted p-2.5"><Icon className={`h-5 w-5 ${tone}`} /></div>
+      </div>
+      <p className="mt-3 text-xs text-muted-foreground">{description}</p>
+    </CardContent>
+  </Card>
+);
 
 export default Dashboard;

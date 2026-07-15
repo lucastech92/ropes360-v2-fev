@@ -50,3 +50,4 @@ export const TemplateCard = ({ template, onEdit, onClone }: TemplateCardProps) =
     </div>
   );
 };
+

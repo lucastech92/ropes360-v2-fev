@@ -146,3 +146,4 @@ export default function MaintenanceHistoryCard({ inventoryItemId }: MaintenanceH
     </Card>
   );
 }
+

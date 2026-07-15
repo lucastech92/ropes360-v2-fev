@@ -73,3 +73,4 @@ export const ServicesEvolutionChart = ({ services }: ServicesEvolutionChartProps
     </ResponsiveContainer>
   );
 };
+

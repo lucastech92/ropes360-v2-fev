@@ -106,3 +106,4 @@ export const MeasurementCard = ({ measurement, onUpdate, onRemove }: Measurement
     </Card>
   );
 };
+

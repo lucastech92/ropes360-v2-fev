@@ -5,3 +5,4 @@ export const PWAUpdatePrompt = () => {
   usePWAUpdate();
   return null;
 };
+

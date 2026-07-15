@@ -147,3 +147,4 @@ export const CableDataCard = ({
     </Card>
   );
 };
+

@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import { Bot, Send, Upload, FileText, Database, Loader2, CheckCircle2, AlertCircle, Clock, Camera, X, Image as ImageIcon } from "lucide-react";
@@ -113,6 +114,11 @@ const AssistenteTecnico = () => {
       const formData = new FormData(e.currentTarget);
       const file = formData.get('document') as File;
       const title = formData.get('title') as string;
+      const knowledgeType = formData.get('knowledge_type') as string || 'internal_procedure';
+      const revision = formData.get('revision') as string;
+      const effectiveDate = formData.get('effective_date') as string;
+      const expiryDate = formData.get('expiry_date') as string;
+      const clientName = formData.get('client_name') as string;
       if (!file || !title) {
         throw new Error('Arquivo e título são obrigatórios');
       }
@@ -144,7 +150,17 @@ const AssistenteTecnico = () => {
         file_path: filePath,
         file_size: file.size,
         uploaded_by: user.id,
-        document_type: 'iso_4309'
+        document_type: knowledgeType === 'standard' ? 'iso_4309' : knowledgeType,
+        knowledge_type: knowledgeType,
+        authority_rank: ({ standard: 10, internal_procedure: 20, client_requirement: 30, manufacturer_manual: 40, historical_report: 50, other: 60 } as Record<string, number>)[knowledgeType] || 60,
+        revision: revision || null,
+        effective_date: effectiveDate || null,
+        expiry_date: expiryDate || null,
+        client_name: clientName || null,
+        approval_status: 'approved',
+        approved_by: user.id,
+        approved_at: new Date().toISOString(),
+        is_active: true
       }).select().single();
       if (docError) throw docError;
 
@@ -841,14 +857,14 @@ const AssistenteTecnico = () => {
                 <DialogTrigger asChild>
                   <Button>
                     <Upload className="h-4 w-4 mr-2" />
-                    Upload Machine Learning 
+                    Adicionar fonte técnica
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Enviar Documento Técnico</DialogTitle>
                     <DialogDescription>
-                      Faça upload da ISO 4309 ou outros documentos técnicos
+                      Cadastre uma fonte aprovada para respostas fundamentadas da IA.
                     </DialogDescription>
                   </DialogHeader>
                   <form onSubmit={handleUploadDocument} className="space-y-4">
@@ -856,6 +872,28 @@ const AssistenteTecnico = () => {
                       <Label htmlFor="title">Título do Documento</Label>
                       <Input id="title" name="title" placeholder="ISO 4309 - 2023" required />
                     </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <Label>Tipo de fonte</Label>
+                        <Select name="knowledge_type" defaultValue="internal_procedure">
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="standard">Norma</SelectItem>
+                            <SelectItem value="internal_procedure">Procedimento interno</SelectItem>
+                            <SelectItem value="client_requirement">Requisito do cliente</SelectItem>
+                            <SelectItem value="manufacturer_manual">Manual do fabricante</SelectItem>
+                            <SelectItem value="historical_report">Relatório histórico</SelectItem>
+                            <SelectItem value="other">Outro</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div><Label htmlFor="revision">Revisão/edição</Label><Input id="revision" name="revision" placeholder="Ex.: 2023 ou Rev. 04" /></div>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div><Label htmlFor="effective_date">Vigente desde</Label><Input id="effective_date" name="effective_date" type="date" /></div>
+                      <div><Label htmlFor="expiry_date">Validade (opcional)</Label><Input id="expiry_date" name="expiry_date" type="date" /></div>
+                    </div>
+                    <div><Label htmlFor="client_name">Cliente específico (opcional)</Label><Input id="client_name" name="client_name" placeholder="Deixe vazio para uso geral" /></div>
                     <div>
                       <Label htmlFor="document">Arquivo PDF</Label>
                       <Input id="document" name="document" type="file" accept=".pdf" required />
@@ -900,10 +938,11 @@ const AssistenteTecnico = () => {
                         <div className={`max-w-[80%] rounded-lg p-3 ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                           <p className="whitespace-pre-wrap">{msg.content}</p>
                           {msg.sources && msg.sources.length > 0 && <div className="mt-2 pt-2 border-t border-border/20">
+                              <p className="mb-1 text-xs font-medium">Fontes consultadas</p>
                               <div className="flex gap-2 flex-wrap">
-                                {msg.sources.map((source, i) => <Badge key={i} variant="outline" className="text-xs">
-                                    {source.type === 'iso_4309' ? <><FileText className="h-3 w-3 mr-1" /> ISO 4309</> : <><Database className="h-3 w-3 mr-1" /> Dados Internos</>}
-                                  </Badge>)}
+                                {msg.sources.flatMap((source, sourceIndex) => source.type === 'technical_documents' && Array.isArray(source.sections)
+                                  ? source.sections.filter((section: any, index: number, all: any[]) => all.findIndex(item => item.document_id === section.document_id) === index).map((section: any, sectionIndex: number) => <Badge key={`${sourceIndex}-${sectionIndex}`} variant="outline" className="text-xs"><FileText className="h-3 w-3 mr-1" />{section.title || section.document_title || 'Fonte técnica'}{section.revision ? ` · ${section.revision}` : ''}</Badge>)
+                                  : [<Badge key={sourceIndex} variant="outline" className="text-xs"><Database className="h-3 w-3 mr-1" />Dados internos</Badge>])}
                               </div>
                             </div>}
                         </div>
@@ -978,8 +1017,8 @@ const AssistenteTecnico = () => {
           <TabsContent value="documents" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Documentos Técnicos</CardTitle>
-                <CardDescription>Documentos disponíveis para consulta</CardDescription>
+                <CardTitle>Fontes da Central de Conhecimento</CardTitle>
+                <CardDescription>A IA consulta somente fontes aprovadas, ativas e dentro da validade.</CardDescription>
               </CardHeader>
               <CardContent>
                 {documents.length === 0 ? <div className="text-center text-muted-foreground py-8">
@@ -991,7 +1030,8 @@ const AssistenteTecnico = () => {
                           {getDocumentStatusIcon(doc.status)}
                           <div>
                             <p className="font-medium">{doc.title}</p>
-                            <p className="text-sm text-muted-foreground">{doc.file_name}</p>
+                            <p className="text-sm text-muted-foreground">{doc.file_name}{doc.revision ? ` · ${doc.revision}` : ''}</p>
+                            <div className="mt-1 flex flex-wrap gap-1"><Badge variant="outline">{({ standard: 'Norma', internal_procedure: 'Procedimento interno', client_requirement: 'Requisito do cliente', manufacturer_manual: 'Manual do fabricante', historical_report: 'Relatório histórico', other: 'Outro' } as Record<string, string>)[doc.knowledge_type] || doc.document_type}</Badge>{doc.client_name && <Badge variant="outline">{doc.client_name}</Badge>}{doc.approval_status && <Badge variant={doc.approval_status === 'approved' ? 'secondary' : 'outline'}>{doc.approval_status === 'approved' ? 'Aprovado' : doc.approval_status}</Badge>}</div>
                           </div>
                         </div>
                         <Badge variant={doc.status === 'ready' ? 'default' : 'secondary'}>

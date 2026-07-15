@@ -345,3 +345,4 @@ export const NotificationBell = () => {
     </Popover>
   );
 };
+

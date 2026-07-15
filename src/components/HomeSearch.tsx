@@ -441,3 +441,4 @@ export function HomeSearch() {
     </div>
   );
 }
+

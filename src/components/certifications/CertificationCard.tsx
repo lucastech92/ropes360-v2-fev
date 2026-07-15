@@ -108,3 +108,4 @@ export const CertificationCard = ({ cert, onDelete, canDelete, showUser, userNam
     </Card>
   );
 };
+

@@ -36,3 +36,4 @@ export const globalShortcuts = [
   { key: 'e', ctrl: true, description: 'Exportar' },
   { key: '/', description: 'Focar busca' },
 ];
+

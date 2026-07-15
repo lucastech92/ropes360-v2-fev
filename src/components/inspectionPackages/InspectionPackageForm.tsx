@@ -229,3 +229,4 @@ export const InspectionPackageForm = ({ onCreated }: Props) => {
     </Card>
   );
 };
+

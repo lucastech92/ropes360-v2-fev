@@ -182,3 +182,4 @@ const EquipmentCheckin = ({
 };
 
 export default EquipmentCheckin;
+

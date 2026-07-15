@@ -25,3 +25,4 @@ export const useLanguagePreference = () => {
     loadLanguagePreference();
   }, [i18n]);
 };
+

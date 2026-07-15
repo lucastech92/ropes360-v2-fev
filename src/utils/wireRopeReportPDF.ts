@@ -314,3 +314,4 @@ export const generateWireRopeReportPDF = async (data: ReportData) => {
   // Save PDF
   doc.save(`Relatorio_Inspecao_${data.reportNumber.replace(/\s/g, '_')}.pdf`);
 };
+

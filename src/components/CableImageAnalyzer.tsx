@@ -198,3 +198,4 @@ export const CableImageAnalyzer = ({ imagePreview, onAnalysisComplete }: CableIm
     </div>
   );
 };
+

@@ -63,3 +63,4 @@ export const InventoryTrendsChart = ({ inventory }: InventoryTrendsChartProps) =
     </ResponsiveContainer>
   );
 };
+

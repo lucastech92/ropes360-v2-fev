@@ -41,16 +41,19 @@ export interface ChecklistFormData {
   isTemplate: boolean;
 }
 
-export const useChecklistData = () => {
+export const useChecklistData = (serviceId?: string | null) => {
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [selectedChecklist, setSelectedChecklist] = useState<string | null>(null);
+  const [linkedChecklistIds, setLinkedChecklistIds] = useState<string[]>([]);
   const [items, setItems] = useState<ChecklistItem[]>([]);
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const { toast } = useToast();
 
   const templates = checklists.filter(c => c.is_template && !c.is_saved);
-  const serviceChecklists = checklists.filter(c => !c.is_template && !c.is_saved);
-  const savedChecklists = checklists.filter(c => c.is_saved && !c.is_template);
+  const serviceChecklists = checklists.filter(c =>
+    !c.is_template && (serviceId ? linkedChecklistIds.includes(c.id) : !c.is_saved)
+  );
+  const savedChecklists = serviceId ? [] : checklists.filter(c => c.is_saved && !c.is_template);
   const currentChecklist = checklists.find(c => c.id === selectedChecklist);
   const completedCount = items.filter(i => i.is_checked).length;
   const totalCount = items.length;
@@ -60,6 +63,23 @@ export const useChecklistData = () => {
     fetchChecklists();
     fetchInventoryItems();
   }, []);
+
+  useEffect(() => {
+    const fetchLinkedChecklists = async () => {
+      if (!serviceId) {
+        setLinkedChecklistIds([]);
+        return;
+      }
+      const { data } = await supabase
+        .from("service_checklists")
+        .select("checklist_id")
+        .eq("service_id", serviceId);
+      const ids = (data ?? []).map((item) => item.checklist_id);
+      setLinkedChecklistIds(ids);
+      if (ids.length > 0) setSelectedChecklist((current) => current && ids.includes(current) ? current : ids[0]);
+    };
+    fetchLinkedChecklists();
+  }, [serviceId]);
 
   useEffect(() => {
     if (selectedChecklist) {
@@ -209,7 +229,7 @@ export const useChecklistData = () => {
     return true;
   };
 
-  const createChecklist = async (formData: ChecklistFormData, selectedServiceId?: string | null) => {
+  const createChecklist = async (formData: ChecklistFormData, selectedServiceId?: string | null, selectedContainerId?: string | null) => {
     if (!formData.name.trim()) return null;
 
     const { data: userData } = await supabase.auth.getUser();
@@ -241,6 +261,10 @@ export const useChecklistData = () => {
         service_id: selectedServiceId,
         checklist_id: data.id,
       });
+      if (selectedContainerId) {
+        const { error: containerError } = await supabase.rpc("assign_service_container", { p_service_id: selectedServiceId, p_container_id: selectedContainerId });
+        if (containerError) toast({ title: "Checklist criado", description: "O container não pôde ser reservado: " + containerError.message, variant: "destructive" });
+      }
     }
 
     setChecklists([data as Checklist, ...checklists]);
@@ -256,7 +280,7 @@ export const useChecklistData = () => {
     return data;
   };
 
-  const updateChecklist = async (formData: ChecklistFormData, selectedServiceId?: string | null) => {
+  const updateChecklist = async (formData: ChecklistFormData, selectedServiceId?: string | null, selectedContainerId?: string | null) => {
     if (!selectedChecklist) return false;
 
     const { error } = await supabase
@@ -291,6 +315,10 @@ export const useChecklistData = () => {
           service_id: selectedServiceId,
           checklist_id: selectedChecklist,
         });
+        if (selectedContainerId) {
+          const { error: containerError } = await supabase.rpc("assign_service_container", { p_service_id: selectedServiceId, p_container_id: selectedContainerId });
+          if (containerError) toast({ title: "Checklist atualizado", description: "O container não pôde ser reservado: " + containerError.message, variant: "destructive" });
+        }
       }
     }
 
@@ -302,16 +330,7 @@ export const useChecklistData = () => {
     return true;
   };
 
-  const cloneTemplate = async (template: Checklist, serviceTag: string, newName?: string) => {
-    if (!serviceTag.trim()) {
-      toast({
-        title: "Erro",
-        description: "Informe o código JBR do serviço",
-        variant: "destructive",
-      });
-      return null;
-    }
-
+  const cloneTemplate = async (template: Checklist, serviceTag: string, newName?: string, serviceId?: string, containerId?: string) => {
     const { data: userData } = await supabase.auth.getUser();
 
     const { data: newChecklist, error: checklistError } = await supabase
@@ -319,7 +338,7 @@ export const useChecklistData = () => {
       .insert({
         name: newName || template.name,
         description: template.description,
-        service_tag: serviceTag,
+        service_tag: serviceTag.trim() || null,
         checklist_type: template.checklist_type,
         is_template: false,
         created_by: userData?.user?.id,
@@ -375,12 +394,22 @@ export const useChecklistData = () => {
       }
     }
 
+    if (serviceId) {
+      const { error: linkError } = await supabase.from("service_checklists").upsert({ service_id: serviceId, checklist_id: newChecklist.id }, { onConflict: "service_id,checklist_id" });
+      if (linkError) toast({ title: "Checklist criado", description: "Não foi possível concluir o vínculo formal com o JBR.", variant: "destructive" });
+    }
+
+    if (serviceId && containerId) {
+      const { error: containerError } = await supabase.rpc("assign_service_container", { p_service_id: serviceId, p_container_id: containerId });
+      if (containerError) toast({ title: "Checklist vinculado", description: "O container não pôde ser reservado: " + containerError.message, variant: "destructive" });
+    }
+
     await fetchChecklists();
     setSelectedChecklist(newChecklist.id);
     
     toast({
       title: "Checklist clonado",
-      description: `Checklist criado para o serviço ${serviceTag} com ${templateItems?.length || 0} itens`,
+      description: serviceTag ? `Checklist criado para o serviço ${serviceTag} com ${templateItems?.length || 0} itens` : `Checklist independente criado com ${templateItems?.length || 0} itens`,
     });
     
     return newChecklist;

@@ -70,3 +70,4 @@ const ModuleCard = ({ title, description, icon: Icon, href, color = "primary" }:
 };
 
 export default ModuleCard;
+

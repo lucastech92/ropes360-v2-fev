@@ -89,3 +89,4 @@ export function ThemeToggle({ variant = "icon", className }: ThemeToggleProps) {
     </DropdownMenu>
   );
 }
+

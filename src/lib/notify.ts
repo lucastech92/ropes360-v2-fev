@@ -33,3 +33,4 @@ export const notify = {
   dismiss: (id?: string | number) => sonnerToast.dismiss(id),
   promise: sonnerToast.promise,
 };
+

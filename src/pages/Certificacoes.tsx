@@ -236,3 +236,4 @@ const Certificacoes = () => {
 };
 
 export default Certificacoes;
+
