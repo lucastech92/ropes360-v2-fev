@@ -45,3 +45,4 @@ export const logActivity = async ({
     console.error("Error logging activity:", error);
   }
 };
+

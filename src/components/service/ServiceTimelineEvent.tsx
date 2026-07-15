@@ -103,3 +103,4 @@ export const ServiceTimelineEvent = ({ event, index, isLast }: ServiceTimelineEv
     </div>
   );
 };
+

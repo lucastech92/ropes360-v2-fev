@@ -241,3 +241,4 @@ export function InventoryAuditTrail() {
     </div>
   );
 }
+

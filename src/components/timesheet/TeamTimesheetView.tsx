@@ -178,3 +178,4 @@ export const TeamTimesheetView = ({ month }: TeamTimesheetViewProps) => {
     </div>
   );
 };
+

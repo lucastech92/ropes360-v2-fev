@@ -129,3 +129,4 @@ export const CalendarEventCard = ({ event, compact = false }: CalendarEventCardP
     </div>
   );
 };
+

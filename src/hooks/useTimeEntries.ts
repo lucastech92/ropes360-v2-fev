@@ -215,3 +215,4 @@ export const getCheckInBorderColor = (type: CheckInType): string => {
   };
   return colors[type];
 };
+

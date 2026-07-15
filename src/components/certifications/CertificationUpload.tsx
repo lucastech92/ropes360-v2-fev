@@ -231,3 +231,4 @@ export const CertificationUpload = ({ isAdmin = false, profiles = [] }: Certific
     </div>
   );
 };
+

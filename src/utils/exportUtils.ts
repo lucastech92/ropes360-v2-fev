@@ -17,3 +17,4 @@ export const exportToCSV = (data: any[], filename: string) => {
   link.click();
   URL.revokeObjectURL(link.href);
 };
+

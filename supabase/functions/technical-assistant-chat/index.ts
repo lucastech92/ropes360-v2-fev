@@ -43,7 +43,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, conversationId, excelData, fileName } = await req.json();
+    const { messages, conversationId, excelData, fileName, selectedDocumentIds } = await req.json();
     console.log('🚀 Request received:', { 
       messagesCount: messages?.length, 
       conversationId,
@@ -109,10 +109,11 @@ serve(async (req) => {
     console.log('🔍 Searching for relevant document chunks...');
     
     const { data: chunks, error: searchError } = await supabaseAdmin.rpc(
-      'search_document_content',
+      'search_approved_technical_knowledge',
       { 
         search_query: searchQuery,
-        match_count: 20
+        match_count: 12,
+        filter_document_ids: Array.isArray(selectedDocumentIds) && selectedDocumentIds.length ? selectedDocumentIds : null
       }
     );
 
@@ -128,7 +129,15 @@ serve(async (req) => {
 
     const relevantChunks = chunks && chunks.length > 0 ? chunks : [];
     const sources = relevantChunks.length > 0 
-      ? [{ type: 'technical_documents', sections: relevantChunks.map((c: any) => c.metadata) }]
+      ? [{ type: 'technical_documents', sections: relevantChunks.map((c: any) => ({
+          document_id: c.document_id,
+          title: c.document_title,
+          file_name: c.file_name,
+          revision: c.revision,
+          knowledge_type: c.knowledge_type,
+          chunk_index: c.chunk_index,
+          authority_rank: c.authority_rank
+        })) }]
       : [];
     
     console.log('📚 Retrieved chunks:', relevantChunks.length);
@@ -142,7 +151,7 @@ serve(async (req) => {
     }
 
     const isoContext = relevantChunks.length > 0
-      ? `\n### CONTEXTO DOS DOCUMENTOS TÉCNICOS (WIRELOCK, ISO 4309, ETC):\n${relevantChunks.map((c: any) => c.content).join('\n\n---\n\n')}\n### FIM DO CONTEXTO DOS DOCUMENTOS`
+      ? `\n### FONTES TÉCNICAS APROVADAS\n${relevantChunks.map((c: any, index: number) => `[Fonte ${index + 1}: ${c.document_title}${c.revision ? `, revisão ${c.revision}` : ''}, trecho ${Number(c.chunk_index) + 1}]\n${c.content}`).join('\n\n---\n\n')}\n### FIM DAS FONTES APROVADAS`
       : '';
 
     const excelContext = excelData 
@@ -176,6 +185,10 @@ REGRAS CRÍTICAS:
 3. **NUNCA INVENTE**: Só cite valores que estejam LITERALMENTE nos dados retornados.
 4. **CITE A FONTE**: Sempre mencione de onde veio a informação.
 5. **PERGUNTE SE PRECISAR**: Se a ferramenta precisa de parâmetros, pergunte ao usuário.
+6. **RESPOSTA FUNDAMENTADA**: Para perguntas técnicas, use somente as fontes aprovadas fornecidas. Cite no texto como [Fonte N].
+7. **SEM SUPORTE DOCUMENTAL**: Se as fontes não sustentarem a resposta, diga claramente que a base aprovada não contém evidência suficiente.
+8. **HIERARQUIA**: Em conflito, priorize menor authority_rank: norma, procedimento interno, requisito do cliente, manual do fabricante e relatório histórico.
+9. **NÃO CONFUNDA HISTÓRICO COM REGRA**: Relatórios históricos são exemplos e nunca substituem norma ou procedimento aprovado.
 ${excelContext}${isoContext}
 
 ${isoContext ? '\n⚠️ IMPORTANTE: Você recebeu trechos de documentos técnicos acima. Analise-os cuidadosamente antes de responder. Se a resposta estiver lá, USE-A!' : ''}`;

@@ -114,3 +114,4 @@ export function useInventoryAuditTrail(filters?: AuditFilters) {
     refetch: fetchAuditTrail,
   };
 }
+

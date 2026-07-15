@@ -67,7 +67,7 @@ export const ServiceLinkSelect = ({
       <div className="space-y-2">
         <Label className="flex items-center gap-2">
           <Briefcase className="h-4 w-4" />
-          Vincular a Ordem de Serviço
+          JBR (opcional)
         </Label>
         <div className="text-sm text-muted-foreground">Carregando...</div>
       </div>
@@ -78,7 +78,7 @@ export const ServiceLinkSelect = ({
     <div className="space-y-2">
       <Label className="flex items-center gap-2">
         <Briefcase className="h-4 w-4" />
-        Vincular a Ordem de Serviço
+        JBR (opcional)
       </Label>
       <Select 
         value={selectedServiceId || "none"} 
@@ -89,7 +89,7 @@ export const ServiceLinkSelect = ({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="none">
-            <span className="text-muted-foreground">Nenhum (sem vínculo)</span>
+            <span className="text-muted-foreground">Nenhum JBR</span>
           </SelectItem>
           {services.map((service) => (
             <SelectItem key={service.id} value={service.id}>
@@ -108,7 +108,7 @@ export const ServiceLinkSelect = ({
       </Select>
       {selectedServiceId && (
         <p className="text-xs text-muted-foreground">
-          O checklist será vinculado ao serviço selecionado e o código JBR será preenchido automaticamente
+          O código será preenchido e o checklist vinculado automaticamente.
         </p>
       )}
     </div>

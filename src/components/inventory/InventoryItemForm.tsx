@@ -493,3 +493,4 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
     </Dialog>
   );
 }
+

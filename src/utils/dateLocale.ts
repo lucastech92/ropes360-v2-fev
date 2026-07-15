@@ -7,3 +7,4 @@ export const getDateLocale = () => {
   if (lang?.startsWith("es")) return es;
   return ptBR;
 };
+

@@ -22,3 +22,4 @@ export default defineMcp({
   }),
   tools: [listMyServices, listMyReports, listMyCertifications, listMyNotifications],
 });
+

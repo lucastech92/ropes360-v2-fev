@@ -205,3 +205,4 @@ export const DocumentUpload = ({ category, employeeFolder, onUploadComplete }: D
     </div>
   );
 };
+

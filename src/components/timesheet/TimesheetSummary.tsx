@@ -53,3 +53,4 @@ export const TimesheetSummary = ({ entries }: TimesheetSummaryProps) => {
     </div>
   );
 };
+

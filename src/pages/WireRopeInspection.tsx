@@ -233,3 +233,4 @@ const WireRopeInspection = () => {
 };
 
 export default WireRopeInspection;
+

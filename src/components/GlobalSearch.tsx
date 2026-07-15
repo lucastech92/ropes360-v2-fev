@@ -208,3 +208,4 @@ export function GlobalSearch() {
     </CommandDialog>
   );
 }
+

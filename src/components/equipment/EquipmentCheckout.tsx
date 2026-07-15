@@ -255,3 +255,4 @@ const EquipmentCheckout = ({
 };
 
 export default EquipmentCheckout;
+

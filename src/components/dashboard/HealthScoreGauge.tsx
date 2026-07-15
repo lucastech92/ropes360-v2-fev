@@ -167,3 +167,4 @@ export const HealthScoreGauge = ({ compact = false }: HealthScoreGaugeProps) => 
     </Card>
   );
 };
+

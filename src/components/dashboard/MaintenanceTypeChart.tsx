@@ -64,3 +64,4 @@ export const MaintenanceTypeChart = ({ maintenanceRecords }: MaintenanceTypeChar
     </ResponsiveContainer>
   );
 };
+

@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PackagePlus, PackageMinus } from "lucide-react";
 import { ServiceLinkSelect } from "@/components/service/ServiceLinkSelect";
+import { ContainerLinkSelect } from "@/components/service/ContainerLinkSelect";
 import {
   Dialog,
   DialogContent,
@@ -31,12 +32,14 @@ interface ChecklistFormDialogProps {
   serviceTag: string;
   type: 'entrada' | 'saida';
   selectedServiceId: string | null;
+  selectedContainerId: string | null;
   onNameChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
   onServiceTagChange: (value: string) => void;
   onTypeChange: (value: 'entrada' | 'saida') => void;
   onIsTemplateChange: (value: boolean) => void;
   onServiceIdChange: (value: string | null) => void;
+  onContainerIdChange: (value: string | null) => void;
   onSubmit: () => void;
 }
 
@@ -50,12 +53,14 @@ export const ChecklistFormDialog = ({
   serviceTag,
   type,
   selectedServiceId,
+  selectedContainerId,
   onNameChange,
   onDescriptionChange,
   onServiceTagChange,
   onTypeChange,
   onIsTemplateChange,
   onServiceIdChange,
+  onContainerIdChange,
   onSubmit,
 }: ChecklistFormDialogProps) => {
   const isCreate = mode === 'create';
@@ -116,19 +121,11 @@ export const ChecklistFormDialog = ({
           </div>
           {!isTemplate && (
             <>
-              <div>
-                <Label htmlFor="service_tag">Código JBR / Tag de Serviço</Label>
-                <Input
-                  id="service_tag"
-                  value={serviceTag}
-                  onChange={(e) => onServiceTagChange(e.target.value)}
-                  placeholder="Ex: JBR-2024-001"
-                />
-              </div>
               <ServiceLinkSelect
                 selectedServiceId={selectedServiceId}
                 onChange={(id) => {
                   onServiceIdChange(id);
+                  onContainerIdChange(null);
                 }}
                 onServiceSelected={(service) => {
                   if (service) {
@@ -136,6 +133,7 @@ export const ChecklistFormDialog = ({
                   }
                 }}
               />
+              <ContainerLinkSelect selectedServiceId={selectedServiceId} selectedContainerId={selectedContainerId} onChange={onContainerIdChange} />
             </>
           )}
           {isCreate && !isTemplate && (

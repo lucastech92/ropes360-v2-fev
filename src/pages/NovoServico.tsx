@@ -210,6 +210,8 @@ const NovoServico = () => {
           .insert({
             ...serviceData,
             created_by: user.id,
+            responsible_user_id: user.id,
+            operational_status: "planning",
           })
           .select()
           .single();

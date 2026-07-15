@@ -58,3 +58,4 @@ export const MaintenanceTimeline = ({ maintenanceRecords }: MaintenanceTimelineP
     </ResponsiveContainer>
   );
 };
+

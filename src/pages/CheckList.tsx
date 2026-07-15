@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import { ClipboardList, FolderOpen, FileText, Archive } from "lucide-react";
@@ -23,6 +24,8 @@ import { SavedChecklistsTab } from "@/components/checklist/SavedChecklistsTab";
 
 const CheckList = () => {
   const { t } = useTranslation();
+  const [searchParams] = useSearchParams();
+  const serviceIdFromJbr = searchParams.get("serviceId");
   const {
     checklists,
     selectedChecklist,
@@ -45,7 +48,7 @@ const CheckList = () => {
     saveChecklist,
     restoreChecklist,
     saveAsTemplate,
-  } = useChecklistData();
+  } = useChecklistData(serviceIdFromJbr);
 
   const [activeTab, setActiveTab] = useState<string>("servicos");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -55,6 +58,7 @@ const CheckList = () => {
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   const [templateToClone, setTemplateToClone] = useState<Checklist | null>(null);
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [selectedContainerId, setSelectedContainerId] = useState<string | null>(null);
 
   // Form state
   const [formName, setFormName] = useState("");
@@ -70,6 +74,7 @@ const CheckList = () => {
     setFormType('saida');
     setFormIsTemplate(false);
     setSelectedServiceId(null);
+    setSelectedContainerId(null);
   };
 
   const openCreateDialog = (asTemplate: boolean) => {
@@ -96,7 +101,12 @@ const CheckList = () => {
           .eq("checklist_id", currentChecklist.id)
           .limit(1)
       );
-      setSelectedServiceId(data?.[0]?.service_id || null);
+      const linkedServiceId = data?.[0]?.service_id || null;
+      setSelectedServiceId(linkedServiceId);
+      if (linkedServiceId) {
+        const { data: linkedService } = await import("@/integrations/supabase/client").then(m => m.supabase.from("services").select("logistics_container_id").eq("id", linkedServiceId).single());
+        setSelectedContainerId(linkedService?.logistics_container_id || null);
+      } else setSelectedContainerId(null);
 
       setIsEditDialogOpen(true);
     }
@@ -114,7 +124,7 @@ const CheckList = () => {
       serviceTag: formServiceTag,
       type: formType,
       isTemplate: formIsTemplate,
-    }, selectedServiceId);
+    }, selectedServiceId, selectedContainerId);
 
     if (result) {
       setIsCreateDialogOpen(false);
@@ -129,17 +139,17 @@ const CheckList = () => {
       serviceTag: formServiceTag,
       type: formType,
       isTemplate: formIsTemplate,
-    }, selectedServiceId);
+    }, selectedServiceId, selectedContainerId);
 
     if (success) {
       setIsEditDialogOpen(false);
     }
   };
 
-  const handleClone = async (serviceTag: string, name?: string) => {
+  const handleClone = async (serviceTag: string, name?: string, serviceId?: string, containerId?: string) => {
     if (!templateToClone) return;
     
-    const result = await cloneTemplate(templateToClone, serviceTag, name);
+    const result = await cloneTemplate(templateToClone, serviceTag, name, serviceId, containerId);
     if (result) {
       setIsCloneDialogOpen(false);
       setTemplateToClone(null);
@@ -167,28 +177,28 @@ const CheckList = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container py-8 space-y-8">
+      <main className="container space-y-6 px-4 py-6">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <ClipboardList className="h-8 w-8" />
+          <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
+            <ClipboardList className="h-6 w-6" />
             {t('checklists.title')}
           </h1>
           <p className="text-muted-foreground">{t('checklists.subtitle')}</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-lg grid-cols-3">
+          <TabsList className="grid w-full max-w-xl grid-cols-3">
             <TabsTrigger value="servicos" className="flex items-center gap-2">
               <FolderOpen className="h-4 w-4" />
-              {t('checklists.tabs.services')} ({serviceChecklists.length})
+              {serviceIdFromJbr ? "Deste JBR" : "Em uso"} ({serviceChecklists.length})
             </TabsTrigger>
             <TabsTrigger value="templates" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              {t('checklists.tabs.templates')} ({templates.length})
+              Templates ({templates.length})
             </TabsTrigger>
             <TabsTrigger value="salvos" className="flex items-center gap-2">
               <Archive className="h-4 w-4" />
-              {t('checklists.tabs.saved')} ({savedChecklists.length})
+              Arquivados ({savedChecklists.length})
             </TabsTrigger>
           </TabsList>
 
@@ -256,12 +266,14 @@ const CheckList = () => {
           serviceTag={formServiceTag}
           type={formType}
           selectedServiceId={selectedServiceId}
+          selectedContainerId={selectedContainerId}
           onNameChange={setFormName}
           onDescriptionChange={setFormDescription}
           onServiceTagChange={setFormServiceTag}
           onTypeChange={setFormType}
           onIsTemplateChange={setFormIsTemplate}
           onServiceIdChange={setSelectedServiceId}
+          onContainerIdChange={setSelectedContainerId}
           onSubmit={handleCreate}
         />
 
@@ -276,12 +288,14 @@ const CheckList = () => {
           serviceTag={formServiceTag}
           type={formType}
           selectedServiceId={selectedServiceId}
+          selectedContainerId={selectedContainerId}
           onNameChange={setFormName}
           onDescriptionChange={setFormDescription}
           onServiceTagChange={setFormServiceTag}
           onTypeChange={setFormType}
           onIsTemplateChange={setFormIsTemplate}
           onServiceIdChange={setSelectedServiceId}
+          onContainerIdChange={setSelectedContainerId}
           onSubmit={handleUpdate}
         />
 

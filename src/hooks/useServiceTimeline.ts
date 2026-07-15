@@ -19,6 +19,12 @@ export interface ServiceInfo {
   escopo: string[] | null;
   data_inicio: string | null;
   data_termino: string | null;
+  operational_status: string;
+  operational_status_updated_at: string;
+  responsible_user_id: string | null;
+  responsible_name: string | null;
+  logistics_container_id: string | null;
+  logistics_released_at: string | null;
 }
 
 export const useServiceTimeline = (serviceId: string | undefined) => {
@@ -26,6 +32,7 @@ export const useServiceTimeline = (serviceId: string | undefined) => {
   const [serviceInfo, setServiceInfo] = useState<ServiceInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     if (!serviceId) return;
@@ -35,21 +42,30 @@ export const useServiceTimeline = (serviceId: string | undefined) => {
       
       const [timelineRes, serviceRes] = await Promise.all([
         supabase.rpc("get_service_timeline", { p_service_id: serviceId }),
-        supabase.from("services").select("id, codigo_jbr, cliente, local, escopo, data_inicio, data_termino").eq("id", serviceId).single(),
+        supabase.from("services").select("id, codigo_jbr, cliente, local, escopo, data_inicio, data_termino, operational_status, operational_status_updated_at, responsible_user_id, logistics_container_id, logistics_released_at").eq("id", serviceId).single(),
       ]);
 
       if (timelineRes.data) {
         setEvents(timelineRes.data as TimelineEvent[]);
       }
       if (serviceRes.data) {
-        setServiceInfo(serviceRes.data);
+        let responsible_name: string | null = null;
+        if (serviceRes.data.responsible_user_id) {
+          const { data: profile } = await supabase
+            .from("user_profiles")
+            .select("full_name")
+            .eq("user_id", serviceRes.data.responsible_user_id)
+            .maybeSingle();
+          responsible_name = profile?.full_name ?? null;
+        }
+        setServiceInfo({ ...serviceRes.data, responsible_name });
       }
       
       setLoading(false);
     };
 
     fetchData();
-  }, [serviceId]);
+  }, [serviceId, refreshKey]);
 
   const filteredEvents = filter === "all"
     ? events
@@ -65,5 +81,7 @@ export const useServiceTimeline = (serviceId: string | undefined) => {
     { key: "activity", label: "Atividades" },
   ];
 
-  return { events: filteredEvents, allEvents: events, serviceInfo, loading, filter, setFilter, eventCategories };
+  const refresh = () => setRefreshKey((current) => current + 1);
+
+  return { events: filteredEvents, allEvents: events, serviceInfo, loading, filter, setFilter, eventCategories, refresh };
 };
