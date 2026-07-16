@@ -41,6 +41,7 @@ interface ChecklistFormDialogProps {
   onServiceIdChange: (value: string | null) => void;
   onContainerIdChange: (value: string | null) => void;
   onSubmit: () => void;
+  submitDisabled?: boolean;
 }
 
 export const ChecklistFormDialog = ({
@@ -62,6 +63,7 @@ export const ChecklistFormDialog = ({
   onServiceIdChange,
   onContainerIdChange,
   onSubmit,
+  submitDisabled = false,
 }: ChecklistFormDialogProps) => {
   const isCreate = mode === 'create';
   const title = isTemplate 
@@ -150,8 +152,12 @@ export const ChecklistFormDialog = ({
           )}
         </div>
         <DialogFooter>
-          <Button onClick={onSubmit}>
-            {isCreate ? (isTemplate ? "Criar Template" : "Criar Checklist") : "Salvar Alterações"}
+          <Button onClick={onSubmit} disabled={submitDisabled}>
+            {submitDisabled
+              ? "Carregando vínculos..."
+              : isCreate
+                ? (isTemplate ? "Criar Template" : "Criar Checklist")
+                : "Salvar Alterações"}
           </Button>
         </DialogFooter>
       </DialogContent>

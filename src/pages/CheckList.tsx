@@ -55,6 +55,7 @@ const CheckList = () => {
   const [activeTab, setActiveTab] = useState<string>("servicos");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isEditContextLoading, setIsEditContextLoading] = useState(false);
   const [isCloneDialogOpen, setIsCloneDialogOpen] = useState(false);
   const [isTemplateMode, setIsTemplateMode] = useState(false);
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
@@ -86,31 +87,44 @@ const CheckList = () => {
     setIsCreateDialogOpen(true);
   };
 
-  const openEditDialog = async () => {
-    if (currentChecklist) {
-      setFormName(currentChecklist.name);
-      setFormDescription(currentChecklist.description || "");
-      setFormServiceTag(currentChecklist.service_tag || "");
-      setFormType(currentChecklist.checklist_type);
-      setFormIsTemplate(currentChecklist.is_template);
-      setIsTemplateMode(currentChecklist.is_template);
-
-      // Load existing service link
-      const { data } = await import("@/integrations/supabase/client").then(m =>
-        m.supabase
-          .from("service_checklists")
-          .select("service_id")
-          .eq("checklist_id", currentChecklist.id)
-          .limit(1)
-      );
-      const linkedServiceId = data?.[0]?.service_id || null;
-      setSelectedServiceId(linkedServiceId);
-      if (linkedServiceId) {
-        const { data: linkedService } = await import("@/integrations/supabase/client").then(m => m.supabase.from("services").select("logistics_container_id").eq("id", linkedServiceId).single());
-        setSelectedContainerId(linkedService?.logistics_container_id || null);
-      } else setSelectedContainerId(null);
-
+  const openEditDialog = async (checklist?: Checklist) => {
+    const checklistToEdit = checklist ?? currentChecklist;
+    if (checklistToEdit) {
+      setSelectedChecklist(checklistToEdit.id);
+      setFormName(checklistToEdit.name);
+      setFormDescription(checklistToEdit.description || "");
+      setFormServiceTag(checklistToEdit.service_tag || "");
+      setFormType(checklistToEdit.checklist_type);
+      setFormIsTemplate(checklistToEdit.is_template);
+      setIsTemplateMode(checklistToEdit.is_template);
+      setSelectedServiceId(checklistToEdit.is_template ? null : serviceIdFromJbr);
+      setSelectedContainerId(null);
+      setIsEditContextLoading(!checklistToEdit.is_template);
       setIsEditDialogOpen(true);
+
+      if (checklistToEdit.is_template) {
+        setIsEditContextLoading(false);
+        return;
+      }
+
+      try {
+        // Load existing service link while the dialog is already visible.
+        const { data } = await import("@/integrations/supabase/client").then(m =>
+          m.supabase
+            .from("service_checklists")
+            .select("service_id")
+            .eq("checklist_id", checklistToEdit.id)
+            .limit(1)
+        );
+        const linkedServiceId = data?.[0]?.service_id || null;
+        setSelectedServiceId(linkedServiceId);
+        if (linkedServiceId) {
+          const { data: linkedService } = await import("@/integrations/supabase/client").then(m => m.supabase.from("services").select("logistics_container_id").eq("id", linkedServiceId).single());
+          setSelectedContainerId(linkedService?.logistics_container_id || null);
+        } else setSelectedContainerId(null);
+      } finally {
+        setIsEditContextLoading(false);
+      }
     }
   };
 
@@ -166,8 +180,7 @@ const CheckList = () => {
   };
 
   const handleEditTemplate = (template: Checklist) => {
-    setSelectedChecklist(template.id);
-    setActiveTab("servicos");
+    void openEditDialog(template);
   };
 
   const handleViewSaved = (id: string) => {
@@ -230,7 +243,7 @@ const CheckList = () => {
                 selectedChecklist={selectedChecklist}
                 onSelectChecklist={setSelectedChecklist}
                 onCreateClick={() => openCreateDialog(false)}
-                onEditClick={openEditDialog}
+                onEditClick={() => void openEditDialog()}
               />
 
               {currentChecklist && (
@@ -309,6 +322,7 @@ const CheckList = () => {
           onServiceIdChange={setSelectedServiceId}
           onContainerIdChange={setSelectedContainerId}
           onSubmit={handleUpdate}
+          submitDisabled={isEditContextLoading}
         />
 
         {/* Clone Dialog */}
