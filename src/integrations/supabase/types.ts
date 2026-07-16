@@ -1336,18 +1336,21 @@ export type Database = {
           created_at: string | null
           id: string
           service_id: string
+          source_template_id: string | null
         }
         Insert: {
           checklist_id: string
           created_at?: string | null
           id?: string
           service_id: string
+          source_template_id?: string | null
         }
         Update: {
           checklist_id?: string
           created_at?: string | null
           id?: string
           service_id?: string
+          source_template_id?: string | null
         }
         Relationships: [
           {
@@ -1362,6 +1365,13 @@ export type Database = {
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_checklists_source_template_id_fkey"
+            columns: ["source_template_id"]
+            isOneToOne: false
+            referencedRelation: "checklists"
             referencedColumns: ["id"]
           },
         ]

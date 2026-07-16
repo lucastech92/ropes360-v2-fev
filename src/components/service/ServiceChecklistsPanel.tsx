@@ -27,13 +27,15 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode }: { serviceId: stri
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [selectedTemplateIds, setSelectedTemplateIds] = useState<string[]>([]);
   const [cloning, setCloning] = useState(false);
+  const [usedTemplateIds, setUsedTemplateIds] = useState<string[]>([]);
+  const [linkedChecklistNames, setLinkedChecklistNames] = useState<string[]>([]);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       const { data } = await supabase
         .from("service_checklists")
-        .select("checklist_id, checklists:checklist_id(id, name, description, checklist_type, checklist_items(id, is_checked))")
+        .select("checklist_id, source_template_id, checklists:checklist_id(id, name, description, checklist_type, checklist_items(id, is_checked))")
         .eq("service_id", serviceId);
 
       const summaries = (data ?? []).flatMap((link: any) => {
@@ -50,6 +52,8 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode }: { serviceId: stri
         }];
       });
       setChecklists(summaries);
+      setUsedTemplateIds((data ?? []).flatMap((link: any) => link.source_template_id ? [link.source_template_id] : []));
+      setLinkedChecklistNames(summaries.map((checklist) => checklist.name.trim().toLocaleLowerCase("pt-BR")));
       setLoading(false);
     };
 
@@ -70,6 +74,17 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode }: { serviceId: stri
 
     setCloning(true);
     try {
+      const { data: existingLinks, error: existingLinksError } = await supabase
+        .from("service_checklists")
+        .select("source_template_id, checklists:checklist_id(name)")
+        .eq("service_id", serviceId);
+      if (existingLinksError) throw existingLinksError;
+
+      const existingTemplateIds = new Set((existingLinks ?? []).flatMap((link: any) => link.source_template_id ? [link.source_template_id] : []));
+      const existingNames = new Set((existingLinks ?? []).flatMap((link: any) => link.checklists?.name
+        ? [link.checklists.name.trim().toLocaleLowerCase("pt-BR")]
+        : []));
+
       for (const templateId of selectedTemplateIds) {
         const { data: template, error: templateError } = await supabase
           .from("checklists")
@@ -77,6 +92,11 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode }: { serviceId: stri
           .eq("id", templateId)
           .single();
         if (templateError || !template) throw templateError ?? new Error("Template não encontrado");
+
+        const normalizedTemplateName = template.name.trim().toLocaleLowerCase("pt-BR");
+        if (template.is_template && (existingTemplateIds.has(template.id) || existingNames.has(normalizedTemplateName))) {
+          throw new Error(`O checklist ${template.name} já foi adicionado a este JBR. Abra a cópia existente em vez de duplicá-la.`);
+        }
 
         if (!template.is_template) {
           const { data: existingLink, error: linkLookupError } = await supabase
@@ -141,8 +161,14 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode }: { serviceId: stri
         const { error: linkError } = await supabase.from("service_checklists").insert({
           service_id: serviceId,
           checklist_id: checklist.id,
+          source_template_id: template.id,
         });
-        if (linkError) throw linkError;
+        if (linkError) {
+          await supabase.from("checklists").delete().eq("id", checklist.id);
+          throw linkError;
+        }
+        existingTemplateIds.add(template.id);
+        existingNames.add(normalizedTemplateName);
       }
 
       setTemplateDialogOpen(false);
@@ -150,7 +176,10 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode }: { serviceId: stri
       setRefreshKey((value) => value + 1);
       toast({ title: "Checklist(s) adicionado(s) ao JBR" });
     } catch (error: any) {
-      toast({ title: "Não foi possível adicionar o checklist", description: error.message, variant: "destructive" });
+      const duplicateMessage = error?.code === "23505"
+        ? "Este template já foi utilizado neste JBR. Abra o checklist existente em vez de criar outra cópia."
+        : error.message;
+      toast({ title: "Não foi possível adicionar o checklist", description: duplicateMessage, variant: "destructive" });
     } finally {
       setCloning(false);
     }
@@ -164,7 +193,7 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode }: { serviceId: stri
           <CardDescription>O checklist é o controle operacional de recursos deste serviço. Ajustes são feitos nele, mantendo um único registro confiável.</CardDescription>
         </div>
         <div className="flex gap-2">
-          <Button size="sm" onClick={() => setTemplateDialogOpen(true)}>
+          <Button size="sm" onClick={() => { setSelectedTemplateIds([]); setTemplateDialogOpen(true); }}>
             <Copy className="mr-2 h-4 w-4" /> Adicionar checklist
           </Button>
           <Button variant="outline" size="sm" onClick={() => navigate(`/checklist?serviceId=${serviceId}`)}>
@@ -209,7 +238,13 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode }: { serviceId: stri
             <DialogTitle>Adicionar checklist ao JBR</DialogTitle>
             <DialogDescription>Escolha templates para copiar ou checklists existentes sem JBR para vincular ao {jbrCode}.</DialogDescription>
           </DialogHeader>
-          <ServiceChecklistsSelect mode="available" selectedChecklistIds={selectedTemplateIds} onChange={setSelectedTemplateIds} />
+          <ServiceChecklistsSelect
+            mode="available"
+            selectedChecklistIds={selectedTemplateIds}
+            onChange={setSelectedTemplateIds}
+            disabledChecklistIds={usedTemplateIds}
+            disabledChecklistNames={linkedChecklistNames}
+          />
           <DialogFooter>
             <Button variant="outline" onClick={() => setTemplateDialogOpen(false)} disabled={cloning}>Cancelar</Button>
             <Button onClick={addChecklistsToJbr} disabled={cloning}>{cloning ? "Adicionando..." : "Adicionar ao JBR"}</Button>

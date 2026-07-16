@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-const getServiceIdFromLocation = (pathname: string, search: string) => {
+export const getServiceIdFromLocation = (pathname: string, search: string) => {
   const fromQuery = new URLSearchParams(search).get("serviceId");
   if (fromQuery) return fromQuery;
 
