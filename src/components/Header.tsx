@@ -14,6 +14,7 @@ import { ForceUpdateButton } from "./ForceUpdateButton";
 import { CommandPaletteHeaderButton } from "./CommandPalette";
 import { DesktopModuleNav } from "./DesktopModuleNav";
 import { OperationalQuickNav } from "./OperationalQuickNav";
+import { MobileOperationalNav } from "./MobileOperationalNav";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -63,6 +64,7 @@ const Header = () => {
       </div>
     </header>
     <NavigationBreadcrumb />
+    <MobileOperationalNav />
   </>;
 };
 

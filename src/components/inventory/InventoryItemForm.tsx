@@ -24,9 +24,9 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { UnifiedInventoryItem, ItemType } from "@/hooks/useUnifiedInventory";
-import { ImagePlus, Loader2, Trash2, Upload } from "lucide-react";
+import { Camera, ImagePlus, Loader2, Trash2, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { removeInventoryPhoto, uploadInventoryPhoto, validateInventoryPhoto } from "@/lib/inventoryPhotoStorage";
+import { prepareInventoryPhoto, removeInventoryPhoto, uploadInventoryPhoto } from "@/lib/inventoryPhotoStorage";
 
 const formSchema = z.object({
   item_name: z.string().min(1, "Nome é obrigatório"),
@@ -64,10 +64,12 @@ interface InventoryItemFormProps {
 export default function InventoryItemForm({ open, onOpenChange, item, onSave }: InventoryItemFormProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [removePhoto, setRemovePhoto] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [preparingPhoto, setPreparingPhoto] = useState(false);
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -159,22 +161,25 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
     return () => URL.revokeObjectURL(objectUrl);
   }, [photoFile, removePhoto, item?.photo_url]);
 
-  const handlePhotoSelected = (file: File | undefined) => {
+  const handlePhotoSelected = async (file: File | undefined) => {
     if (!file) return;
-    const validationError = validateInventoryPhoto(file);
-    if (validationError) {
-      toast({ title: "Foto não aceita", description: validationError, variant: "destructive" });
-      return;
+    setPreparingPhoto(true);
+    try {
+      const preparedPhoto = await prepareInventoryPhoto(file);
+      setPhotoFile(preparedPhoto);
+      setRemovePhoto(false);
+    } catch (error: any) {
+      toast({ title: "Foto não aceita", description: error.message, variant: "destructive" });
+    } finally {
+      setPreparingPhoto(false);
     }
-
-    setPhotoFile(file);
-    setRemovePhoto(false);
   };
 
   const handleRemovePhoto = () => {
     setPhotoFile(null);
     setRemovePhoto(true);
     if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
   };
 
   const handleSubmit = async (data: FormData) => {
@@ -359,7 +364,7 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
                       )}
                     </div>
                     <div className="flex-1 space-y-2">
-                      <p className="text-sm text-muted-foreground">JPG, PNG ou WebP, com no máximo 5 MB.</p>
+                      <p className="text-sm text-muted-foreground">Use a câmera ou escolha uma imagem. O arquivo será comprimido automaticamente.</p>
                       <Input
                         ref={fileInputRef}
                         type="file"
@@ -367,10 +372,43 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
                         className="hidden"
                         onChange={(event) => handlePhotoSelected(event.target.files?.[0])}
                       />
+                      <Input
+                        ref={cameraInputRef}
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        className="hidden"
+                        onChange={(event) => handlePhotoSelected(event.target.files?.[0])}
+                      />
                       <div className="flex flex-wrap gap-2">
-                        <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-                          <Upload className="mr-2 h-4 w-4" />
-                          {photoPreview ? "Substituir foto" : "Anexar foto"}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={preparingPhoto}
+                          onClick={() => {
+                            if (fileInputRef.current) {
+                              fileInputRef.current.value = "";
+                              fileInputRef.current.click();
+                            }
+                          }}
+                        >
+                          {preparingPhoto ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                          {preparingPhoto ? "Otimizando..." : photoPreview ? "Substituir" : "Escolher foto"}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={preparingPhoto}
+                          onClick={() => {
+                            if (cameraInputRef.current) {
+                              cameraInputRef.current.value = "";
+                              cameraInputRef.current.click();
+                            }
+                          }}
+                        >
+                          <Camera className="mr-2 h-4 w-4" /> Tirar foto
                         </Button>
                         {photoPreview && (
                           <Button type="button" variant="ghost" size="sm" className="text-destructive" onClick={handleRemovePhoto}>
@@ -603,10 +641,10 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
             </Tabs>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={saving || preparingPhoto}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={saving}>
+              <Button type="submit" disabled={saving || preparingPhoto}>
                 {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {saving ? "Salvando..." : item ? "Salvar" : "Cadastrar"}
               </Button>

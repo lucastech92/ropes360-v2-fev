@@ -37,7 +37,7 @@ export const NotificationPermissionPrompt = () => {
   }
 
   return (
-    <Card className="fixed bottom-4 right-4 w-96 shadow-lg z-50 border-primary">
+    <Card className="fixed bottom-20 left-4 right-4 z-50 w-auto border-primary shadow-lg md:bottom-4 md:left-auto md:right-4 md:w-96">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
@@ -92,4 +92,3 @@ export const NotificationPermissionPrompt = () => {
     </Card>
   );
 };
-

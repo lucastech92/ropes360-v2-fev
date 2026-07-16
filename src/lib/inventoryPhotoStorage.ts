@@ -2,6 +2,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 const BUCKET = "inventory-images";
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_SOURCE_SIZE = 20 * 1024 * 1024;
+const MAX_IMAGE_DIMENSION = 1600;
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export const validateInventoryPhoto = (file: File) => {
@@ -14,6 +16,39 @@ export const validateInventoryPhoto = (file: File) => {
   }
 
   return null;
+};
+
+export const prepareInventoryPhoto = async (file: File) => {
+  if (!ALLOWED_TYPES.has(file.type)) {
+    throw new Error("Use uma imagem JPG, PNG ou WebP.");
+  }
+  if (file.size > MAX_SOURCE_SIZE) {
+    throw new Error("A foto original deve ter no máximo 20 MB.");
+  }
+
+  const bitmap = await createImageBitmap(file);
+  try {
+    const scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(bitmap.width, bitmap.height));
+    if (scale === 1 && file.size <= MAX_FILE_SIZE) return file;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Não foi possível preparar a imagem.");
+
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", 0.82));
+    if (!blob) throw new Error("Não foi possível comprimir a imagem.");
+
+    const baseName = file.name.replace(/\.[^.]+$/, "") || "foto-item";
+    const prepared = new File([blob], `${baseName}.webp`, { type: blob.type || "image/webp" });
+    const validationError = validateInventoryPhoto(prepared);
+    if (validationError) throw new Error(validationError);
+    return prepared;
+  } finally {
+    bitmap.close();
+  }
 };
 
 export const uploadInventoryPhoto = async (file: File) => {

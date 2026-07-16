@@ -18,12 +18,16 @@ interface ServiceChecklistsSelectProps {
   selectedChecklistIds: string[];
   onChange: (checklistIds: string[]) => void;
   mode: 'templates' | 'available' | 'all';
+  disabledChecklistIds?: string[];
+  disabledChecklistNames?: string[];
 }
 
 export const ServiceChecklistsSelect = ({
   selectedChecklistIds,
   onChange,
   mode = 'templates',
+  disabledChecklistIds = [],
+  disabledChecklistNames = [],
 }: ServiceChecklistsSelectProps) => {
   const [checklists, setChecklists] = useState<ChecklistTemplate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +62,15 @@ export const ServiceChecklistsSelect = ({
     }
   };
 
-  const toggleChecklist = (checklistId: string) => {
+  const isChecklistDisabled = (checklist: ChecklistTemplate) => {
+    const normalizedName = checklist.name.trim().toLocaleLowerCase("pt-BR");
+    return disabledChecklistIds.includes(checklist.id)
+      || (checklist.is_template && disabledChecklistNames.includes(normalizedName));
+  };
+
+  const toggleChecklist = (checklist: ChecklistTemplate) => {
+    if (isChecklistDisabled(checklist)) return;
+    const checklistId = checklist.id;
     if (selectedChecklistIds.includes(checklistId)) {
       onChange(selectedChecklistIds.filter((id) => id !== checklistId));
     } else {
@@ -103,15 +115,17 @@ export const ServiceChecklistsSelect = ({
                 : 'Nenhum checklist disponível'}
           </p>
         ) : (
-          checklists.map((checklist) => (
-            <div
+          checklists.map((checklist) => {
+            const disabled = isChecklistDisabled(checklist);
+            return <div
               key={checklist.id}
-              className="flex items-center space-x-2 p-2 rounded hover:bg-muted/50 cursor-pointer"
-              onClick={() => toggleChecklist(checklist.id)}
+              className={`flex items-center space-x-2 rounded p-2 ${disabled ? "cursor-not-allowed bg-muted/30 opacity-60" : "cursor-pointer hover:bg-muted/50"}`}
+              onClick={() => toggleChecklist(checklist)}
             >
               <Checkbox
                 checked={selectedChecklistIds.includes(checklist.id)}
-                onCheckedChange={() => toggleChecklist(checklist.id)}
+                disabled={disabled}
+                onCheckedChange={() => toggleChecklist(checklist)}
                 onClick={(e) => e.stopPropagation()}
               />
               <div className="flex-1 min-w-0 flex items-center gap-2">
@@ -130,6 +144,9 @@ export const ServiceChecklistsSelect = ({
                       {checklist.description}
                     </p>
                   )}
+                  {disabled && (
+                    <p className="text-xs font-medium text-amber-600">Já adicionado a este JBR</p>
+                  )}
                 </div>
                 <Badge 
                   variant="outline" 
@@ -147,14 +164,17 @@ export const ServiceChecklistsSelect = ({
                   {checklist.checklist_type === 'entrada' ? 'Entrada' : 'Saída'}
                 </Badge>
               </div>
-            </div>
-          ))
+            </div>;
+          })
         )}
       </div>
       {(mode === 'templates' || mode === 'available') && selectedChecklistIds.length > 0 && (
         <p className="text-xs text-muted-foreground">
           Templates serão clonados; checklists existentes serão vinculados diretamente ao JBR.
         </p>
+      )}
+      {(disabledChecklistIds.length > 0 || disabledChecklistNames.length > 0) && (
+        <p className="text-xs text-amber-600">Checklists já usados neste JBR ficam bloqueados para evitar cópias repetidas.</p>
       )}
     </div>
   );

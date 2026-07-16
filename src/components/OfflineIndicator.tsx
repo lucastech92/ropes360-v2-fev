@@ -36,7 +36,7 @@ export const OfflineIndicator = () => {
   return (
     <div
       className={cn(
-        "fixed bottom-4 left-4 z-50 flex items-center gap-2 rounded-lg px-4 py-2 shadow-lg transition-all duration-300",
+        "fixed bottom-20 left-4 z-50 flex items-center gap-2 rounded-lg px-4 py-2 shadow-lg transition-all duration-300 md:bottom-4",
         "bg-destructive text-destructive-foreground"
       )}
     >
@@ -45,4 +45,3 @@ export const OfflineIndicator = () => {
     </div>
   );
 };
-

@@ -198,6 +198,12 @@ All colors MUST be HSL.
   }
 }
 
+@media (max-width: 767px) {
+  body.has-mobile-operational-nav {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
+}
+
 @layer base {
   * {
     @apply border-border;

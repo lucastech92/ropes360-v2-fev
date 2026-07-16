@@ -144,6 +144,14 @@ const NovoServico = () => {
       return template;
     }
 
+    const { data: existingTemplateLink } = await supabase
+      .from("service_checklists")
+      .select("id")
+      .eq("service_id", serviceId)
+      .eq("source_template_id", template.id)
+      .maybeSingle();
+    if (existingTemplateLink) return null;
+
     // Create cloned checklist
     const { data: newChecklist, error: checklistError } = await supabase
       .from("checklists")
@@ -182,10 +190,15 @@ const NovoServico = () => {
     }
 
     // Link cloned checklist to service
-    await supabase.from("service_checklists").insert({
+    const { error: linkError } = await supabase.from("service_checklists").insert({
       service_id: serviceId,
       checklist_id: newChecklist.id,
+      source_template_id: template.id,
     });
+    if (linkError) {
+      await supabase.from("checklists").delete().eq("id", newChecklist.id);
+      return null;
+    }
 
     return newChecklist;
   };

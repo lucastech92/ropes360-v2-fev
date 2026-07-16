@@ -395,8 +395,22 @@ export const useChecklistData = (serviceId?: string | null) => {
     }
 
     if (serviceId) {
-      const { error: linkError } = await supabase.from("service_checklists").upsert({ service_id: serviceId, checklist_id: newChecklist.id }, { onConflict: "service_id,checklist_id" });
-      if (linkError) toast({ title: "Checklist criado", description: "Não foi possível concluir o vínculo formal com o JBR.", variant: "destructive" });
+      const { error: linkError } = await supabase.from("service_checklists").insert({
+        service_id: serviceId,
+        checklist_id: newChecklist.id,
+        source_template_id: template.id,
+      });
+      if (linkError) {
+        await supabase.from("checklists").delete().eq("id", newChecklist.id);
+        toast({
+          title: "Checklist já utilizado",
+          description: linkError.code === "23505"
+            ? "Este template já foi adicionado ao JBR. Abra o checklist existente."
+            : "Não foi possível concluir o vínculo formal com o JBR.",
+          variant: "destructive",
+        });
+        return null;
+      }
     }
 
     if (serviceId && containerId) {
