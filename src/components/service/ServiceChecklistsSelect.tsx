@@ -11,12 +11,13 @@ interface ChecklistTemplate {
   description: string | null;
   checklist_type: 'entrada' | 'saida';
   is_template: boolean;
+  service_checklists?: { service_id: string }[];
 }
 
 interface ServiceChecklistsSelectProps {
   selectedChecklistIds: string[];
   onChange: (checklistIds: string[]) => void;
-  mode: 'templates' | 'all';
+  mode: 'templates' | 'available' | 'all';
 }
 
 export const ServiceChecklistsSelect = ({
@@ -35,7 +36,7 @@ export const ServiceChecklistsSelect = ({
     try {
       let query = supabase
         .from("checklists")
-        .select("id, name, description, checklist_type, is_template")
+        .select("id, name, description, checklist_type, is_template, service_checklists(service_id)")
         .order("name");
 
       if (mode === 'templates') {
@@ -45,7 +46,10 @@ export const ServiceChecklistsSelect = ({
       const { data, error } = await query;
 
       if (!error && data) {
-        setChecklists(data as ChecklistTemplate[]);
+        const loaded = data as ChecklistTemplate[];
+        setChecklists(mode === 'available'
+          ? loaded.filter((checklist) => checklist.is_template || !checklist.service_checklists?.length)
+          : loaded);
       }
     } catch (error) {
       console.error("Error fetching checklists:", error);
@@ -79,7 +83,11 @@ export const ServiceChecklistsSelect = ({
       <div className="flex items-center justify-between">
         <Label className="flex items-center gap-2">
           <ClipboardList className="h-4 w-4" />
-          {mode === 'templates' ? 'Checklists (Templates para clonar)' : 'Checklists'}
+          {mode === 'templates'
+            ? 'Checklists (Templates para clonar)'
+            : mode === 'available'
+              ? 'Templates e checklists sem JBR'
+              : 'Checklists'}
         </Label>
         {selectedChecklistIds.length > 0 && (
           <Badge variant="secondary">{selectedChecklistIds.length} selecionado(s)</Badge>
@@ -88,9 +96,11 @@ export const ServiceChecklistsSelect = ({
       <div className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
         {checklists.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            {mode === 'templates' 
-              ? 'Nenhum template disponível. Crie templates na página de Checklists.' 
-              : 'Nenhum checklist disponível'}
+            {mode === 'templates'
+              ? 'Nenhum template disponível. Crie templates na página de Checklists.'
+              : mode === 'available'
+                ? 'Nenhum template ou checklist sem JBR disponível.'
+                : 'Nenhum checklist disponível'}
           </p>
         ) : (
           checklists.map((checklist) => (
@@ -112,6 +122,9 @@ export const ServiceChecklistsSelect = ({
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{checklist.name}</p>
+                  {!checklist.is_template && mode === 'available' && (
+                    <p className="text-xs text-muted-foreground">Checklist existente sem JBR</p>
+                  )}
                   {checklist.description && (
                     <p className="text-xs text-muted-foreground truncate">
                       {checklist.description}
@@ -138,12 +151,11 @@ export const ServiceChecklistsSelect = ({
           ))
         )}
       </div>
-      {mode === 'templates' && selectedChecklistIds.length > 0 && (
+      {(mode === 'templates' || mode === 'available') && selectedChecklistIds.length > 0 && (
         <p className="text-xs text-muted-foreground">
-          Os templates selecionados serão clonados automaticamente com o código JBR do serviço
+          Templates serão clonados; checklists existentes serão vinculados diretamente ao JBR.
         </p>
       )}
     </div>
   );
 };
-
