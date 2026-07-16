@@ -13,6 +13,7 @@ import { NavigationBreadcrumb } from "./NavigationBreadcrumb";
 import { ForceUpdateButton } from "./ForceUpdateButton";
 import { CommandPaletteHeaderButton } from "./CommandPalette";
 import { DesktopModuleNav } from "./DesktopModuleNav";
+import { OperationalQuickNav } from "./OperationalQuickNav";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -40,8 +41,10 @@ const Header = () => {
         </div>
 
         <nav className="flex items-center gap-1">
+          <OperationalQuickNav />
+          <div className="mx-1 hidden h-6 w-px bg-border md:block" />
           <DesktopModuleNav />
-          <div className="mx-1 hidden h-6 w-px bg-border xl:block" />
+          <div className="mx-1 hidden h-6 w-px bg-border 2xl:block" />
           <CommandPaletteHeaderButton />
           <NotificationBell />
           <DropdownMenu>
