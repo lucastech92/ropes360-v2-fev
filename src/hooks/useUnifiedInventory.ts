@@ -13,6 +13,9 @@ export interface UnifiedInventoryItem {
   item_name: string;
   category: string | null;
   quantity: number;
+  physical_quantity: number;
+  reserved_quantity: number;
+  available_quantity: number;
   unit: string | null;
   location: string | null;
   min_quantity: number | null;
@@ -86,14 +89,28 @@ export const useUnifiedInventory = () => {
         return;
       }
 
-      const { data, error } = await supabase
-        .from("inventory")
-        .select("*")
-        .order("item_name");
+      const [inventoryResult, availabilityResult] = await Promise.all([
+        supabase.from("inventory").select("*").order("item_name"),
+        (supabase as any).from("inventory_stock_availability").select("inventory_item_id, physical_quantity, reserved_quantity, available_quantity"),
+      ]);
 
-      if (error) throw error;
+      if (inventoryResult.error) throw inventoryResult.error;
+      if (availabilityResult.error) throw availabilityResult.error;
 
-      const typedData = (data || []) as UnifiedInventoryItem[];
+      const availability = new Map(
+        (availabilityResult.data || []).map((row: any) => [row.inventory_item_id, row]),
+      );
+      const typedData = (inventoryResult.data || []).map((item) => {
+        const stock = availability.get(item.id);
+        const physical = stock?.physical_quantity ?? item.quantity ?? 0;
+        return {
+          ...item,
+          quantity: physical,
+          physical_quantity: physical,
+          reserved_quantity: stock?.reserved_quantity ?? 0,
+          available_quantity: stock?.available_quantity ?? physical,
+        };
+      }) as UnifiedInventoryItem[];
       setItems(typedData);
       calculateStats(typedData);
     } catch (error: any) {
@@ -115,7 +132,7 @@ export const useUnifiedInventory = () => {
       total: data.length,
       consumiveis: data.filter((i) => i.item_type === "consumivel").length,
       equipamentos: data.filter((i) => i.item_type === "equipamento").length,
-      lowStock: data.filter((i) => i.min_quantity !== null && i.quantity <= i.min_quantity).length,
+      lowStock: data.filter((i) => i.min_quantity !== null && i.available_quantity <= i.min_quantity).length,
       available: data.filter((i) => i.item_type === "equipamento" && i.status === "available").length,
       inService: data.filter((i) => i.item_type === "equipamento" && i.status === "in_service").length,
       maintenance: data.filter((i) => i.item_type === "equipamento" && i.status === "maintenance").length,

@@ -6,6 +6,10 @@ export interface InventoryItem {
   id: string;
   item_name: string;
   quantity: number;
+  physical_quantity: number;
+  reserved_quantity: number;
+  reserved_for_service: number;
+  available_quantity: number;
   unit: string | null;
   status: string | null;
   next_calibration: string | null;
@@ -61,8 +65,11 @@ export const useChecklistData = (serviceId?: string | null) => {
 
   useEffect(() => {
     fetchChecklists();
-    fetchInventoryItems();
   }, []);
+
+  useEffect(() => {
+    fetchInventoryItems();
+  }, [serviceId]);
 
   useEffect(() => {
     const fetchLinkedChecklists = async () => {
@@ -88,13 +95,18 @@ export const useChecklistData = (serviceId?: string | null) => {
   }, [selectedChecklist]);
 
   const fetchInventoryItems = async () => {
-    const { data, error } = await supabase
-      .from("inventory")
-      .select("id, item_name, quantity, unit, status, next_calibration")
-      .order("item_name");
+    const { data, error } = await (supabase as any).rpc("get_inventory_stock_availability", {
+      p_service_id: serviceId ?? null,
+    });
 
     if (!error && data) {
-      setInventoryItems(data);
+      setInventoryItems(data as InventoryItem[]);
+    } else if (error) {
+      toast({
+        title: "Não foi possível carregar a disponibilidade",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -189,8 +201,10 @@ export const useChecklistData = (serviceId?: string | null) => {
 
     if (error) {
       toast({
-        title: "Erro",
-        description: "Não foi possível adicionar o item",
+        title: "Não foi possível reservar o item",
+        description: error.message.includes("Insufficient available stock")
+          ? "A quantidade disponível já está comprometida com outros JBRs. Atualize o estoque ou reduza a quantidade."
+          : error.message,
         variant: "destructive",
       });
       return false;
@@ -200,7 +214,9 @@ export const useChecklistData = (serviceId?: string | null) => {
     await fetchInventoryItems();
     toast({
       title: "Item adicionado",
-      description: "Item adicionado ao checklist. O estoque será movimentado no fluxo do JBR.",
+      description: serviceId
+        ? "Quantidade reservada para este JBR. O saldo físico será baixado somente na liberação logística."
+        : "Item adicionado ao checklist. A reserva será criada quando ele for vinculado a um JBR.",
     });
     return true;
   };

@@ -67,7 +67,7 @@ export const AddItemForm = ({ inventoryItems, onAddItem }: AddItemFormProps) => 
     const selectedItem = inventoryItems.find(item => item.id === selectedInventoryItem);
     if (!selectedItem) return;
 
-    const availableStock = selectedItem.quantity || 0;
+    const availableStock = selectedItem.available_quantity || 0;
 
     // Check for maintenance or calibration status first
     if (selectedItem.status === 'maintenance' || selectedItem.status === 'calibration') {
@@ -123,7 +123,9 @@ export const AddItemForm = ({ inventoryItems, onAddItem }: AddItemFormProps) => 
 
   const handleConfirmWarning = async () => {
     if (pendingItem) {
-      await confirmAdd(pendingItem.id, pendingItem.quantity);
+      if (pendingItem.warningType !== 'stock') {
+        await confirmAdd(pendingItem.id, pendingItem.quantity);
+      }
     }
     setShowWarning(false);
     setPendingItem(null);
@@ -180,11 +182,11 @@ export const AddItemForm = ({ inventoryItems, onAddItem }: AddItemFormProps) => 
             <>
               <p>
                 Você está tentando adicionar <strong>{pendingItem.quantity}</strong> unidades de{" "}
-                <strong>{pendingItem.itemName}</strong>, mas o estoque atual possui apenas{" "}
+                <strong>{pendingItem.itemName}</strong>, mas, após descontar as reservas de outros JBRs, existem apenas{" "}
                 <strong>{pendingItem.availableStock}</strong> unidades disponíveis.
               </p>
               <p className="text-amber-600 font-medium mt-2">
-                Deseja continuar mesmo assim?
+                Reduza a quantidade ou ajuste as reservas existentes.
               </p>
             </>
           ),
@@ -224,7 +226,8 @@ export const AddItemForm = ({ inventoryItems, onAddItem }: AddItemFormProps) => 
           <SelectContent>
             {inventoryItems.map((item) => (
               <SelectItem key={item.id} value={item.id}>
-                {item.item_name} - Disponível: {item.quantity} {item.unit || 'un'}
+                {item.item_name} - Disponível: {item.available_quantity} {item.unit || 'un'}
+                {item.reserved_quantity > 0 ? ` · Reservado: ${item.reserved_quantity}` : ''}
               </SelectItem>
             ))}
           </SelectContent>
@@ -257,7 +260,7 @@ export const AddItemForm = ({ inventoryItems, onAddItem }: AddItemFormProps) => 
           <AlertDialogFooter>
             <AlertDialogCancel onClick={handleCancelWarning}>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmWarning} className={getButtonColor()}>
-              Continuar mesmo assim
+              {pendingItem?.warningType === 'stock' ? 'Voltar e ajustar' : 'Continuar mesmo assim'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -265,4 +268,3 @@ export const AddItemForm = ({ inventoryItems, onAddItem }: AddItemFormProps) => 
     </>
   );
 };
-

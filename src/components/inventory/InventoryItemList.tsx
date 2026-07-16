@@ -57,7 +57,7 @@ export default function InventoryItemList({
       const matchesType =
         filterType === "all" || item.item_type === filterType;
 
-      const isLowStock = item.min_quantity !== null && item.quantity <= item.min_quantity;
+      const isLowStock = item.min_quantity !== null && item.available_quantity <= item.min_quantity;
       const isCalibrationDue = item.item_type === "equipamento"
         && !!item.next_calibration
         && new Date(item.next_calibration) <= calibrationLimit;
@@ -77,7 +77,9 @@ export default function InventoryItemList({
       Código: i.code || "",
       "Número do CA": i.ca_number || "",
       Categoria: i.category || "",
-      Quantidade: i.quantity,
+      "Estoque Físico": i.physical_quantity,
+      Reservado: i.reserved_quantity,
+      Disponível: i.available_quantity,
       Unidade: i.unit || "",
       Localização: i.item_type === "equipamento" ? i.current_location : i.location,
       Status: i.status || "",
