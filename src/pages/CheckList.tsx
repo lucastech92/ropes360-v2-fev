@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
-import { ClipboardList, FolderOpen, FileText, Archive } from "lucide-react";
+import { ArrowLeft, ClipboardList, FolderOpen, FileText, Archive } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
@@ -24,6 +25,7 @@ import { SavedChecklistsTab } from "@/components/checklist/SavedChecklistsTab";
 
 const CheckList = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const serviceIdFromJbr = searchParams.get("serviceId");
   const {
@@ -178,6 +180,16 @@ const CheckList = () => {
       <Header />
       
       <main className="container space-y-6 px-4 py-6">
+        {serviceIdFromJbr && (
+          <Button
+            variant="ghost"
+            className="-mb-2 -ml-2"
+            onClick={() => navigate(`/servico/${serviceIdFromJbr}/timeline`)}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar ao JBR
+          </Button>
+        )}
         <div className="space-y-2">
           <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
             <ClipboardList className="h-6 w-6" />

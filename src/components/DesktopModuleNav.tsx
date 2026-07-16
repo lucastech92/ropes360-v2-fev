@@ -31,7 +31,7 @@ const sections = [
 export const DesktopModuleNav = () => {
   const location = useLocation();
   const { isInspector } = useUserRole();
-  return <div className="hidden items-center gap-0.5 xl:flex">
+  return <div className="hidden items-center gap-0.5 2xl:flex">
     {sections.filter(section => !isInspector || !section.restricted).map(section => {
       const items = section.items.filter(item => !isInspector || !item.restricted);
       const active = items.some(item => location.pathname === item.href || location.pathname.startsWith(`${item.href}/`));
