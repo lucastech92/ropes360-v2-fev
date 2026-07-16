@@ -31,16 +31,20 @@ export const ServiceChecklistsSelect = ({
 }: ServiceChecklistsSelectProps) => {
   const [checklists, setChecklists] = useState<ChecklistTemplate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchChecklists();
   }, [mode]);
 
   const fetchChecklists = async () => {
+    setLoading(true);
+    setLoadError(null);
+
     try {
       let query = supabase
         .from("checklists")
-        .select("id, name, description, checklist_type, is_template, service_checklists(service_id)")
+        .select("id, name, description, checklist_type, is_template, service_checklists!service_checklists_checklist_id_fkey(service_id)")
         .order("name");
 
       if (mode === 'templates') {
@@ -49,14 +53,21 @@ export const ServiceChecklistsSelect = ({
 
       const { data, error } = await query;
 
-      if (!error && data) {
-        const loaded = data as ChecklistTemplate[];
-        setChecklists(mode === 'available'
-          ? loaded.filter((checklist) => checklist.is_template || !checklist.service_checklists?.length)
-          : loaded);
+      if (error) {
+        console.error("Error fetching checklists:", error);
+        setChecklists([]);
+        setLoadError("Não foi possível carregar os checklists. Tente novamente.");
+        return;
       }
+
+      const loaded = (data ?? []) as ChecklistTemplate[];
+      setChecklists(mode === 'available'
+        ? loaded.filter((checklist) => checklist.is_template || !checklist.service_checklists?.length)
+        : loaded);
     } catch (error) {
       console.error("Error fetching checklists:", error);
+      setChecklists([]);
+      setLoadError("Não foi possível carregar os checklists. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -106,7 +117,9 @@ export const ServiceChecklistsSelect = ({
         )}
       </div>
       <div className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
-        {checklists.length === 0 ? (
+        {loadError ? (
+          <p className="text-sm text-destructive">{loadError}</p>
+        ) : checklists.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             {mode === 'templates'
               ? 'Nenhum template disponível. Crie templates na página de Checklists.'
