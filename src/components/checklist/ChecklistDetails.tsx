@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Copy, FileText, PackageMinus, PackagePlus, Archive, MoreHorizontal } from "lucide-react";
+import { Copy, FileText, PackageMinus, PackagePlus, Archive, MoreHorizontal, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Checklist, ChecklistItem } from "@/hooks/useChecklistData";
 import { ChecklistItemRow } from "./ChecklistItemRow";
@@ -27,7 +27,9 @@ interface ChecklistDetailsProps {
   onDeleteItem: (itemId: string) => void;
   onAddItem: (inventoryItemId: string, quantity: number) => Promise<boolean>;
   onCloneClick: () => void;
-  onSaveClick?: () => void;
+  onArchiveClick?: () => void;
+  onFinishClick?: () => void;
+  finishLabel?: string;
 }
 
 export const ChecklistDetails = ({
@@ -41,7 +43,9 @@ export const ChecklistDetails = ({
   onDeleteItem,
   onAddItem,
   onCloneClick,
-  onSaveClick,
+  onArchiveClick,
+  onFinishClick,
+  finishLabel = "Salvar checklist",
 }: ChecklistDetailsProps) => {
   return (
     <Card>
@@ -103,8 +107,8 @@ export const ChecklistDetails = ({
                   Clonar
                 </Button>
               )}
-              {onSaveClick && (
-                <DropdownMenu><DropdownMenuTrigger asChild><Button size="sm" variant="outline"><MoreHorizontal className="h-4 w-4" /><span className="sr-only">Mais ações</span></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onClick={onSaveClick}><Archive className="mr-2 h-4 w-4" />Arquivar checklist</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
+              {onArchiveClick && (
+                <DropdownMenu><DropdownMenuTrigger asChild><Button size="sm" variant="outline"><MoreHorizontal className="h-4 w-4" /><span className="sr-only">Mais ações</span></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onClick={onArchiveClick}><Archive className="mr-2 h-4 w-4" />Arquivar checklist</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
               )}
             </div>
           </div>
@@ -130,6 +134,19 @@ export const ChecklistDetails = ({
           inventoryItems={inventoryItems}
           onAddItem={onAddItem}
         />
+
+        {onFinishClick && (
+          <div className="flex flex-col gap-3 rounded-lg border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-medium">Terminou de montar o checklist?</p>
+              <p className="text-xs text-muted-foreground">Cada item é gravado automaticamente. Use o botão para concluir esta etapa.</p>
+            </div>
+            <Button onClick={onFinishClick} disabled={items.length === 0} className="w-full sm:w-auto">
+              <Save className="mr-2 h-4 w-4" />
+              {finishLabel}
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

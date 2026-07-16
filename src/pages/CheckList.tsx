@@ -22,10 +22,12 @@ import { ChecklistSelector } from "@/components/checklist/ChecklistSelector";
 import { ChecklistDetails } from "@/components/checklist/ChecklistDetails";
 import { TemplatesTab } from "@/components/checklist/TemplatesTab";
 import { SavedChecklistsTab } from "@/components/checklist/SavedChecklistsTab";
+import { useToast } from "@/hooks/use-toast";
 
 const CheckList = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const serviceIdFromJbr = searchParams.get("serviceId");
   const {
@@ -188,6 +190,17 @@ const CheckList = () => {
     setActiveTab("servicos");
   };
 
+  const handleFinishChecklist = () => {
+    toast({
+      title: "Checklist salvo",
+      description: `${items.length} item(ns) confirmado(s). As alterações já estão gravadas.`,
+    });
+
+    if (serviceIdFromJbr) {
+      navigate(`/servico/${serviceIdFromJbr}/timeline`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -258,10 +271,12 @@ const CheckList = () => {
                   onDeleteItem={(id) => setDeleteItemId(id)}
                   onAddItem={addItem}
                   onCloneClick={() => openCloneDialog(currentChecklist)}
-                  onSaveClick={currentChecklist && !currentChecklist.is_template && !currentChecklist.is_saved
+                  onArchiveClick={currentChecklist && !currentChecklist.is_template && !currentChecklist.is_saved
                     ? () => saveChecklist(currentChecklist.id)
                     : undefined
                   }
+                  onFinishClick={!currentChecklist.is_template ? handleFinishChecklist : undefined}
+                  finishLabel={serviceIdFromJbr ? "Salvar e voltar ao JBR" : "Salvar checklist"}
                 />
               )}
             </div>
