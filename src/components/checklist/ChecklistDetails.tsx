@@ -111,6 +111,12 @@ export const ChecklistDetails = ({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {!checklist.is_template && checklist.checklist_type === 'saida' && (
+          <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-3 text-sm">
+            <p className="font-medium text-blue-700 dark:text-blue-300">Quantidade preparada para embarque</p>
+            <p className="mt-1 text-muted-foreground">O saldo do estoque será baixado somente quando este checklist estiver vinculado a um JBR e a logística for liberada.</p>
+          </div>
+        )}
         <div className="overflow-hidden rounded-lg border">{items.length ? items.map((item) => (
           <ChecklistItemRow
             key={item.id}

@@ -200,7 +200,7 @@ export const useChecklistData = (serviceId?: string | null) => {
     await fetchInventoryItems();
     toast({
       title: "Item adicionado",
-      description: "Item adicionado e estoque atualizado automaticamente",
+      description: "Item adicionado ao checklist. O estoque será movimentado no fluxo do JBR.",
     });
     return true;
   };
@@ -224,7 +224,7 @@ export const useChecklistData = (serviceId?: string | null) => {
     await fetchInventoryItems();
     toast({
       title: "Item removido",
-      description: "Item removido e estoque atualizado automaticamente",
+      description: "Item removido do checklist. Nenhum saldo de estoque foi alterado.",
     });
     return true;
   };

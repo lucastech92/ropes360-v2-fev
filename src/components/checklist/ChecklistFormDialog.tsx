@@ -104,7 +104,7 @@ export const ChecklistFormDialog = ({
                 <SelectItem value="saida">
                   <div className="flex items-center gap-2">
                     <PackageMinus className="h-4 w-4" />
-                    {isTemplate ? "Saída (retira do estoque)" : "Checklist de Saída (retira do estoque)"}
+                    {isTemplate ? "Saída (prepara embarque)" : "Checklist de Saída (prepara embarque)"}
                   </div>
                 </SelectItem>
               </SelectContent>

@@ -116,7 +116,7 @@ const NovoServico = () => {
     }
   };
 
-  const cloneChecklistTemplate = async (templateId: string, serviceId: string, serviceTag: string, userId: string) => {
+  const attachChecklistToService = async (templateId: string, serviceId: string, serviceTag: string, userId: string) => {
     // Fetch template
     const { data: template, error: templateError } = await supabase
       .from("checklists")
@@ -125,6 +125,24 @@ const NovoServico = () => {
       .single();
 
     if (templateError || !template) return null;
+
+    if (!template.is_template) {
+      const { data: existingLink, error: linkLookupError } = await supabase
+        .from("service_checklists")
+        .select("service_id")
+        .eq("checklist_id", template.id)
+        .maybeSingle();
+      if (linkLookupError || existingLink) return null;
+
+      const { error: linkError } = await supabase.from("service_checklists").insert({
+        service_id: serviceId,
+        checklist_id: template.id,
+      });
+      if (linkError) return null;
+
+      await supabase.from("checklists").update({ service_tag: serviceTag }).eq("id", template.id);
+      return template;
+    }
 
     // Create cloned checklist
     const { data: newChecklist, error: checklistError } = await supabase
@@ -243,7 +261,7 @@ const NovoServico = () => {
         if (!id) {
           // For new services, clone selected templates
           for (const templateId of selectedChecklists) {
-            await cloneChecklistTemplate(templateId, serviceId, formData.codigo_jbr, user.id);
+            await attachChecklistToService(templateId, serviceId, formData.codigo_jbr, user.id);
           }
         } else {
           // For existing services, update linked checklists
@@ -490,7 +508,7 @@ const NovoServico = () => {
                 <ServiceChecklistsSelect
                   selectedChecklistIds={selectedChecklists}
                   onChange={setSelectedChecklists}
-                  mode={id ? 'all' : 'templates'}
+                  mode={id ? 'all' : 'available'}
                 />
               </div>
 

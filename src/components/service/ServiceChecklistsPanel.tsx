@@ -56,9 +56,9 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode }: { serviceId: stri
     load();
   }, [serviceId, refreshKey]);
 
-  const cloneTemplatesToJbr = async () => {
+  const addChecklistsToJbr = async () => {
     if (selectedTemplateIds.length === 0) {
-      toast({ title: "Selecione pelo menos um template", variant: "destructive" });
+      toast({ title: "Selecione pelo menos um checklist", variant: "destructive" });
       return;
     }
 
@@ -77,6 +77,29 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode }: { serviceId: stri
           .eq("id", templateId)
           .single();
         if (templateError || !template) throw templateError ?? new Error("Template não encontrado");
+
+        if (!template.is_template) {
+          const { data: existingLink, error: linkLookupError } = await supabase
+            .from("service_checklists")
+            .select("service_id")
+            .eq("checklist_id", template.id)
+            .maybeSingle();
+          if (linkLookupError) throw linkLookupError;
+          if (existingLink) throw new Error(`O checklist ${template.name} já está vinculado a outro JBR.`);
+
+          const { error: directLinkError } = await supabase.from("service_checklists").insert({
+            service_id: serviceId,
+            checklist_id: template.id,
+          });
+          if (directLinkError) throw directLinkError;
+
+          const { error: tagError } = await supabase
+            .from("checklists")
+            .update({ service_tag: jbrCode })
+            .eq("id", template.id);
+          if (tagError) throw tagError;
+          continue;
+        }
 
         const { data: checklist, error: checklistError } = await supabase
           .from("checklists")
@@ -125,7 +148,7 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode }: { serviceId: stri
       setTemplateDialogOpen(false);
       setSelectedTemplateIds([]);
       setRefreshKey((value) => value + 1);
-      toast({ title: "Checklist(s) copiado(s) e vinculado(s) ao JBR" });
+      toast({ title: "Checklist(s) adicionado(s) ao JBR" });
     } catch (error: any) {
       toast({ title: "Não foi possível adicionar o checklist", description: error.message, variant: "destructive" });
     } finally {
@@ -184,12 +207,12 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode }: { serviceId: stri
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Adicionar checklist ao JBR</DialogTitle>
-            <DialogDescription>Escolha um ou mais templates. Cada um será copiado para o JBR {jbrCode}, preservando o padrão original para os próximos serviços.</DialogDescription>
+            <DialogDescription>Escolha templates para copiar ou checklists existentes sem JBR para vincular ao {jbrCode}.</DialogDescription>
           </DialogHeader>
-          <ServiceChecklistsSelect mode="templates" selectedChecklistIds={selectedTemplateIds} onChange={setSelectedTemplateIds} />
+          <ServiceChecklistsSelect mode="available" selectedChecklistIds={selectedTemplateIds} onChange={setSelectedTemplateIds} />
           <DialogFooter>
             <Button variant="outline" onClick={() => setTemplateDialogOpen(false)} disabled={cloning}>Cancelar</Button>
-            <Button onClick={cloneTemplatesToJbr} disabled={cloning}>{cloning ? "Copiando..." : "Copiar e vincular"}</Button>
+            <Button onClick={addChecklistsToJbr} disabled={cloning}>{cloning ? "Adicionando..." : "Adicionar ao JBR"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
