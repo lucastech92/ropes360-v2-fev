@@ -11,7 +11,7 @@ import {
 import { Search, Plus, Download, Package, Wrench } from "lucide-react";
 import { exportToExcel } from "@/utils/exportUtils";
 import InventoryItemCard from "./InventoryItemCard";
-import type { UnifiedInventoryItem, ItemType, EquipmentStatus } from "@/hooks/useUnifiedInventory";
+import type { UnifiedInventoryItem, InventorySituationFilter } from "@/hooks/useUnifiedInventory";
 
 interface InventoryItemListProps {
   items: UnifiedInventoryItem[];
@@ -23,6 +23,8 @@ interface InventoryItemListProps {
   onViewDetails?: (item: UnifiedInventoryItem) => void;
   canManage: boolean;
   canDelete?: boolean;
+  situationFilter: InventorySituationFilter;
+  onSituationFilterChange: (filter: InventorySituationFilter) => void;
 }
 
 export default function InventoryItemList({
@@ -35,35 +37,45 @@ export default function InventoryItemList({
   onViewDetails,
   canManage,
   canDelete = false,
+  situationFilter,
+  onSituationFilterChange,
 }: InventoryItemListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
-  const [filterStatus, setFilterStatus] = useState<string>("all");
 
   const filteredItems = useMemo(() => {
+    const calibrationLimit = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
     return items.filter((item) => {
       const matchesSearch =
         item.item_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.ca_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.location?.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesType =
         filterType === "all" || item.item_type === filterType;
 
-      const matchesStatus =
-        filterStatus === "all" ||
-        (item.item_type === "equipamento" && item.status === filterStatus);
+      const isLowStock = item.min_quantity !== null && item.quantity <= item.min_quantity;
+      const isCalibrationDue = item.item_type === "equipamento"
+        && !!item.next_calibration
+        && new Date(item.next_calibration) <= calibrationLimit;
+      const matchesSituation = situationFilter === "all"
+        || (situationFilter === "low_stock" && isLowStock)
+        || (situationFilter === "calibration_due" && isCalibrationDue)
+        || (item.item_type === "equipamento" && item.status === situationFilter);
 
-      return matchesSearch && matchesType && matchesStatus;
+      return matchesSearch && matchesType && matchesSituation;
     });
-  }, [items, searchTerm, filterType, filterStatus]);
+  }, [items, searchTerm, filterType, situationFilter]);
 
   const handleExport = () => {
     const exportData = filteredItems.map((i) => ({
       Tipo: i.item_type === "equipamento" ? "Equipamento" : "Consumível",
       Nome: i.item_name,
       Código: i.code || "",
+      "Número do CA": i.ca_number || "",
       Categoria: i.category || "",
       Quantidade: i.quantity,
       Unidade: i.unit || "",
@@ -90,7 +102,7 @@ export default function InventoryItemList({
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por nome, categoria, código..."
+            placeholder="Buscar por nome, categoria, código ou CA..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -118,21 +130,21 @@ export default function InventoryItemList({
           </SelectContent>
         </Select>
 
-        {(filterType === "all" || filterType === "equipamento") && (
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os Status</SelectItem>
-              <SelectItem value="available">Disponível</SelectItem>
-              <SelectItem value="in_service">Em Serviço</SelectItem>
-              <SelectItem value="maintenance">Manutenção</SelectItem>
-              <SelectItem value="calibration">Calibração</SelectItem>
-              <SelectItem value="inactive">Inativo</SelectItem>
-            </SelectContent>
-          </Select>
-        )}
+        <Select value={situationFilter} onValueChange={(value) => onSituationFilterChange(value as InventorySituationFilter)}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Situação" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas as Situações</SelectItem>
+            <SelectItem value="low_stock">Estoque Baixo</SelectItem>
+            <SelectItem value="available">Disponível</SelectItem>
+            <SelectItem value="in_service">Em Serviço</SelectItem>
+            <SelectItem value="maintenance">Manutenção</SelectItem>
+            <SelectItem value="calibration">Em Calibração</SelectItem>
+            <SelectItem value="calibration_due">Calibração Próxima/Vencida</SelectItem>
+            <SelectItem value="inactive">Inativo</SelectItem>
+          </SelectContent>
+        </Select>
 
         <div className="flex gap-2 ml-auto">
           <Button variant="outline" onClick={handleExport} disabled={filteredItems.length === 0}>
@@ -179,4 +191,3 @@ export default function InventoryItemList({
     </div>
   );
 }
-

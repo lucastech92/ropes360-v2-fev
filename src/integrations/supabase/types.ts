@@ -802,6 +802,7 @@ export type Database = {
         Row: {
           acquisition_date: string | null
           calibration_interval_months: number | null
+          ca_number: string | null
           category: string | null
           code: string | null
           condition: Database["public"]["Enums"]["equipment_condition"] | null
@@ -827,6 +828,7 @@ export type Database = {
         Insert: {
           acquisition_date?: string | null
           calibration_interval_months?: number | null
+          ca_number?: string | null
           category?: string | null
           code?: string | null
           condition?: Database["public"]["Enums"]["equipment_condition"] | null
@@ -852,6 +854,7 @@ export type Database = {
         Update: {
           acquisition_date?: string | null
           calibration_interval_months?: number | null
+          ca_number?: string | null
           category?: string | null
           code?: string | null
           condition?: Database["public"]["Enums"]["equipment_condition"] | null
