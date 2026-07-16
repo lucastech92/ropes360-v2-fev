@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
-import { useUnifiedInventory, UnifiedInventoryItem, EquipmentCondition } from "@/hooks/useUnifiedInventory";
+import { useUnifiedInventory, UnifiedInventoryItem, EquipmentCondition, InventorySituationFilter } from "@/hooks/useUnifiedInventory";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Package, Wrench, BarChart3, Sparkles, History, Gauge } from "lucide-react";
 import {
@@ -61,6 +61,12 @@ const Inventario = () => {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [preselectedMaintenanceItem, setPreselectedMaintenanceItem] = useState<string | null>(null);
   const [preselectedCalibrationItem, setPreselectedCalibrationItem] = useState<string | null>(null);
+  const [inventorySituation, setInventorySituation] = useState<InventorySituationFilter>("all");
+
+  const handleInventorySituation = (filter: InventorySituationFilter) => {
+    setInventorySituation(filter);
+    setActiveTab("items");
+  };
 
   const handleAdd = () => {
     setSelectedItem(null);
@@ -170,7 +176,11 @@ const Inventario = () => {
             </p>
           </div>
 
-          <InventoryDashboard stats={stats} />
+          <InventoryDashboard
+            stats={stats}
+            activeFilter={inventorySituation}
+            onFilterSelect={handleInventorySituation}
+          />
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full max-w-4xl grid-cols-6">
@@ -216,6 +226,8 @@ const Inventario = () => {
                   onViewDetails={handleViewDetails}
                   canManage={canManage}
                   canDelete={canDelete}
+                  situationFilter={inventorySituation}
+                  onSituationFilterChange={setInventorySituation}
                 />
               )}
             </TabsContent>
@@ -358,4 +370,3 @@ const Inventario = () => {
 };
 
 export default Inventario;
-

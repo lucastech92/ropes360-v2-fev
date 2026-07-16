@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -24,6 +24,9 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { UnifiedInventoryItem, ItemType } from "@/hooks/useUnifiedInventory";
+import { ImagePlus, Loader2, Trash2, Upload } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { removeInventoryPhoto, uploadInventoryPhoto, validateInventoryPhoto } from "@/lib/inventoryPhotoStorage";
 
 const formSchema = z.object({
   item_name: z.string().min(1, "Nome é obrigatório"),
@@ -36,6 +39,7 @@ const formSchema = z.object({
   notes: z.string().optional(),
   // Equipment-specific fields
   code: z.string().optional(),
+  ca_number: z.string().optional(),
   serial_number: z.string().optional(),
   manufacturer: z.string().optional(),
   model: z.string().optional(),
@@ -58,6 +62,12 @@ interface InventoryItemFormProps {
 }
 
 export default function InventoryItemForm({ open, onOpenChange, item, onSave }: InventoryItemFormProps) {
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [removePhoto, setRemovePhoto] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -70,6 +80,7 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
       min_quantity: 0,
       notes: "",
       code: "",
+      ca_number: "",
       serial_number: "",
       manufacturer: "",
       model: "",
@@ -97,6 +108,7 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
         min_quantity: item.min_quantity || 0,
         notes: item.notes || "",
         code: item.code || "",
+        ca_number: item.ca_number || "",
         serial_number: item.serial_number || "",
         manufacturer: item.manufacturer || "",
         model: item.model || "",
@@ -119,6 +131,7 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
         min_quantity: 0,
         notes: "",
         code: "",
+        ca_number: "",
         serial_number: "",
         manufacturer: "",
         model: "",
@@ -131,13 +144,75 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
         current_location: "Base",
       });
     }
-  }, [item, form]);
+    setPhotoFile(null);
+    setRemovePhoto(false);
+  }, [item, form, open]);
+
+  useEffect(() => {
+    if (!photoFile) {
+      setPhotoPreview(removePhoto ? null : item?.photo_url || null);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(photoFile);
+    setPhotoPreview(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [photoFile, removePhoto, item?.photo_url]);
+
+  const handlePhotoSelected = (file: File | undefined) => {
+    if (!file) return;
+    const validationError = validateInventoryPhoto(file);
+    if (validationError) {
+      toast({ title: "Foto não aceita", description: validationError, variant: "destructive" });
+      return;
+    }
+
+    setPhotoFile(file);
+    setRemovePhoto(false);
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoFile(null);
+    setRemovePhoto(true);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const handleSubmit = async (data: FormData) => {
-    const success = await onSave(data);
-    if (success) {
+    setSaving(true);
+    let uploadedPhoto: { path: string; publicUrl: string } | null = null;
+
+    try {
+      if (photoFile) uploadedPhoto = await uploadInventoryPhoto(photoFile);
+
+      const nextPhotoUrl = uploadedPhoto?.publicUrl ?? (removePhoto ? null : item?.photo_url || null);
+      const success = await onSave({ ...data, photo_url: nextPhotoUrl });
+
+      if (!success) {
+        if (uploadedPhoto) await removeInventoryPhoto(uploadedPhoto.publicUrl);
+        return;
+      }
+
+      if (item?.photo_url && item.photo_url !== nextPhotoUrl) {
+        try {
+          await removeInventoryPhoto(item.photo_url);
+        } catch (error) {
+          console.error("Não foi possível remover a foto anterior:", error);
+        }
+      }
+
       onOpenChange(false);
       form.reset();
+    } catch (error: any) {
+      if (uploadedPhoto) {
+        try {
+          await removeInventoryPhoto(uploadedPhoto.publicUrl);
+        } catch (cleanupError) {
+          console.error("Não foi possível limpar a foto enviada:", cleanupError);
+        }
+      }
+      toast({ title: "Não foi possível salvar a foto", description: error.message, variant: "destructive" });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -273,6 +348,40 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
                   )}
                 />
 
+                <div className="space-y-2">
+                  <Label>Foto do item</Label>
+                  <div className="flex flex-col gap-3 rounded-lg border border-dashed p-3 sm:flex-row sm:items-center">
+                    <div className="flex h-28 w-full items-center justify-center overflow-hidden rounded-md bg-muted sm:w-40">
+                      {photoPreview ? (
+                        <img src={photoPreview} alt="Prévia do item" className="h-full w-full object-cover" />
+                      ) : (
+                        <ImagePlus className="h-8 w-8 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="flex-1 space-y-2">
+                      <p className="text-sm text-muted-foreground">JPG, PNG ou WebP, com no máximo 5 MB.</p>
+                      <Input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        onChange={(event) => handlePhotoSelected(event.target.files?.[0])}
+                      />
+                      <div className="flex flex-wrap gap-2">
+                        <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                          <Upload className="mr-2 h-4 w-4" />
+                          {photoPreview ? "Substituir foto" : "Anexar foto"}
+                        </Button>
+                        {photoPreview && (
+                          <Button type="button" variant="ghost" size="sm" className="text-destructive" onClick={handleRemovePhoto}>
+                            <Trash2 className="mr-2 h-4 w-4" /> Remover
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <FormField
                   control={form.control}
                   name="notes"
@@ -290,7 +399,7 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
 
               {itemType === "equipamento" && (
                 <TabsContent value="equipment" className="space-y-4 mt-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-4 md:grid-cols-3">
                     <FormField
                       control={form.control}
                       name="code"
@@ -313,6 +422,20 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
                           <FormLabel>Número de Série</FormLabel>
                           <FormControl>
                             <Input {...field} placeholder="S/N" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="ca_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Número do CA</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Ex: 12345" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -480,11 +603,12 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
             </Tabs>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
                 Cancelar
               </Button>
-              <Button type="submit">
-                {item ? "Salvar" : "Cadastrar"}
+              <Button type="submit" disabled={saving}>
+                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {saving ? "Salvando..." : item ? "Salvar" : "Cadastrar"}
               </Button>
             </DialogFooter>
           </form>
@@ -493,4 +617,3 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
     </Dialog>
   );
 }
-

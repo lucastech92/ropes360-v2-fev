@@ -62,7 +62,7 @@ export default function InventoryItemCard({
   canDelete = false,
 }: InventoryItemCardProps) {
   const isEquipment = item.item_type === "equipamento";
-  const isLowStock = !isEquipment && item.min_quantity && item.quantity <= item.min_quantity;
+  const isLowStock = item.min_quantity !== null && item.quantity <= item.min_quantity;
   
   const calibrationDue = item.next_calibration ? new Date(item.next_calibration) : null;
   const isCalibrationUrgent = calibrationDue && calibrationDue <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -86,6 +86,11 @@ export default function InventoryItemCard({
       `}
       onClick={handleCardClick}
     >
+      {item.photo_url && (
+        <div className="h-32 overflow-hidden rounded-t-lg border-b bg-muted">
+          <img src={item.photo_url} alt={item.item_name} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+        </div>
+      )}
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1">
@@ -99,6 +104,9 @@ export default function InventoryItemCard({
             </div>
             {isEquipment && item.code && (
               <p className="text-xs text-muted-foreground font-mono">{item.code}</p>
+            )}
+            {isEquipment && item.ca_number && (
+              <p className="text-xs text-muted-foreground">CA {item.ca_number}</p>
             )}
           </div>
 
@@ -239,4 +247,3 @@ export default function InventoryItemCard({
     </Card>
   );
 }
-

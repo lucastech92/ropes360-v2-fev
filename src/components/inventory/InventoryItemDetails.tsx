@@ -30,6 +30,7 @@ import {
   Loader2,
   Plus,
   CalendarClock,
+  ShieldCheck,
 } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -142,7 +143,7 @@ export default function InventoryItemDetails({
   if (!item) return null;
 
   const isEquipment = item.item_type === "equipamento";
-  const isLowStock = !isEquipment && item.min_quantity && item.quantity <= item.min_quantity;
+  const isLowStock = item.min_quantity !== null && item.quantity <= item.min_quantity;
   const calibrationDue = item.next_calibration ? new Date(item.next_calibration) : null;
   const isCalibrationUrgent = calibrationDue && calibrationDue <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
   const isCalibrationOverdue = calibrationDue && calibrationDue < new Date();
@@ -346,6 +347,16 @@ export default function InventoryItemDetails({
                             <div>
                               <p className="text-xs text-muted-foreground">Nº Série</p>
                               <p className="font-medium font-mono">{item.serial_number}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {item.ca_number && (
+                          <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
+                            <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+                            <div>
+                              <p className="text-xs text-muted-foreground">Número do CA</p>
+                              <p className="font-medium font-mono">{item.ca_number}</p>
                             </div>
                           </div>
                         )}
@@ -666,4 +677,3 @@ export default function InventoryItemDetails({
     </Sheet>
   );
 }
-

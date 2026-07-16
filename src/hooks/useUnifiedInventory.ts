@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { removeInventoryPhoto } from "@/lib/inventoryPhotoStorage";
 
 export type ItemType = "consumivel" | "equipamento";
 export type EquipmentStatus = "available" | "in_service" | "maintenance" | "calibration" | "inactive";
 export type EquipmentCondition = "excellent" | "good" | "fair" | "needs_repair" | "damaged";
+export type InventorySituationFilter = "all" | "low_stock" | EquipmentStatus | "calibration_due";
 
 export interface UnifiedInventoryItem {
   id: string;
@@ -27,6 +29,7 @@ export interface UnifiedInventoryItem {
   next_calibration: string | null;
   calibration_interval_months: number | null;
   photo_url: string | null;
+  ca_number: string | null;
   current_location: string | null;
   last_updated: string | null;
 }
@@ -112,7 +115,7 @@ export const useUnifiedInventory = () => {
       total: data.length,
       consumiveis: data.filter((i) => i.item_type === "consumivel").length,
       equipamentos: data.filter((i) => i.item_type === "equipamento").length,
-      lowStock: data.filter((i) => i.min_quantity && i.quantity <= i.min_quantity).length,
+      lowStock: data.filter((i) => i.min_quantity !== null && i.quantity <= i.min_quantity).length,
       available: data.filter((i) => i.item_type === "equipamento" && i.status === "available").length,
       inService: data.filter((i) => i.item_type === "equipamento" && i.status === "in_service").length,
       maintenance: data.filter((i) => i.item_type === "equipamento" && i.status === "maintenance").length,
@@ -132,6 +135,7 @@ export const useUnifiedInventory = () => {
         ...item,
         updated_by: user.id,
         code: item.code && item.code.trim() !== "" ? item.code.trim() : null,
+        ca_number: item.ca_number && item.ca_number.trim() !== "" ? item.ca_number.trim() : null,
         acquisition_date: item.acquisition_date || null,
         last_calibration: item.last_calibration || null,
         next_calibration: item.next_calibration || null,
@@ -180,6 +184,9 @@ export const useUnifiedInventory = () => {
       if (typeof item.code === "string") {
         updateData.code = item.code.trim() !== "" ? item.code.trim() : null;
       }
+      if (typeof item.ca_number === "string") {
+        updateData.ca_number = item.ca_number.trim() !== "" ? item.ca_number.trim() : null;
+      }
 
       const { error } = await supabase
         .from("inventory")
@@ -213,6 +220,7 @@ export const useUnifiedInventory = () => {
 
   const deleteItem = async (id: string) => {
     try {
+      const photoUrl = items.find((item) => item.id === id)?.photo_url;
       // Delete related records first to avoid foreign key violations
       const { error: maintenanceError } = await supabase
         .from("maintenance_records")
@@ -240,6 +248,12 @@ export const useUnifiedInventory = () => {
 
       const { error } = await supabase.from("inventory").delete().eq("id", id);
       if (error) throw error;
+
+      try {
+        await removeInventoryPhoto(photoUrl);
+      } catch (photoError) {
+        console.error("Não foi possível remover a foto do item:", photoError);
+      }
 
       toast({
         title: "Item removido",
@@ -415,4 +429,3 @@ export const useUnifiedInventory = () => {
     fetchAllocations,
   };
 };
-
