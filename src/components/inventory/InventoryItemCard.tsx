@@ -19,6 +19,7 @@ import {
   Package,
   Wrench,
   Calendar,
+  BookmarkCheck,
 } from "lucide-react";
 import type { UnifiedInventoryItem, EquipmentStatus, EquipmentCondition } from "@/hooks/useUnifiedInventory";
 import { format } from "date-fns";
@@ -62,7 +63,7 @@ export default function InventoryItemCard({
   canDelete = false,
 }: InventoryItemCardProps) {
   const isEquipment = item.item_type === "equipamento";
-  const isLowStock = item.min_quantity !== null && item.quantity <= item.min_quantity;
+  const isLowStock = item.min_quantity !== null && item.available_quantity <= item.min_quantity;
   
   const calibrationDue = item.next_calibration ? new Date(item.next_calibration) : null;
   const isCalibrationUrgent = calibrationDue && calibrationDue <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
@@ -120,6 +121,12 @@ export default function InventoryItemCard({
               <Badge variant="destructive" className="gap-1">
                 <AlertTriangle className="h-3 w-3" />
                 Estoque Baixo
+              </Badge>
+            )}
+            {item.reserved_quantity > 0 && (
+              <Badge variant="outline" className="gap-1 border-blue-300 text-blue-700">
+                <BookmarkCheck className="h-3 w-3" />
+                {item.reserved_quantity} reservado
               </Badge>
             )}
             {isCalibrationUrgent && (
@@ -188,14 +195,16 @@ export default function InventoryItemCard({
             </div>
           )}
 
-          {!isEquipment && (
-            <div>
-              <span className="text-muted-foreground">Quantidade:</span>{" "}
-              <span className={isLowStock ? "text-destructive font-semibold" : ""}>
-                {item.quantity} {item.unit || ""}
-              </span>
-            </div>
-          )}
+          <div className="col-span-2 rounded-md bg-muted/50 p-2">
+            <span className="text-muted-foreground">Estoque:</span>{" "}
+            <span>{item.physical_quantity} físico</span>
+            <span className="text-muted-foreground"> · </span>
+            <span>{item.reserved_quantity} reservado</span>
+            <span className="text-muted-foreground"> · </span>
+            <span className={isLowStock ? "font-semibold text-destructive" : "font-semibold text-emerald-700"}>
+              {item.available_quantity} disponível {item.unit || ""}
+            </span>
+          </div>
 
           {isEquipment && item.condition && (
             <div>

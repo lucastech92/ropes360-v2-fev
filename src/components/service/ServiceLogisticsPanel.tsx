@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Box, CheckCircle2, ClipboardCheck, Plus, ShieldCheck } from "lucide-react";
+import { BookmarkCheck, Box, CheckCircle2, ClipboardCheck, Plus, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +24,14 @@ type ChecklistProgress = {
   completed: number;
 };
 
+type StockReservation = {
+  inventory_item_id: string;
+  item_name: string;
+  unit: string | null;
+  reserved_quantity: number;
+  prepared_quantity: number;
+};
+
 interface ServiceLogisticsPanelProps {
   serviceId: string;
   containerId: string | null;
@@ -42,6 +50,7 @@ export const ServiceLogisticsPanel = ({
   const { toast } = useToast();
   const [containers, setContainers] = useState<OperationContainer[]>([]);
   const [checklistProgress, setChecklistProgress] = useState<ChecklistProgress>({ total: 0, completed: 0 });
+  const [reservations, setReservations] = useState<StockReservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
@@ -50,7 +59,7 @@ export const ServiceLogisticsPanel = ({
 
   const load = async () => {
     setLoading(true);
-    const [containersResult, checklistsResult] = await Promise.all([
+    const [containersResult, checklistsResult, reservationsResult] = await Promise.all([
       supabase
         .from("operation_containers")
         .select("id, name, code, status, assigned_service_id")
@@ -59,6 +68,11 @@ export const ServiceLogisticsPanel = ({
         .from("service_checklists")
         .select("checklists:checklist_id(checklist_items(id, is_checked))")
         .eq("service_id", serviceId),
+      (supabase as any)
+        .from("service_inventory_reservations")
+        .select("inventory_item_id, item_name, unit, reserved_quantity, prepared_quantity")
+        .eq("service_id", serviceId)
+        .order("item_name"),
     ]);
 
     if (containersResult.error) {
@@ -72,6 +86,11 @@ export const ServiceLogisticsPanel = ({
       total: items.length,
       completed: items.filter((item: { is_checked: boolean }) => item.is_checked).length,
     });
+    if (reservationsResult.error) {
+      toast({ title: "Não foi possível carregar as reservas", description: reservationsResult.error.message, variant: "destructive" });
+    } else {
+      setReservations((reservationsResult.data ?? []) as StockReservation[]);
+    }
     setLoading(false);
   };
 
@@ -205,9 +224,37 @@ export const ServiceLogisticsPanel = ({
           </div>
         </div>
 
+        <div className="rounded-lg border p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="flex items-center gap-2 text-sm font-medium">
+              <BookmarkCheck className="h-4 w-4 text-blue-700" /> Reserva de estoque
+            </span>
+            <Badge variant="outline" className={releasedAt ? "border-emerald-300 text-emerald-700" : "border-blue-300 text-blue-700"}>
+              {releasedAt ? "Convertida em despacho" : `${reservations.length} item(ns) reservado(s)`}
+            </Badge>
+          </div>
+          {releasedAt ? (
+            <p className="mt-2 text-xs text-muted-foreground">Na liberação, as quantidades preparadas foram baixadas do saldo físico e registradas no extrato.</p>
+          ) : reservations.length === 0 ? (
+            <p className="mt-2 text-xs text-muted-foreground">Adicione itens a um checklist de saída vinculado ao JBR para criar a reserva automaticamente.</p>
+          ) : (
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {reservations.map((reservation) => (
+                <div key={reservation.inventory_item_id} className="flex items-center justify-between gap-3 rounded-md bg-muted/50 px-3 py-2 text-sm">
+                  <span className="truncate">{reservation.item_name}</span>
+                  <span className="shrink-0 font-medium">
+                    {reservation.reserved_quantity} {reservation.unit || "un"}
+                    <span className="ml-1 text-xs font-normal text-muted-foreground">({reservation.prepared_quantity} preparado)</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {!releasedAt && canManage && (
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-muted/50 p-3">
-            <p className="text-sm text-muted-foreground">A confirmação reserva o container e baixa somente as quantidades já embarcadas. Checklists pendentes permanecem visíveis.</p>
+            <p className="text-sm text-muted-foreground">Os itens já estão reservados para este JBR. A confirmação baixa somente as quantidades preparadas e libera qualquer diferença não embarcada.</p>
             <Button onClick={releaseLogistics} disabled={saving || !containerId}>
               <ShieldCheck className="mr-2 h-4 w-4" /> {saving ? "Salvando..." : "Liberar JBR"}
             </Button>

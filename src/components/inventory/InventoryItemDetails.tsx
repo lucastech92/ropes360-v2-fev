@@ -143,7 +143,7 @@ export default function InventoryItemDetails({
   if (!item) return null;
 
   const isEquipment = item.item_type === "equipamento";
-  const isLowStock = item.min_quantity !== null && item.quantity <= item.min_quantity;
+  const isLowStock = item.min_quantity !== null && item.available_quantity <= item.min_quantity;
   const calibrationDue = item.next_calibration ? new Date(item.next_calibration) : null;
   const isCalibrationUrgent = calibrationDue && calibrationDue <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
   const isCalibrationOverdue = calibrationDue && calibrationDue < new Date();
@@ -280,17 +280,22 @@ export default function InventoryItemDetails({
                       </div>
                     </div>
 
-                    {!isEquipment && (
-                      <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
-                        <Hash className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-xs text-muted-foreground">Quantidade</p>
-                          <p className={`font-medium ${isLowStock ? "text-destructive" : ""}`}>
-                            {item.quantity} {item.unit || ""}
-                          </p>
-                        </div>
+                    <div className="col-span-2 grid grid-cols-3 gap-2 rounded-lg bg-muted/50 p-3">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Físico</p>
+                        <p className="font-medium">{item.physical_quantity} {item.unit || ""}</p>
                       </div>
-                    )}
+                      <div>
+                        <p className="text-xs text-muted-foreground">Reservado</p>
+                        <p className="font-medium text-blue-700">{item.reserved_quantity} {item.unit || ""}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Disponível</p>
+                        <p className={`font-medium ${isLowStock ? "text-destructive" : "text-emerald-700"}`}>
+                          {item.available_quantity} {item.unit || ""}
+                        </p>
+                      </div>
+                    </div>
 
                     <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
