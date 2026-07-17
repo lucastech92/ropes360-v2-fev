@@ -256,9 +256,12 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
               )}
             />
 
-            <Tabs defaultValue="basic" className="w-full">
+            <Tabs key={itemType} defaultValue="basic" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="basic">Dados Básicos</TabsTrigger>
+                {itemType === "consumivel" && (
+                  <TabsTrigger value="consumable">Identificação / EPI</TabsTrigger>
+                )}
                 {itemType === "equipamento" && (
                   <TabsTrigger value="equipment">Dados do Equipamento</TabsTrigger>
                 )}
@@ -434,6 +437,75 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave }: 
                   )}
                 />
               </TabsContent>
+
+              {itemType === "consumivel" && (
+                <TabsContent value="consumable" className="space-y-4 mt-4">
+                  <div className="rounded-lg border bg-muted/30 p-3">
+                    <p className="text-sm font-medium">Rastreabilidade do consumível ou EPI</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Preencha os dados aplicáveis. O número de série pode ficar vazio para itens controlados apenas por quantidade.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="ca_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Número do CA</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Ex: 12345" inputMode="numeric" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="manufacturer"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Fabricante</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Fabricante" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="model"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Modelo</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Modelo" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="serial_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Número de Série</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="S/N (opcional)" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </TabsContent>
+              )}
 
               {itemType === "equipamento" && (
                 <TabsContent value="equipment" className="space-y-4 mt-4">
