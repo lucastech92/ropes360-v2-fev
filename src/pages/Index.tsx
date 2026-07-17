@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { BookOpen, BriefcaseBusiness, ClipboardCheck, Package } from "lucide-react";
+import { BookOpen, BriefcaseBusiness, ClipboardCheck, Compass, Package } from "lucide-react";
 import Header from "@/components/Header";
 import { DashboardMetrics } from "@/components/DashboardMetrics";
 import { HealthScoreGauge } from "@/components/dashboard/HealthScoreGauge";
@@ -21,10 +21,26 @@ const Index = () => {
   return <div className="min-h-screen bg-background">
     <Header />
     <main>
-      <section className="border-b">
-        <div className="container flex flex-col gap-4 px-4 py-6 sm:flex-row sm:items-center sm:justify-between">
-          <div><h1 className="text-2xl font-semibold tracking-tight">Visão geral</h1><p className="mt-1 text-sm text-muted-foreground">Acompanhe a operação e acesse o que precisa.</p></div>
-          <div className="flex flex-wrap gap-2"><Button asChild><Link to="/novo-servico">Novo JBR</Link></Button><CommandPaletteTrigger /></div>
+      <section className="relative overflow-hidden border-b bg-gradient-to-br from-primary/10 via-background to-muted/60">
+        <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full border border-primary/10" aria-hidden="true" />
+        <div className="pointer-events-none absolute -right-8 -top-12 h-48 w-48 rounded-full border border-primary/15" aria-hidden="true" />
+        <div className="container relative flex flex-col gap-6 px-4 py-8 sm:py-10 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+              <Compass className="h-4 w-4" /> Gestão operacional integrada
+            </div>
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Ropes<span className="text-primary">360</span></h1>
+            <p className="mt-4 text-lg font-medium leading-relaxed text-foreground sm:text-xl">
+              Conectar pessoas, equipamentos e decisões para tornar cada serviço de campo mais seguro, rastreável e eficiente.
+            </p>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              Do planejamento do JBR ao retorno dos recursos, toda a operação em um único fluxo.
+            </p>
+          </div>
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <Button asChild><Link to="/novo-servico">Novo JBR</Link></Button>
+            <CommandPaletteTrigger />
+          </div>
         </div>
       </section>
 
