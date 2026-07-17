@@ -23,7 +23,7 @@ const ServiceTimeline = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { events, serviceInfo, loading, filter, setFilter, eventCategories, refresh } = useServiceTimeline(id);
-  const { isAdmin, isModerator } = useUserRole();
+  const { isAdmin, isModerator, isInspector } = useUserRole();
   const { toast } = useToast();
   const [updatingPhase, setUpdatingPhase] = useState(false);
   const [operationalRefreshKey, setOperationalRefreshKey] = useState(0);
@@ -59,7 +59,7 @@ const ServiceTimeline = () => {
         <div className="mt-4"><ServicePhaseStepper status={serviceInfo.operational_status as ServiceOperationalStatus} /></div>
       </section> : null}
 
-      {serviceInfo && <div className="grid items-start gap-5 lg:grid-cols-2"><ServiceChecklistsPanel serviceId={serviceInfo.id} jbrCode={serviceInfo.codigo_jbr} canRemove={isAdmin} /><ServiceLogisticsPanel serviceId={serviceInfo.id} containerId={serviceInfo.logistics_container_id} releasedAt={serviceInfo.logistics_released_at} canManage={isAdmin || isModerator} onChanged={refreshOperationalData} /></div>}
+      {serviceInfo && <div className="grid items-start gap-5 lg:grid-cols-2"><ServiceChecklistsPanel serviceId={serviceInfo.id} jbrCode={serviceInfo.codigo_jbr} canRemove={isAdmin} onChanged={refreshOperationalData} /><ServiceLogisticsPanel serviceId={serviceInfo.id} containerId={serviceInfo.logistics_container_id} releasedAt={serviceInfo.logistics_released_at} canManage={isAdmin || isModerator || isInspector} onChanged={refreshOperationalData} refreshKey={operationalRefreshKey} /></div>}
       {serviceInfo && <ServiceDocumentCenter serviceId={serviceInfo.id} client={serviceInfo.cliente} scope={serviceInfo.escopo ?? []} />}
       {serviceInfo && <ServiceReturnPanel serviceId={serviceInfo.id} onChanged={refreshOperationalData} />}
       {serviceInfo && <ServiceInventoryMovementsPanel serviceId={serviceInfo.id} refreshKey={operationalRefreshKey} />}
