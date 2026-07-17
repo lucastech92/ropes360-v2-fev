@@ -28,7 +28,7 @@ interface ChecklistSummary {
   completedCount: number;
 }
 
-export const ServiceChecklistsPanel = ({ serviceId, jbrCode, canRemove = false }: { serviceId: string; jbrCode: string; canRemove?: boolean }) => {
+export const ServiceChecklistsPanel = ({ serviceId, jbrCode, canRemove = false, onChanged }: { serviceId: string; jbrCode: string; canRemove?: boolean; onChanged?: () => void }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [checklists, setChecklists] = useState<ChecklistSummary[]>([]);
@@ -186,7 +186,8 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode, canRemove = false }
       setTemplateDialogOpen(false);
       setSelectedTemplateIds([]);
       setRefreshKey((value) => value + 1);
-      toast({ title: "Checklist(s) adicionado(s) ao JBR" });
+      onChanged?.();
+      toast({ title: "Checklist(s) adicionado(s) ao JBR", description: "Os itens de saída foram baixados imediatamente do inventário." });
     } catch (error: any) {
       const duplicateMessage = error?.code === "23505"
         ? "Este template já foi utilizado neste JBR. Abra o checklist existente em vez de criar outra cópia."
@@ -204,12 +205,12 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode, canRemove = false }
     try {
       const { data: service, error: serviceError } = await supabase
         .from("services")
-        .select("logistics_inventory_dispatched_at")
+        .select("logistics_released_at")
         .eq("id", serviceId)
         .single();
       if (serviceError) throw serviceError;
 
-      if (service.logistics_inventory_dispatched_at) {
+      if (service.logistics_released_at) {
         toast({
           title: "Checklist não pode ser removido",
           description: "A logística deste JBR já foi liberada e o estoque já foi movimentado.",
@@ -234,9 +235,10 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode, canRemove = false }
 
       setChecklistToRemove(null);
       setRefreshKey((value) => value + 1);
+      onChanged?.();
       toast({
         title: "Checklist removido do JBR",
-        description: "A reserva de estoque foi liberada e o checklist continua disponível para reutilização.",
+        description: "Os itens foram devolvidos ao estoque e o checklist continua disponível para reutilização.",
       });
     } catch (error: any) {
       toast({
@@ -337,7 +339,7 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode, canRemove = false }
           <AlertDialogHeader>
             <AlertDialogTitle>Remover checklist do JBR?</AlertDialogTitle>
             <AlertDialogDescription>
-              O checklist “{checklistToRemove?.name}” será desvinculado do {jbrCode}. A reserva de estoque associada será liberada, mas o checklist não será apagado e poderá ser reutilizado.
+              O checklist “{checklistToRemove?.name}” será desvinculado do {jbrCode}. Os itens baixados serão devolvidos ao estoque, mas o checklist não será apagado e poderá ser reutilizado.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

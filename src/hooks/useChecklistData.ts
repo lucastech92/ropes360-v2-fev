@@ -201,9 +201,9 @@ export const useChecklistData = (serviceId?: string | null) => {
 
     if (error) {
       toast({
-        title: "Não foi possível reservar o item",
-        description: error.message.includes("Insufficient available stock")
-          ? "A quantidade disponível já está comprometida com outros JBRs. Atualize o estoque ou reduza a quantidade."
+        title: "Não foi possível baixar o item",
+        description: error.message.includes("Insufficient stock")
+          ? "Não há saldo suficiente no inventário. Atualize o estoque ou reduza a quantidade."
           : error.message,
         variant: "destructive",
       });
@@ -215,8 +215,8 @@ export const useChecklistData = (serviceId?: string | null) => {
     toast({
       title: "Item adicionado",
       description: serviceId
-        ? "Quantidade reservada para este JBR. O saldo físico será baixado somente na liberação logística."
-        : "Item adicionado ao checklist. A reserva será criada quando ele for vinculado a um JBR.",
+        ? "Quantidade baixada imediatamente do inventário para este JBR."
+        : "Item adicionado ao checklist. A baixa ocorrerá quando ele for vinculado a um JBR.",
     });
     return true;
   };
@@ -240,7 +240,9 @@ export const useChecklistData = (serviceId?: string | null) => {
     await fetchInventoryItems();
     toast({
       title: "Item removido",
-      description: "Item removido do checklist. Nenhum saldo de estoque foi alterado.",
+      description: serviceId
+        ? "Item removido e quantidade devolvida ao inventário."
+        : "Item removido do checklist.",
     });
     return true;
   };

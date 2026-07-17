@@ -182,11 +182,11 @@ export const AddItemForm = ({ inventoryItems, onAddItem }: AddItemFormProps) => 
             <>
               <p>
                 Você está tentando adicionar <strong>{pendingItem.quantity}</strong> unidades de{" "}
-                <strong>{pendingItem.itemName}</strong>, mas, após descontar as reservas de outros JBRs, existem apenas{" "}
+                <strong>{pendingItem.itemName}</strong>, mas existem apenas{" "}
                 <strong>{pendingItem.availableStock}</strong> unidades disponíveis.
               </p>
               <p className="text-amber-600 font-medium mt-2">
-                Reduza a quantidade ou ajuste as reservas existentes.
+                Reduza a quantidade ou faça uma entrada no inventário.
               </p>
             </>
           ),
@@ -227,7 +227,6 @@ export const AddItemForm = ({ inventoryItems, onAddItem }: AddItemFormProps) => 
             {inventoryItems.map((item) => (
               <SelectItem key={item.id} value={item.id}>
                 {item.item_name} - Disponível: {item.available_quantity} {item.unit || 'un'}
-                {item.reserved_quantity > 0 ? ` · Reservado: ${item.reserved_quantity}` : ''}
               </SelectItem>
             ))}
           </SelectContent>
