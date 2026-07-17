@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle2, ClipboardList, Copy, ExternalLink } from "lucide-react";
+import { CheckCircle2, ClipboardList, Copy, ExternalLink, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -8,6 +8,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ServiceChecklistsSelect } from "@/components/service/ServiceChecklistsSelect";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ChecklistSummary {
   id: string;
@@ -18,7 +28,7 @@ interface ChecklistSummary {
   completedCount: number;
 }
 
-export const ServiceChecklistsPanel = ({ serviceId, jbrCode }: { serviceId: string; jbrCode: string }) => {
+export const ServiceChecklistsPanel = ({ serviceId, jbrCode, canRemove = false }: { serviceId: string; jbrCode: string; canRemove?: boolean }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [checklists, setChecklists] = useState<ChecklistSummary[]>([]);
@@ -29,6 +39,8 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode }: { serviceId: stri
   const [cloning, setCloning] = useState(false);
   const [usedTemplateIds, setUsedTemplateIds] = useState<string[]>([]);
   const [linkedChecklistNames, setLinkedChecklistNames] = useState<string[]>([]);
+  const [checklistToRemove, setChecklistToRemove] = useState<ChecklistSummary | null>(null);
+  const [removingChecklistId, setRemovingChecklistId] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -185,6 +197,58 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode }: { serviceId: stri
     }
   };
 
+  const removeChecklistFromJbr = async () => {
+    if (!checklistToRemove) return;
+
+    setRemovingChecklistId(checklistToRemove.id);
+    try {
+      const { data: service, error: serviceError } = await supabase
+        .from("services")
+        .select("logistics_inventory_dispatched_at")
+        .eq("id", serviceId)
+        .single();
+      if (serviceError) throw serviceError;
+
+      if (service.logistics_inventory_dispatched_at) {
+        toast({
+          title: "Checklist não pode ser removido",
+          description: "A logística deste JBR já foi liberada e o estoque já foi movimentado.",
+          variant: "destructive",
+        });
+        setChecklistToRemove(null);
+        return;
+      }
+
+      const { error: unlinkError } = await supabase
+        .from("service_checklists")
+        .delete()
+        .eq("service_id", serviceId)
+        .eq("checklist_id", checklistToRemove.id);
+      if (unlinkError) throw unlinkError;
+
+      const { error: tagError } = await supabase
+        .from("checklists")
+        .update({ service_tag: null })
+        .eq("id", checklistToRemove.id);
+      if (tagError) console.error("Não foi possível limpar a identificação do JBR no checklist:", tagError);
+
+      setChecklistToRemove(null);
+      setRefreshKey((value) => value + 1);
+      toast({
+        title: "Checklist removido do JBR",
+        description: "A reserva de estoque foi liberada e o checklist continua disponível para reutilização.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Não foi possível remover o checklist",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setRemovingChecklistId(null);
+    }
+  };
+
   return (
     <Card className="mb-6">
       <CardHeader className="flex flex-row items-start justify-between gap-4">
@@ -220,7 +284,24 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode }: { serviceId: stri
                       <p className="font-medium">{checklist.name}</p>
                       <p className="mt-1 text-sm text-muted-foreground">{checklist.description || (checklist.checklist_type === "saida" ? "Checklist de preparação / embarque" : "Checklist de retorno")}</p>
                     </div>
-                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                    <div className="flex shrink-0 items-center gap-1">
+                      <CheckCircle2 className="h-5 w-5 text-primary" />
+                      {canRemove && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          aria-label={`Remover ${checklist.name} do JBR`}
+                          disabled={removingChecklistId === checklist.id}
+                          onClick={() => setChecklistToRemove(checklist)}
+                        >
+                          {removingChecklistId === checklist.id
+                            ? <Loader2 className="h-4 w-4 animate-spin" />
+                            : <Trash2 className="h-4 w-4" />}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   <div className="mt-4 flex items-center gap-3">
                     <Progress value={progress} className="h-2" />
@@ -251,6 +332,30 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode }: { serviceId: stri
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <AlertDialog open={!!checklistToRemove} onOpenChange={(open) => !open && setChecklistToRemove(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remover checklist do JBR?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O checklist “{checklistToRemove?.name}” será desvinculado do {jbrCode}. A reserva de estoque associada será liberada, mas o checklist não será apagado e poderá ser reutilizado.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!removingChecklistId}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(event) => {
+                event.preventDefault();
+                void removeChecklistFromJbr();
+              }}
+              disabled={!!removingChecklistId}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {removingChecklistId ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+              Remover do JBR
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
