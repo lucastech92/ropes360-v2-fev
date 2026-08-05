@@ -2,20 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Copy, FileText, PackageMinus, PackagePlus, Archive, MoreHorizontal, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Checklist, ChecklistItem } from "@/hooks/useChecklistData";
+import { Checklist, ChecklistItem, InventoryItem } from "@/hooks/useChecklistData";
 import { ChecklistItemRow } from "./ChecklistItemRow";
 import { AddItemForm } from "./AddItemForm";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-
-interface InventoryItem {
-  id: string;
-  item_name: string;
-  quantity: number;
-  available_quantity?: number;
-  unit: string | null;
-  status: string | null;
-  next_calibration: string | null;
-}
 
 interface ChecklistDetailsProps {
   checklist: Checklist;
