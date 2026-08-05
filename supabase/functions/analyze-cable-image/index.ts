@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { authorizationErrorResponse, requireApprovedUser } from '../_shared/require-approved-user.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -25,6 +26,7 @@ serve(async (req) => {
   }
 
   try {
+    await requireApprovedUser(req, ['admin', 'moderator', 'inspector']);
     const { imageBase64 } = await req.json();
     
     if (!imageBase64) {
@@ -240,6 +242,8 @@ Use a função report_cable_analysis para retornar sua análise.`
 
   } catch (error) {
     console.error('Erro na função:', error);
+    const authResponse = authorizationErrorResponse(error, corsHeaders);
+    if (authResponse) return authResponse;
     return new Response(
       JSON.stringify({ 
         success: false, 
@@ -252,4 +256,3 @@ Use a função report_cable_analysis para retornar sua análise.`
     );
   }
 });
-

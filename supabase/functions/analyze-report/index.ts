@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
+import { authorizationErrorResponse, requireApprovedUser } from '../_shared/require-approved-user.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -56,6 +57,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    await requireApprovedUser(req, ['admin', 'moderator', 'inspector']);
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Autenticação necessária para revisar documentos.");
 
@@ -203,6 +205,8 @@ ${typeof profileContext === "string" ? profileContext : ""}`;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Erro desconhecido na revisão.";
     console.error("analyze-report failed", message);
+    const authResponse = authorizationErrorResponse(error, corsHeaders);
+    if (authResponse) return authResponse;
     return new Response(JSON.stringify({ error: message }), {
       status: message.includes("Autenticação") || message.includes("Sessão") ? 401 : 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

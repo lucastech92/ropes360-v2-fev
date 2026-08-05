@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FileText, Sparkles, Download, Calendar, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import { supabase } from "@/integrations/supabase/client";
 
 const REPORT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/executive-report`;
 
@@ -32,11 +33,14 @@ const RelatorioExecutivo = () => {
     abortRef.current = controller;
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error("Usuário não autenticado");
+
       const resp = await fetch(REPORT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ period }),
         signal: controller.signal,
@@ -251,4 +255,3 @@ const RelatorioExecutivo = () => {
 };
 
 export default RelatorioExecutivo;
-

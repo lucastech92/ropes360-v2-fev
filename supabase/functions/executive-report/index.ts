@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authorizationErrorResponse, requireApprovedUser } from '../_shared/require-approved-user.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,6 +11,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    await requireApprovedUser(req, ['admin', 'moderator']);
     const { period } = await req.json(); // 'weekly' or 'monthly'
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
@@ -157,9 +159,10 @@ Período: ${periodLabel}.`;
     });
   } catch (e) {
     console.error("executive-report error:", e);
+    const authResponse = authorizationErrorResponse(e, corsHeaders);
+    if (authResponse) return authResponse;
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
-
