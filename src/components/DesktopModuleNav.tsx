@@ -4,7 +4,10 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useUserRole } from "@/hooks/useUserRole";
 
-const sections = [
+type NavItem = { label: string; href: string; icon: LucideIcon; restricted?: boolean };
+type NavSection = { label: string; icon: LucideIcon; restricted?: boolean; items: NavItem[] };
+
+const sections: NavSection[] = [
   { label: "Operação", icon: BriefcaseBusiness, items: [
     { label: "Visão da operação", href: "/dashboard", icon: BriefcaseBusiness },
     { label: "JBRs e serviços", href: "/servicos", icon: BriefcaseBusiness },
