@@ -97,8 +97,8 @@ export const useUnifiedInventory = () => {
       if (inventoryResult.error) throw inventoryResult.error;
       if (availabilityResult.error) throw availabilityResult.error;
 
-      const availability = new Map(
-        (availabilityResult.data || []).map((row: any) => [row.inventory_item_id, row]),
+      const availability = new Map<string, any>(
+        (availabilityResult.data || []).map((row: any) => [row.inventory_item_id as string, row]),
       );
       const typedData = (inventoryResult.data || []).map((item) => {
         const stock = availability.get(item.id);
