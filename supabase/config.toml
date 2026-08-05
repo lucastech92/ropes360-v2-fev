@@ -1,22 +1,22 @@
 project_id = "tnjqqaasmrkiaxnmkpcn"
 
 [functions.process-technical-document]
-verify_jwt = false
+verify_jwt = true
 
 [functions.technical-assistant-chat]
-verify_jwt = false
+verify_jwt = true
 
 [functions.send-push-notification]
-verify_jwt = false
+verify_jwt = true
 
 [functions.analyze-cable-image]
-verify_jwt = false
+verify_jwt = true
 
 [functions.analyze-report]
-verify_jwt = false
+verify_jwt = true
 
 [functions.equipment-ai]
-verify_jwt = false
+verify_jwt = true
 
 [functions.executive-report]
-verify_jwt = false
+verify_jwt = true

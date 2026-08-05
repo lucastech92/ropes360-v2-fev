@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.74.0';
+import { authorizationErrorResponse, requireApprovedUser } from '../_shared/require-approved-user.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -50,6 +51,7 @@ serve(async (req) => {
   }
 
   try {
+    await requireApprovedUser(req, ['admin', 'moderator', 'inspector']);
     const { documentId } = await req.json();
     console.log('📄 Processing document:', documentId);
     
@@ -148,6 +150,8 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('❌ Error:', error);
+    const authResponse = authorizationErrorResponse(error, corsHeaders);
+    if (authResponse) return authResponse;
     
     try {
       const { documentId } = await req.json();
@@ -175,4 +179,3 @@ serve(async (req) => {
     );
   }
 });
-
