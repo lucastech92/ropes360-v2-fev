@@ -11,6 +11,7 @@ interface InventoryItem {
   id: string;
   item_name: string;
   quantity: number;
+  available_quantity?: number;
   unit: string | null;
   status: string | null;
   next_calibration: string | null;
@@ -118,17 +119,22 @@ export const ChecklistDetails = ({
         {!checklist.is_template && checklist.checklist_type === 'saida' && (
           <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-3 text-sm">
             <p className="font-medium text-blue-700 dark:text-blue-300">Quantidade destinada ao JBR</p>
-            <p className="mt-1 text-muted-foreground">Ao vincular este checklist a um JBR, a quantidade planejada é baixada imediatamente do inventário.</p>
+            <p className="mt-1 text-muted-foreground">Use os botões + e − para confirmar a quantidade. Cada unidade selecionada é baixada imediatamente do estoque, cujo saldo aparece na linha.</p>
           </div>
         )}
-        <div className="overflow-hidden rounded-lg border">{items.length ? items.map((item) => (
-          <ChecklistItemRow
-            key={item.id}
-            item={item}
-            onQuantityChange={onQuantityChange}
-            onDelete={onDeleteItem}
-          />
-        )) : <p className="p-6 text-center text-sm text-muted-foreground">Nenhum item neste checklist.</p>}</div>
+        <div className="overflow-hidden rounded-lg border">{items.length ? items.map((item) => {
+          const inventoryItem = inventoryItems.find((candidate) => candidate.id === item.inventory_item_id);
+          return (
+            <ChecklistItemRow
+              key={item.id}
+              item={item}
+              stockQuantity={inventoryItem?.available_quantity ?? inventoryItem?.quantity ?? null}
+              stockUnit={inventoryItem?.unit}
+              onQuantityChange={onQuantityChange}
+              onDelete={onDeleteItem}
+            />
+          );
+        }) : <p className="p-6 text-center text-sm text-muted-foreground">Nenhum item neste checklist.</p>}</div>
 
         <AddItemForm
           inventoryItems={inventoryItems}

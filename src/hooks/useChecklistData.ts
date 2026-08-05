@@ -155,8 +155,12 @@ export const useChecklistData = (serviceId?: string | null) => {
 
     if (error) {
       toast({
-        title: "Erro",
-        description: "Não foi possível atualizar a quantidade",
+        title: "Não foi possível atualizar a quantidade",
+        description: error.message.includes("Insufficient stock")
+          ? "Não há saldo disponível para selecionar mais uma unidade."
+          : error.message.includes("after the JBR logistics release")
+            ? "O JBR já foi liberado e suas quantidades não podem mais ser alteradas."
+            : error.message,
         variant: "destructive",
       });
       return;
@@ -215,8 +219,8 @@ export const useChecklistData = (serviceId?: string | null) => {
     toast({
       title: "Item adicionado",
       description: serviceId
-        ? "Quantidade baixada imediatamente do inventário para este JBR."
-        : "Item adicionado ao checklist. A baixa ocorrerá quando ele for vinculado a um JBR.",
+        ? "Item adicionado. O estoque será baixado conforme você selecionar a quantidade no checklist."
+        : "Item adicionado ao checklist. Nenhuma quantidade foi baixada do estoque.",
     });
     return true;
   };
