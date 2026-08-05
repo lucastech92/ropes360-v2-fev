@@ -186,7 +186,7 @@ export const ServiceLogisticsPanel = ({
 
     toast({
       title: "JBR liberado para campo",
-      description: isChecklistComplete ? "Container confirmado. O estoque já havia sido baixado ao adicionar o checklist." : "Container confirmado. Há itens pendentes no checklist, mas não ocorreu uma segunda baixa de estoque.",
+      description: isChecklistComplete ? "Container confirmado. As quantidades selecionadas já haviam sido baixadas no checklist." : "Container confirmado. Há itens pendentes no checklist, mas não ocorreu uma segunda baixa de estoque.",
     });
     onChanged();
     load();
@@ -278,7 +278,7 @@ export const ServiceLogisticsPanel = ({
               {releaseDisabledReason ?? "Tudo pronto para liberar o JBR."}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              O estoque já foi baixado ao adicionar o checklist. A liberação apenas confirma o container e autoriza a saída para campo.
+              As quantidades selecionadas no checklist já foram baixadas. A liberação apenas confirma o container e autoriza a saída para campo.
             </p>
           </div>
           <Button

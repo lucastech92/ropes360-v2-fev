@@ -187,7 +187,7 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode, canRemove = false, 
       setSelectedTemplateIds([]);
       setRefreshKey((value) => value + 1);
       onChanged?.();
-      toast({ title: "Checklist(s) adicionado(s) ao JBR", description: "Os itens de saída foram baixados imediatamente do inventário." });
+      toast({ title: "Checklist(s) adicionado(s) ao JBR", description: "O estoque será baixado conforme as quantidades forem selecionadas dentro do checklist." });
     } catch (error: any) {
       const duplicateMessage = error?.code === "23505"
         ? "Este template já foi utilizado neste JBR. Abra o checklist existente em vez de criar outra cópia."
@@ -238,7 +238,7 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode, canRemove = false, 
       onChanged?.();
       toast({
         title: "Checklist removido do JBR",
-        description: "Os itens foram devolvidos ao estoque e o checklist continua disponível para reutilização.",
+        description: "As quantidades selecionadas foram devolvidas ao estoque e o checklist continua disponível para reutilização.",
       });
     } catch (error: any) {
       toast({
@@ -339,7 +339,7 @@ export const ServiceChecklistsPanel = ({ serviceId, jbrCode, canRemove = false, 
           <AlertDialogHeader>
             <AlertDialogTitle>Remover checklist do JBR?</AlertDialogTitle>
             <AlertDialogDescription>
-              O checklist “{checklistToRemove?.name}” será desvinculado do {jbrCode}. Os itens baixados serão devolvidos ao estoque, mas o checklist não será apagado e poderá ser reutilizado.
+              O checklist “{checklistToRemove?.name}” será desvinculado do {jbrCode}. As quantidades selecionadas serão devolvidas ao estoque, mas o checklist não será apagado e poderá ser reutilizado.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
