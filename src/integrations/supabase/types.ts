@@ -191,6 +191,13 @@ export type Database = {
             referencedRelation: "inventory"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "checklist_items_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_stock_availability"
+            referencedColumns: ["inventory_item_id"]
+          },
         ]
       }
       checklists: {
@@ -562,6 +569,13 @@ export type Database = {
             referencedRelation: "inventory"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "equipment_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_stock_availability"
+            referencedColumns: ["inventory_item_id"]
+          },
         ]
       }
       equipment_allocations: {
@@ -801,8 +815,8 @@ export type Database = {
       inventory: {
         Row: {
           acquisition_date: string | null
-          calibration_interval_months: number | null
           ca_number: string | null
+          calibration_interval_months: number | null
           category: string | null
           code: string | null
           condition: Database["public"]["Enums"]["equipment_condition"] | null
@@ -827,8 +841,8 @@ export type Database = {
         }
         Insert: {
           acquisition_date?: string | null
-          calibration_interval_months?: number | null
           ca_number?: string | null
+          calibration_interval_months?: number | null
           category?: string | null
           code?: string | null
           condition?: Database["public"]["Enums"]["equipment_condition"] | null
@@ -853,8 +867,8 @@ export type Database = {
         }
         Update: {
           acquisition_date?: string | null
-          calibration_interval_months?: number | null
           ca_number?: string | null
+          calibration_interval_months?: number | null
           category?: string | null
           code?: string | null
           condition?: Database["public"]["Enums"]["equipment_condition"] | null
@@ -940,6 +954,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "inventory_allocations_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_stock_availability"
+            referencedColumns: ["inventory_item_id"]
+          },
+          {
             foreignKeyName: "inventory_allocations_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
@@ -1010,6 +1031,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "inventory_consumption_history_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_stock_availability"
+            referencedColumns: ["inventory_item_id"]
+          },
+          {
             foreignKeyName: "inventory_consumption_history_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
@@ -1053,6 +1081,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "inventory"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_predictions_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_stock_availability"
+            referencedColumns: ["inventory_item_id"]
           },
         ]
       }
@@ -1137,6 +1172,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "inventory"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_records_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_stock_availability"
+            referencedColumns: ["inventory_item_id"]
           },
         ]
       }
@@ -1454,6 +1496,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "service_dispatch_items_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_stock_availability"
+            referencedColumns: ["inventory_item_id"]
+          },
+          {
             foreignKeyName: "service_dispatch_items_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
@@ -1631,6 +1680,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "service_inventory_movements_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_stock_availability"
+            referencedColumns: ["inventory_item_id"]
+          },
+          {
             foreignKeyName: "service_inventory_movements_return_session_id_fkey"
             columns: ["return_session_id"]
             isOneToOne: false
@@ -1736,6 +1792,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "service_resource_manifest_items_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_stock_availability"
+            referencedColumns: ["inventory_item_id"]
+          },
+          {
             foreignKeyName: "service_resource_manifest_items_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
@@ -1806,6 +1869,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "inventory"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_return_items_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_stock_availability"
+            referencedColumns: ["inventory_item_id"]
           },
           {
             foreignKeyName: "service_return_items_return_session_id_fkey"
@@ -2156,8 +2226,83 @@ export type Database = {
           },
         ]
       }
+      inventory_stock_availability: {
+        Row: {
+          available_quantity: number | null
+          inventory_item_id: string | null
+          physical_quantity: number | null
+          reserved_quantity: number | null
+        }
+        Insert: {
+          available_quantity?: never
+          inventory_item_id?: string | null
+          physical_quantity?: never
+          reserved_quantity?: never
+        }
+        Update: {
+          available_quantity?: never
+          inventory_item_id?: string | null
+          physical_quantity?: never
+          reserved_quantity?: never
+        }
+        Relationships: []
+      }
+      service_inventory_reservations: {
+        Row: {
+          codigo_jbr: string | null
+          inventory_item_id: string | null
+          item_name: string | null
+          prepared_quantity: number | null
+          reserved_quantity: number | null
+          service_id: string | null
+          unit: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_dispatch_items_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_dispatch_items_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_stock_availability"
+            referencedColumns: ["inventory_item_id"]
+          },
+          {
+            foreignKeyName: "service_dispatch_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      apply_service_checklist_item_stock: {
+        Args: {
+          p_actor?: string
+          p_checklist_id: string
+          p_checklist_item_id: string
+          p_inventory_item_id: string
+          p_item_name: string
+          p_quantity: number
+          p_service_id: string
+        }
+        Returns: undefined
+      }
+      assert_inventory_reservation_capacity: {
+        Args: {
+          p_excluded_checklist_item_id?: string
+          p_extra_quantity: number
+          p_inventory_item_id: string
+        }
+        Returns: undefined
+      }
       assign_service_container: {
         Args: { p_container_id: string; p_service_id: string }
         Returns: {
@@ -2254,6 +2399,21 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_inventory_stock_availability: {
+        Args: { p_service_id?: string }
+        Returns: {
+          available_quantity: number
+          id: string
+          item_name: string
+          next_calibration: string
+          physical_quantity: number
+          quantity: number
+          reserved_for_service: number
+          reserved_quantity: number
+          status: Database["public"]["Enums"]["equipment_status"]
+          unit: string
+        }[]
+      }
       get_service_timeline: {
         Args: { p_service_id: string }
         Returns: {
@@ -2324,6 +2484,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      refund_service_dispatch_item: {
+        Args: { p_actor?: string; p_dispatch_item_id: string; p_notes?: string }
+        Returns: undefined
       }
       release_service_logistics: {
         Args: { p_service_id: string }
@@ -2418,6 +2582,18 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      sync_service_checklist_item_stock: {
+        Args: {
+          p_actor?: string
+          p_checklist_id: string
+          p_checklist_item_id: string
+          p_inventory_item_id: string
+          p_item_name: string
+          p_selected_quantity: number
+          p_service_id: string
+        }
+        Returns: undefined
       }
       upsert_service_resource_manifest: {
         Args: {
