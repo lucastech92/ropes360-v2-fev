@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getReleaseDisabledReason } from "@/lib/serviceLogistics";
 
 type OperationContainer = {
   id: string;
@@ -50,6 +51,7 @@ export const ServiceLogisticsPanel = ({
 }: ServiceLogisticsPanelProps) => {
   const { toast } = useToast();
   const [containers, setContainers] = useState<OperationContainer[]>([]);
+  const [linkedChecklistCount, setLinkedChecklistCount] = useState(0);
   const [checklistProgress, setChecklistProgress] = useState<ChecklistProgress>({ total: 0, completed: 0 });
   const [deductions, setDeductions] = useState<StockDeduction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,7 +84,9 @@ export const ServiceLogisticsPanel = ({
       setContainers((containersResult.data ?? []) as OperationContainer[]);
     }
 
-    const items = (checklistsResult.data ?? []).flatMap((link: any) => link.checklists?.checklist_items ?? []);
+    const linkedChecklists = checklistsResult.data ?? [];
+    const items = linkedChecklists.flatMap((link: any) => link.checklists?.checklist_items ?? []);
+    setLinkedChecklistCount(linkedChecklists.length);
     setChecklistProgress({
       total: items.length,
       completed: items.filter((item: { is_checked: boolean }) => item.is_checked).length,
@@ -118,6 +122,13 @@ export const ServiceLogisticsPanel = ({
   const checklistPercent = checklistProgress.total > 0
     ? Math.round((checklistProgress.completed / checklistProgress.total) * 100)
     : 0;
+  const releaseDisabledReason = getReleaseDisabledReason({
+    releasedAt,
+    loading,
+    canManage,
+    linkedChecklistCount,
+    containerId,
+  });
 
   const assignContainer = async (nextContainerId: string) => {
     setSaving(true);
@@ -261,14 +272,26 @@ export const ServiceLogisticsPanel = ({
           )}
         </div>
 
-        {!releasedAt && canManage && (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-muted/50 p-3">
-            <p className="text-sm text-muted-foreground">O estoque já foi baixado ao adicionar o checklist. Esta ação apenas confirma o container e libera o JBR para campo.</p>
-            <Button onClick={releaseLogistics} disabled={saving || !containerId}>
-              <ShieldCheck className="mr-2 h-4 w-4" /> {saving ? "Salvando..." : "Liberar JBR"}
-            </Button>
+        <div className="flex flex-col gap-3 rounded-lg bg-muted/50 p-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-medium">
+              {releaseDisabledReason ?? "Tudo pronto para liberar o JBR."}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              O estoque já foi baixado ao adicionar o checklist. A liberação apenas confirma o container e autoriza a saída para campo.
+            </p>
           </div>
-        )}
+          <Button
+            onClick={releaseLogistics}
+            disabled={saving || Boolean(releaseDisabledReason)}
+            variant={releasedAt ? "secondary" : "default"}
+            className="w-full shrink-0 sm:w-auto"
+            title={releaseDisabledReason ?? "Liberar JBR para campo"}
+          >
+            {releasedAt ? <CheckCircle2 className="mr-2 h-4 w-4" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
+            {saving ? "Salvando..." : releasedAt ? "JBR liberado" : "Liberar JBR"}
+          </Button>
+        </div>
       </CardContent>
 
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
