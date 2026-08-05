@@ -2365,6 +2365,29 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      complete_service_return_internal: {
+        Args: { p_notes?: string; p_return_session_id: string }
+        Returns: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          id: string
+          inventory_applied_at: string | null
+          inventory_applied_by: string | null
+          notes: string | null
+          service_id: string
+          started_at: string
+          started_by: string | null
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "service_return_sessions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       create_notification_with_push: {
         Args: {
           p_message: string
@@ -2377,6 +2400,29 @@ export type Database = {
         Returns: string
       }
       dispatch_service_resource_manifest: {
+        Args: { p_dispatched_quantity: number; p_manifest_id: string }
+        Returns: {
+          consumed_quantity: number
+          created_at: string
+          created_by: string | null
+          dispatched_quantity: number
+          id: string
+          inventory_item_id: string
+          notes: string | null
+          planned_quantity: number
+          returned_quantity: number | null
+          service_id: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "service_resource_manifest_items"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      dispatch_service_resource_manifest_internal: {
         Args: { p_dispatched_quantity: number; p_manifest_id: string }
         Returns: {
           consumed_quantity: number
@@ -2446,6 +2492,10 @@ export type Database = {
           responsible_user_id: string
         }[]
       }
+      has_approved_role: {
+        Args: { p_allowed_roles: Database["public"]["Enums"]["app_role"][] }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2453,7 +2503,40 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_approved_user: { Args: { p_user_id?: string }; Returns: boolean }
       record_service_return_item: {
+        Args: {
+          p_notes?: string
+          p_return_condition: string
+          p_return_item_id: string
+          p_returned_quantity: number
+        }
+        Returns: {
+          checked_at: string | null
+          checked_by: string | null
+          checklist_name: string
+          consumed_quantity: number
+          created_at: string
+          dispatched_quantity: number
+          id: string
+          inventory_item_id: string | null
+          item_name: string
+          notes: string | null
+          return_condition: string | null
+          return_session_id: string
+          returned_quantity: number | null
+          source_checklist_id: string
+          source_checklist_item_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "service_return_items"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      record_service_return_item_internal: {
         Args: {
           p_notes?: string
           p_return_condition: string
@@ -2551,6 +2634,34 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      return_service_resource_manifest_internal: {
+        Args: {
+          p_consumed_quantity: number
+          p_manifest_id: string
+          p_notes?: string
+          p_returned_quantity: number
+        }
+        Returns: {
+          consumed_quantity: number
+          created_at: string
+          created_by: string | null
+          dispatched_quantity: number
+          id: string
+          inventory_item_id: string
+          notes: string | null
+          planned_quantity: number
+          returned_quantity: number | null
+          service_id: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "service_resource_manifest_items"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       search_document_content: {
         Args: { match_count?: number; search_query: string }
         Returns: {
@@ -2561,6 +2672,29 @@ export type Database = {
         }[]
       }
       start_service_return: {
+        Args: { p_service_id: string }
+        Returns: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          id: string
+          inventory_applied_at: string | null
+          inventory_applied_by: string | null
+          notes: string | null
+          service_id: string
+          started_at: string
+          started_by: string | null
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "service_return_sessions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      start_service_return_internal: {
         Args: { p_service_id: string }
         Returns: {
           completed_at: string | null
@@ -2596,6 +2730,34 @@ export type Database = {
         Returns: undefined
       }
       upsert_service_resource_manifest: {
+        Args: {
+          p_inventory_item_id: string
+          p_notes?: string
+          p_planned_quantity: number
+          p_service_id: string
+        }
+        Returns: {
+          consumed_quantity: number
+          created_at: string
+          created_by: string | null
+          dispatched_quantity: number
+          id: string
+          inventory_item_id: string
+          notes: string | null
+          planned_quantity: number
+          returned_quantity: number | null
+          service_id: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "service_resource_manifest_items"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      upsert_service_resource_manifest_internal: {
         Args: {
           p_inventory_item_id: string
           p_notes?: string
