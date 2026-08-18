@@ -2233,18 +2233,6 @@ export type Database = {
           physical_quantity: number | null
           reserved_quantity: number | null
         }
-        Insert: {
-          available_quantity?: never
-          inventory_item_id?: string | null
-          physical_quantity?: never
-          reserved_quantity?: never
-        }
-        Update: {
-          available_quantity?: never
-          inventory_item_id?: string | null
-          physical_quantity?: never
-          reserved_quantity?: never
-        }
         Relationships: []
       }
       service_inventory_reservations: {
