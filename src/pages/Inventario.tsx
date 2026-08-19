@@ -24,10 +24,13 @@ import MaintenanceTab from "@/components/inventory/MaintenanceTab";
 import UtilizationTab from "@/components/inventory/UtilizationTab";
 import { InventoryTrendsAI } from "@/components/inventory/InventoryTrendsAI";
 import { InventoryAuditTrail } from "@/components/inventory/InventoryAuditTrail";
+import InventoryReservationsDialog from "@/components/inventory/InventoryReservationsDialog";
+import { useInventoryReservations } from "@/hooks/useInventoryReservations";
 import CalibrationTab from "@/components/inventory/CalibrationTab";
 import EquipmentCheckout from "@/components/equipment/EquipmentCheckout";
 import EquipmentCheckin from "@/components/equipment/EquipmentCheckin";
 import { useUserRole } from "@/hooks/useUserRole";
+
 
 const Inventario = () => {
   const { t } = useTranslation();
