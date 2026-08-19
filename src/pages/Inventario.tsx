@@ -65,6 +65,14 @@ const Inventario = () => {
   const [preselectedMaintenanceItem, setPreselectedMaintenanceItem] = useState<string | null>(null);
   const [preselectedCalibrationItem, setPreselectedCalibrationItem] = useState<string | null>(null);
   const [inventorySituation, setInventorySituation] = useState<InventorySituationFilter>("all");
+  const [reservationsOpen, setReservationsOpen] = useState(false);
+  const {
+    groups: reservationGroups,
+    summary: reservationSummary,
+    loading: reservationsLoading,
+  } = useInventoryReservations();
+
+
 
   const handleInventorySituation = (filter: InventorySituationFilter) => {
     setInventorySituation(filter);
