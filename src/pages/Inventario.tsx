@@ -180,7 +180,18 @@ const Inventario = () => {
             stats={stats}
             activeFilter={inventorySituation}
             onFilterSelect={handleInventorySituation}
+            reservations={reservationSummary}
+            onOpenReservations={() => setReservationsOpen(true)}
           />
+
+          <InventoryReservationsDialog
+            open={reservationsOpen}
+            onOpenChange={setReservationsOpen}
+            groups={reservationGroups}
+            summary={reservationSummary}
+            loading={reservationsLoading}
+          />
+
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full max-w-4xl grid-cols-6">
