@@ -141,6 +141,8 @@ export default function InventoryItemList({
           <SelectContent>
             <SelectItem value="all">Todas as Situações</SelectItem>
             <SelectItem value="low_stock">Estoque Baixo</SelectItem>
+            <SelectItem value="reserved">Com Estoque Reservado</SelectItem>
+
             <SelectItem value="available">Disponível</SelectItem>
             <SelectItem value="in_service">Em Serviço</SelectItem>
             <SelectItem value="maintenance">Manutenção</SelectItem>
