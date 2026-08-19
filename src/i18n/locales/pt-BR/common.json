@@ -260,7 +260,10 @@
       "lowStock": "Estoque Baixo",
       "itemsBelowMinimum": "Itens abaixo do mínimo",
       "calibrationDue": "Calibração Próxima",
-      "next30Days": "Nos próximos 30 dias"
+      "next30Days": "Nos próximos 30 dias",
+      "reservedStock": "Estoque Reservado",
+      "reservedItemsCount": "{{count}} item(ns) com reserva",
+      "unlinkedReserved": "{{units}} em {{checklists}} avulso(s)"
     }
   },
   "maintenance": {

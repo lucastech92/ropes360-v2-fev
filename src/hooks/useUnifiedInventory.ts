@@ -6,7 +6,7 @@ import { removeInventoryPhoto } from "@/lib/inventoryPhotoStorage";
 export type ItemType = "consumivel" | "equipamento";
 export type EquipmentStatus = "available" | "in_service" | "maintenance" | "calibration" | "inactive";
 export type EquipmentCondition = "excellent" | "good" | "fair" | "needs_repair" | "damaged";
-export type InventorySituationFilter = "all" | "low_stock" | EquipmentStatus | "calibration_due";
+export type InventorySituationFilter = "all" | "low_stock" | EquipmentStatus | "calibration_due" | "reserved";
 
 export interface UnifiedInventoryItem {
   id: string;

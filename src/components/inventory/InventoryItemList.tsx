@@ -64,7 +64,9 @@ export default function InventoryItemList({
       const matchesSituation = situationFilter === "all"
         || (situationFilter === "low_stock" && isLowStock)
         || (situationFilter === "calibration_due" && isCalibrationDue)
+        || (situationFilter === "reserved" && item.reserved_quantity > 0)
         || (item.item_type === "equipamento" && item.status === situationFilter);
+
 
       return matchesSearch && matchesType && matchesSituation;
     });
@@ -139,6 +141,8 @@ export default function InventoryItemList({
           <SelectContent>
             <SelectItem value="all">Todas as Situações</SelectItem>
             <SelectItem value="low_stock">Estoque Baixo</SelectItem>
+            <SelectItem value="reserved">Com Estoque Reservado</SelectItem>
+
             <SelectItem value="available">Disponível</SelectItem>
             <SelectItem value="in_service">Em Serviço</SelectItem>
             <SelectItem value="maintenance">Manutenção</SelectItem>

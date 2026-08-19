@@ -24,10 +24,13 @@ import MaintenanceTab from "@/components/inventory/MaintenanceTab";
 import UtilizationTab from "@/components/inventory/UtilizationTab";
 import { InventoryTrendsAI } from "@/components/inventory/InventoryTrendsAI";
 import { InventoryAuditTrail } from "@/components/inventory/InventoryAuditTrail";
+import InventoryReservationsDialog from "@/components/inventory/InventoryReservationsDialog";
+import { useInventoryReservations } from "@/hooks/useInventoryReservations";
 import CalibrationTab from "@/components/inventory/CalibrationTab";
 import EquipmentCheckout from "@/components/equipment/EquipmentCheckout";
 import EquipmentCheckin from "@/components/equipment/EquipmentCheckin";
 import { useUserRole } from "@/hooks/useUserRole";
+
 
 const Inventario = () => {
   const { t } = useTranslation();
@@ -62,6 +65,14 @@ const Inventario = () => {
   const [preselectedMaintenanceItem, setPreselectedMaintenanceItem] = useState<string | null>(null);
   const [preselectedCalibrationItem, setPreselectedCalibrationItem] = useState<string | null>(null);
   const [inventorySituation, setInventorySituation] = useState<InventorySituationFilter>("all");
+  const [reservationsOpen, setReservationsOpen] = useState(false);
+  const {
+    groups: reservationGroups,
+    summary: reservationSummary,
+    loading: reservationsLoading,
+  } = useInventoryReservations();
+
+
 
   const handleInventorySituation = (filter: InventorySituationFilter) => {
     setInventorySituation(filter);
@@ -180,7 +191,18 @@ const Inventario = () => {
             stats={stats}
             activeFilter={inventorySituation}
             onFilterSelect={handleInventorySituation}
+            reservations={reservationSummary}
+            onOpenReservations={() => setReservationsOpen(true)}
           />
+
+          <InventoryReservationsDialog
+            open={reservationsOpen}
+            onOpenChange={setReservationsOpen}
+            groups={reservationGroups}
+            summary={reservationSummary}
+            loading={reservationsLoading}
+          />
+
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full max-w-4xl grid-cols-6">
