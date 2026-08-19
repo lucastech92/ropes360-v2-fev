@@ -81,8 +81,10 @@ export default function InventoryDashboard({
     },
   ];
 
+  const hasUnlinked = (reservations?.unlinkedReservedUnits ?? 0) > 0;
+
   return (
-    <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+    <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
       {statCards.map((stat) => (
         <button key={stat.title} type="button" className="text-left" onClick={() => onFilterSelect(stat.filter)}>
           <Card className={cn(
@@ -101,6 +103,33 @@ export default function InventoryDashboard({
           </Card>
         </button>
       ))}
+
+      {reservations && (
+        <button type="button" className="text-left" onClick={onOpenReservations}>
+          <Card className={cn(
+            "h-full transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md",
+            hasUnlinked ? "bg-amber-500/10 border-amber-500/30" : "bg-card",
+          )}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t("inventory.dashboard.reservedStock")}</CardTitle>
+              <Lock className={cn("h-4 w-4", hasUnlinked ? "text-amber-600" : "text-muted-foreground")} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{reservations.reservedUnits}</div>
+              <p className="text-xs text-muted-foreground">
+                {t("inventory.dashboard.reservedItemsCount", { count: reservations.reservedItems })}
+                {hasUnlinked
+                  ? ` · ${t("inventory.dashboard.unlinkedReserved", {
+                      units: reservations.unlinkedReservedUnits,
+                      checklists: reservations.unlinkedChecklists,
+                    })}`
+                  : ""}
+              </p>
+            </CardContent>
+          </Card>
+        </button>
+      )}
     </div>
   );
+
 }
