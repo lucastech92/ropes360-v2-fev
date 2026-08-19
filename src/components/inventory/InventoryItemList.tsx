@@ -64,7 +64,9 @@ export default function InventoryItemList({
       const matchesSituation = situationFilter === "all"
         || (situationFilter === "low_stock" && isLowStock)
         || (situationFilter === "calibration_due" && isCalibrationDue)
+        || (situationFilter === "reserved" && item.reserved_quantity > 0)
         || (item.item_type === "equipamento" && item.status === situationFilter);
+
 
       return matchesSearch && matchesType && matchesSituation;
     });
