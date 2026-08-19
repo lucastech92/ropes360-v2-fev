@@ -1,17 +1,27 @@
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Wrench, AlertTriangle, CheckCircle, Calendar } from "lucide-react";
+import { Package, Wrench, AlertTriangle, CheckCircle, Calendar, Lock } from "lucide-react";
 import type { InventorySituationFilter, InventoryStats } from "@/hooks/useUnifiedInventory";
+import type { ReservationSummary } from "@/hooks/useInventoryReservations";
 import { cn } from "@/lib/utils";
 
 interface InventoryDashboardProps {
   stats: InventoryStats;
   activeFilter: InventorySituationFilter;
   onFilterSelect: (filter: InventorySituationFilter) => void;
+  reservations?: ReservationSummary;
+  onOpenReservations?: () => void;
 }
 
-export default function InventoryDashboard({ stats, activeFilter, onFilterSelect }: InventoryDashboardProps) {
+export default function InventoryDashboard({
+  stats,
+  activeFilter,
+  onFilterSelect,
+  reservations,
+  onOpenReservations,
+}: InventoryDashboardProps) {
   const { t } = useTranslation();
+
 
   const statCards: Array<{
     title: string;
