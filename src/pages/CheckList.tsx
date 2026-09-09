@@ -232,7 +232,7 @@ const CheckList = () => {
             </TabsTrigger>
             <TabsTrigger value="templates" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Templates ({templates.length})
+              Modelos ({templates.length})
             </TabsTrigger>
             <TabsTrigger value="salvos" className="flex items-center gap-2">
               <Archive className="h-4 w-4" />

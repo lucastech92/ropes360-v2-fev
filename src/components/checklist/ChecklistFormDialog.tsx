@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import { PackagePlus, PackageMinus } from "lucide-react";
 import { ServiceLinkSelect } from "@/components/service/ServiceLinkSelect";
 import { ContainerLinkSelect } from "@/components/service/ContainerLinkSelect";
