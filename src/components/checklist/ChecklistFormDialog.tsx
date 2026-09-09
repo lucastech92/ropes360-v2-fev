@@ -139,24 +139,10 @@ export const ChecklistFormDialog = ({
             </>
           )}
           {isCreate && (
-            <div className="flex items-start gap-2 rounded-md border border-border p-3">
-              <Checkbox
-                id="is_template"
-                checked={isTemplate}
-                onClick={(e) => e.stopPropagation()}
-                onCheckedChange={(checked) => onIsTemplateChange(checked as boolean)}
-              />
-              <div className="space-y-1">
-                <span className="text-sm font-medium leading-none">
-                  Salvar como template (modelo reutilizável)
-                </span>
-                <p className="text-xs text-muted-foreground">
-                  {isTemplate
-                    ? "Sem vínculo com JBR agora. Ao usar, você clona o template e escolhe o JBR. Desmarque para voltar."
-                    : "Marque para criar um modelo reutilizável, sem vincular a um JBR."}
-                </p>
-              </div>
-            </div>
+            <p className="rounded-md border border-border p-3 text-xs text-muted-foreground">
+              Todo checklist criado fica disponível na aba Modelos e pode ser reutilizado depois —
+              basta escolher outro JBR na hora de reutilizar.
+            </p>
           )}
         </div>
         <DialogFooter>
