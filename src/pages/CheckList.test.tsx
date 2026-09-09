@@ -126,7 +126,7 @@ describe("CheckList edit flow", () => {
     const user = userEvent.setup();
     renderPage();
 
-    await user.click(screen.getByRole("tab", { name: /Templates/ }));
+    await user.click(screen.getByRole("tab", { name: /Modelos/ }));
     await user.click(screen.getByRole("button", { name: "Editar template de teste" }));
 
     expect(screen.getByRole("dialog")).toHaveTextContent("edit:template:Template 900cc");
