@@ -53,7 +53,8 @@ export const useChecklistData = (serviceId?: string | null) => {
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const { toast } = useToast();
 
-  const templates = checklists.filter(c => c.is_template && !c.is_saved);
+  // Todo checklist criado pode ser reutilizado: a aba Templates lista o histórico completo.
+  const templates = checklists;
   const serviceChecklists = checklists.filter(c =>
     !c.is_template && (serviceId ? linkedChecklistIds.includes(c.id) : !c.is_saved)
   );
