@@ -311,7 +311,15 @@ const CheckList = () => {
           onDescriptionChange={setFormDescription}
           onServiceTagChange={setFormServiceTag}
           onTypeChange={setFormType}
-          onIsTemplateChange={setFormIsTemplate}
+          onIsTemplateChange={(value) => {
+            setFormIsTemplate(value);
+            setIsTemplateMode(value);
+            if (value) {
+              setSelectedServiceId(null);
+              setSelectedContainerId(null);
+              setFormServiceTag("");
+            }
+          }}
           onServiceIdChange={setSelectedServiceId}
           onContainerIdChange={setSelectedContainerId}
           onSubmit={handleCreate}
