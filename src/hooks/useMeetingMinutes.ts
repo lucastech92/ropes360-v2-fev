@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { notifyError, notifySuccess } from "@/lib/notify";
+import { notify } from "@/lib/notify";
 
 export type ProjectStatus = "planned" | "in_progress" | "delayed" | "completed";
 export type ActionStatus = "pending" | "in_progress" | "completed";
@@ -114,9 +114,9 @@ export const useMeetingMinutes = () => {
     },
     onSuccess: () => {
       invalidate(["meeting_minutes"]);
-      notifySuccess("Ata criada", "Agora adicione os projetos e as ações.");
+      notify.success("Ata criada", { description: "Agora adicione os projetos e as ações." });
     },
-    onError: (e: Error) => notifyError("Erro ao criar ata", e.message),
+    onError: (e: Error) => notify.error("Erro ao criar ata", { description: e.message }),
   });
 
   const updateMinute = useMutation({
@@ -126,9 +126,9 @@ export const useMeetingMinutes = () => {
     },
     onSuccess: () => {
       invalidate(["meeting_minutes"]);
-      notifySuccess("Ata atualizada");
+      notify.success("Ata atualizada");
     },
-    onError: (e: Error) => notifyError("Erro ao atualizar ata", e.message),
+    onError: (e: Error) => notify.error("Erro ao atualizar ata", { description: e.message }),
   });
 
   const deleteMinute = useMutation({
@@ -138,9 +138,9 @@ export const useMeetingMinutes = () => {
     },
     onSuccess: () => {
       invalidate(["meeting_minutes", "meeting_projects", "meeting_action_items"]);
-      notifySuccess("Ata excluída");
+      notify.success("Ata excluída");
     },
-    onError: (e: Error) => notifyError("Erro ao excluir ata", e.message),
+    onError: (e: Error) => notify.error("Erro ao excluir ata", { description: e.message }),
   });
 
   const saveProject = useMutation({
@@ -155,7 +155,7 @@ export const useMeetingMinutes = () => {
       }
     },
     onSuccess: () => invalidate(["meeting_projects"]),
-    onError: (e: Error) => notifyError("Erro ao salvar projeto", e.message),
+    onError: (e: Error) => notify.error("Erro ao salvar projeto", { description: e.message }),
   });
 
   const deleteProject = useMutation({
@@ -164,7 +164,7 @@ export const useMeetingMinutes = () => {
       if (error) throw error;
     },
     onSuccess: () => invalidate(["meeting_projects", "meeting_action_items"]),
-    onError: (e: Error) => notifyError("Erro ao excluir projeto", e.message),
+    onError: (e: Error) => notify.error("Erro ao excluir projeto", { description: e.message }),
   });
 
   const saveActionItem = useMutation({
@@ -181,7 +181,7 @@ export const useMeetingMinutes = () => {
       }
     },
     onSuccess: () => invalidate(["meeting_action_items"]),
-    onError: (e: Error) => notifyError("Erro ao salvar ação", e.message),
+    onError: (e: Error) => notify.error("Erro ao salvar ação", { description: e.message }),
   });
 
   const toggleActionItem = useMutation({
@@ -196,7 +196,7 @@ export const useMeetingMinutes = () => {
       if (error) throw error;
     },
     onSuccess: () => invalidate(["meeting_action_items"]),
-    onError: (e: Error) => notifyError("Erro ao atualizar ação", e.message),
+    onError: (e: Error) => notify.error("Erro ao atualizar ação", { description: e.message }),
   });
 
   const deleteActionItem = useMutation({
@@ -205,7 +205,7 @@ export const useMeetingMinutes = () => {
       if (error) throw error;
     },
     onSuccess: () => invalidate(["meeting_action_items"]),
-    onError: (e: Error) => notifyError("Erro ao excluir ação", e.message),
+    onError: (e: Error) => notify.error("Erro ao excluir ação", { description: e.message }),
   });
 
   return {
