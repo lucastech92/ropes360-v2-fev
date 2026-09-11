@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, Boxes, BriefcaseBusiness, CalendarDays, ChevronDown, ClipboardCheck, FileText, History, Package, ShieldCheck, Sparkles, Users, type LucideIcon } from "lucide-react";
+import { BookOpen, Boxes, BriefcaseBusiness, CalendarDays, ChevronDown, ClipboardCheck, ClipboardList, FileText, History, Package, ShieldCheck, Sparkles, Users, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -25,6 +25,7 @@ const sections: NavSection[] = [
     { label: "Treinamento ISO 4309", href: "/treinamento-iso4309", icon: ShieldCheck },
   ] },
   { label: "Gestão", icon: Users, restricted: true, items: [
+    { label: "Atas de reuniões", href: "/atas-reuniao", icon: ClipboardList },
     { label: "Calendário", href: "/calendario", icon: CalendarDays },
     { label: "Histórico", href: "/historico", icon: History },
     { label: "Equipe e usuários", href: "/gerenciar-usuarios", icon: Users },
