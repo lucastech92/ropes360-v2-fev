@@ -32,6 +32,7 @@ import Certificacoes from "./pages/Certificacoes";
 import ServiceTimeline from "./pages/ServiceTimeline";
 import RelatorioExecutivo from "./pages/RelatorioExecutivo";
 import Notificacoes from "./pages/Notificacoes";
+import AtasReuniao from "./pages/AtasReuniao";
 import OAuthConsent from "./pages/OAuthConsent";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
