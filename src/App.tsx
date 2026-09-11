@@ -96,6 +96,7 @@ const App = () => {
               <Route path="/servico/:id/timeline" element={<ProtectedRoute><ServiceTimeline /></ProtectedRoute>} />
               <Route path="/relatorio-executivo" element={<ProtectedRoute><RelatorioExecutivo /></ProtectedRoute>} />
               <Route path="/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
+              <Route path="/atas-reuniao" element={<ProtectedRoute><RoleRoute allowedRoles={['admin','moderator']}><AtasReuniao /></RoleRoute></ProtectedRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
               </Routes>
