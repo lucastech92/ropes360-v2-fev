@@ -95,6 +95,7 @@ export const MobileNav = () => {
         { label: t('modules.historico'), href: "/historico", icon: History },
         { label: t('modules.folhaPonto'), href: "/folha-ponto", icon: Calendar },
         { label: t('nav.calendar'), href: "/calendario", icon: Calendar },
+        { label: "Atas de reuniões", href: "/atas-reuniao", icon: ClipboardList },
         { label: t('modules.gerenciarUsuarios'), href: "/gerenciar-usuarios", icon: Shield },
       ]
     },

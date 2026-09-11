@@ -78,6 +78,7 @@ const ALL_NAV: NavAction[] = [
   { label: "Histórico", icon: History, path: "/historico", roles: ["admin", "moderator"] },
   { label: "Folha de Ponto", icon: Calendar, path: "/folha-ponto", roles: ["admin", "moderator"] },
   { label: "Calendário", icon: Calendar, path: "/calendario", roles: ["admin", "moderator"] },
+  { label: "Atas de Reuniões", icon: ClipboardList, path: "/atas-reuniao", keywords: "ata reuniao semanal acoes responsaveis", roles: ["admin", "moderator"] },
   { label: "Certificações", icon: Award, path: "/certificacoes", roles: ["admin", "moderator"] },
   { label: "Gerenciar Usuários", icon: Users, path: "/gerenciar-usuarios", roles: ["admin", "moderator"] },
   { label: "Relatório Executivo", icon: Gauge, path: "/relatorio-executivo", roles: ["admin", "moderator"] },
