@@ -1,70 +1,79 @@
 import { Link } from "react-router-dom";
-import { BookOpen, BriefcaseBusiness, ClipboardCheck, Compass, Package } from "lucide-react";
+import { BookOpen, BriefcaseBusiness, ClipboardCheck, Package, ArrowRight, ClipboardList, Users } from "lucide-react";
 import Header from "@/components/Header";
-import { DashboardMetrics } from "@/components/DashboardMetrics";
+import { HomeHero } from "@/components/dashboard/HomeHero";
+import { HomePulse } from "@/components/dashboard/HomePulse";
+import { AlertsSummaryWidget } from "@/components/dashboard/AlertsSummaryWidget";
 import { HealthScoreGauge } from "@/components/dashboard/HealthScoreGauge";
 import { InspectorHome } from "@/components/dashboard/InspectorHome";
-import { CommandPaletteTrigger } from "@/components/CommandPalette";
-import { Button } from "@/components/ui/button";
 import { useUserRole } from "@/hooks/useUserRole";
 
-const primaryLinks = [
+const hubLinks = [
   { label: "JBRs e serviços", description: "Planejar e acompanhar serviços", href: "/servicos", icon: BriefcaseBusiness },
   { label: "Checklists", description: "Preparar e conferir materiais", href: "/checklist", icon: ClipboardCheck },
-  { label: "Inventário", description: "Consultar estoque e equipamentos", href: "/inventario", icon: Package },
-  { label: "Conhecimento técnico", description: "Consultar documentos e a IA", href: "/assistente-tecnico", icon: BookOpen },
+  { label: "Ativos e equipamentos", description: "Estoque, calibração e manutenção", href: "/inventario", icon: Package },
+  { label: "Conhecimento técnico", description: "Documentos e assistente de IA", href: "/assistente-tecnico", icon: BookOpen },
+  { label: "Certificações", description: "Competências e validades da equipe", href: "/certificacoes", icon: Users },
+  { label: "Atas de reuniões", description: "Decisões, ações e responsáveis", href: "/atas-reuniao", icon: ClipboardList, restricted: true },
 ];
 
 const Index = () => {
   const { isInspector } = useUserRole();
+  const links = hubLinks.filter((l) => !(l.restricted && isInspector));
 
-  return <div className="min-h-screen bg-background">
-    <Header />
-    <main>
-      <section className="relative overflow-hidden border-b bg-gradient-to-br from-primary/10 via-background to-muted/60">
-        <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full border border-primary/10" aria-hidden="true" />
-        <div className="pointer-events-none absolute -right-8 -top-12 h-48 w-48 rounded-full border border-primary/15" aria-hidden="true" />
-        <div className="container relative flex flex-col gap-6 px-4 py-8 sm:py-10 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl">
-            <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-              <Compass className="h-4 w-4" /> Gestão operacional integrada
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main>
+        <HomeHero />
+
+        <div className="container space-y-8 px-4 py-6">
+          <AlertsSummaryWidget />
+
+          <section aria-labelledby="operation-summary" className="space-y-4">
+            <h2 id="operation-summary" className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              Pulso da operação
+            </h2>
+            {isInspector ? (
+              <InspectorHome />
+            ) : (
+              <div className="space-y-4">
+                <HomePulse />
+                <HealthScoreGauge compact />
+              </div>
+            )}
+          </section>
+
+          <section aria-labelledby="primary-access" className="space-y-4">
+            <h2 id="primary-access" className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              Hub operacional
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {links.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    className="group flex items-start gap-3 rounded-xl border bg-card p-4 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40"
+                  >
+                    <div className="mt-0.5 rounded-lg bg-muted p-2 transition-colors group-hover:bg-primary/10">
+                      <Icon className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold">{item.label}</p>
+                      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{item.description}</p>
+                    </div>
+                    <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                  </Link>
+                );
+              })}
             </div>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Ropes<span className="text-primary">360</span></h1>
-            <p className="mt-4 text-lg font-medium leading-relaxed text-foreground sm:text-xl">
-              Conectar pessoas, equipamentos e decisões para tornar cada serviço de campo mais seguro, rastreável e eficiente.
-            </p>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-              Do planejamento do JBR ao retorno dos recursos, toda a operação em um único fluxo.
-            </p>
-          </div>
-          <div className="flex shrink-0 flex-wrap gap-2">
-            <Button asChild><Link to="/novo-servico">Novo JBR</Link></Button>
-            <CommandPaletteTrigger />
-          </div>
+          </section>
         </div>
-      </section>
-
-      <div className="container space-y-8 px-4 py-6">
-        <section aria-labelledby="operation-summary" className="space-y-4">
-          <h2 id="operation-summary" className="text-base font-semibold">Resumo da operação</h2>
-          {isInspector ? <InspectorHome /> : <><HealthScoreGauge compact /><DashboardMetrics /></>}
-        </section>
-
-        <section aria-labelledby="primary-access" className="space-y-3">
-          <h2 id="primary-access" className="text-base font-semibold">Acessos principais</h2>
-          <div className="grid overflow-hidden rounded-lg border sm:grid-cols-2 lg:grid-cols-4">
-            {primaryLinks.map((item, index) => {
-              const Icon = item.icon;
-              return <Link key={item.href} to={item.href} className={`group flex min-h-24 items-start gap-3 p-4 transition-colors hover:bg-muted/50 ${index > 0 ? "border-t sm:border-t-0 sm:border-l" : ""} ${index === 2 ? "sm:border-l-0 sm:border-t lg:border-l lg:border-t-0" : ""} ${index === 3 ? "sm:border-t lg:border-t-0" : ""}`}>
-                <div className="mt-0.5 rounded-md bg-muted p-2"><Icon className="h-4 w-4 text-muted-foreground group-hover:text-foreground" /></div>
-                <div><p className="text-sm font-medium">{item.label}</p><p className="mt-1 text-xs leading-relaxed text-muted-foreground">{item.description}</p></div>
-              </Link>;
-            })}
-          </div>
-        </section>
-      </div>
-    </main>
-  </div>;
+      </main>
+    </div>
+  );
 };
 
 export default Index;
