@@ -27,10 +27,7 @@ export const useHomeOverview = () => {
           .select("id", { count: "exact", head: true })
           .lte("data_inicio", today)
           .gte("data_termino", today),
-        supabase
-          .from("checklists")
-          .select("id", { count: "exact", head: true })
-          .eq("archived", false),
+        supabase.from("checklists").select("id", { count: "exact", head: true }),
         supabase.from("inventory").select("quantity, min_quantity"),
       ]);
 
