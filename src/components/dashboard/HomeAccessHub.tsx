@@ -7,7 +7,7 @@ import { useHomeAccessHub } from "@/hooks/useHomeAccessHub";
 import { useUserRole } from "@/hooks/useUserRole";
 import { cn } from "@/lib/utils";
 
-type TrendDatum = { month: string; value: number };
+type TrendDatum = { value: number; month?: string; name?: string };
 
 const TrendChart = ({ data, bar = false }: { data: TrendDatum[]; bar?: boolean }) => (
   <div className="h-16 w-full" aria-hidden="true">
