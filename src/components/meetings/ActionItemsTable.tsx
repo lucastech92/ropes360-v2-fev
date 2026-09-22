@@ -70,8 +70,8 @@ export const ActionItemsTable = ({ items, projects, profiles, canEdit, canDelete
 
   return (
     <Card className="border-border/60">
-      <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
-        <CardTitle className="flex flex-wrap items-center gap-2 text-base">
+      <CardHeader className="flex flex-col items-start justify-between gap-3 pb-3 sm:flex-row sm:items-center">
+        <CardTitle className="flex min-w-0 flex-wrap items-center gap-2 text-base">
           <CheckSquare className="h-4 w-4 text-primary" />
           Responsabilidades e ações
           <Badge variant="secondary">{items.length}</Badge>
@@ -83,7 +83,7 @@ export const ActionItemsTable = ({ items, projects, profiles, canEdit, canDelete
           )}
         </CardTitle>
         {canEdit && (
-          <Button size="sm" variant="outline" className="gap-1.5" onClick={() => start(null)}>
+          <Button size="sm" variant="outline" className="w-full gap-1.5 sm:w-auto" onClick={() => start(null)}>
             <Plus className="h-4 w-4" />
             Ação
           </Button>
@@ -95,8 +95,69 @@ export const ActionItemsTable = ({ items, projects, profiles, canEdit, canDelete
             Nenhuma ação registrada nesta ata.
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
+          <>
+            <div className="space-y-3 sm:hidden">
+              {items.map((item) => {
+                const late = isOverdue(item);
+                const done = item.status === "completed";
+                const name = profileLabel(item.assignee_id) || item.assignee_name || "Não atribuído";
+                const project = projects.find((p) => p.id === item.project_id);
+                return (
+                  <div key={item.id} className={cn("space-y-3 rounded-lg border p-3", late && "border-destructive/30 bg-destructive/5")}>
+                    <div className="flex min-w-0 items-start gap-3">
+                      <Checkbox
+                        checked={done}
+                        disabled={!canEdit}
+                        aria-label="Concluir ação"
+                        className="mt-0.5 shrink-0"
+                        onClick={(e) => e.stopPropagation()}
+                        onCheckedChange={(value) => onToggle(item.id, value === true)}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className={cn("break-words text-sm font-medium", done && "text-muted-foreground line-through")}>
+                          {item.description}
+                        </p>
+                        {project && <p className="mt-0.5 truncate text-xs text-muted-foreground">{project.title}</p>}
+                      </div>
+                      <Badge variant="outline" className={cn("shrink-0", statusMeta[item.status].className)}>
+                        {statusMeta[item.status].label}
+                      </Badge>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t pt-3">
+                      <div className="flex min-w-0 flex-1 items-center gap-2">
+                        <Avatar className="h-6 w-6 shrink-0">
+                          <AvatarFallback className="text-[9px]">{getInitials(name) || "?"}</AvatarFallback>
+                        </Avatar>
+                        <span className="truncate text-xs text-muted-foreground">{name}</span>
+                      </div>
+                      <span className={cn("text-xs", late ? "font-medium text-destructive" : "text-muted-foreground")}>
+                        {item.due_date
+                          ? format(new Date(`${item.due_date}T00:00:00`), "dd MMM yyyy", { locale: getDateLocale() })
+                          : "Sem prazo"}
+                      </span>
+                      {(canEdit || canDelete) && (
+                        <div className="flex shrink-0 gap-0.5">
+                          {canEdit && (
+                            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => start(item)}>
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
+                          {canDelete && (
+                            <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => onDelete(item.id)}>
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="hidden max-w-full overflow-x-auto sm:block">
+              <Table className="min-w-[640px]">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-10" />
@@ -185,13 +246,14 @@ export const ActionItemsTable = ({ items, projects, profiles, canEdit, canDelete
                   );
                 })}
               </TableBody>
-            </Table>
-          </div>
+              </Table>
+            </div>
+          </>
         )}
       </CardContent>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-lg overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? "Editar ação" : "Nova ação"}</DialogTitle>
           </DialogHeader>

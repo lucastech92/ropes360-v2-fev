@@ -108,7 +108,7 @@ const AtasReuniao = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container space-y-6 px-4 py-6">
+      <main className="container min-w-0 space-y-6 overflow-x-clip px-4 py-6">
         {/* Header */}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3">
@@ -199,41 +199,45 @@ const AtasReuniao = () => {
             }}
           />
         ) : (
-          <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+          <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(240px,280px)_minmax(0,1fr)]">
             {/* Lista de atas */}
-            <Card className="border-border/60 lg:sticky lg:top-20 lg:self-start">
+            <Card className="min-w-0 border-border/60 lg:sticky lg:top-20 lg:self-start">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-sm">
                   <CalendarDays className="h-4 w-4 text-primary" />
                   Atas ({filteredMinutes.length})
                 </CardTitle>
               </CardHeader>
-              <CardContent className="max-h-[60vh] space-y-2 overflow-y-auto">
+              <CardContent className="flex snap-x gap-2 overflow-x-auto pb-4 lg:block lg:max-h-[60vh] lg:space-y-2 lg:overflow-x-hidden lg:overflow-y-auto">
                 {filteredMinutes.map((m) => {
                   const late = actionItems.filter((a) => a.minute_id === m.id).filter(isOverdue).length;
                   const active = selected?.id === m.id;
                   return (
-                    <button
+                    <Button
                       key={m.id}
+                      type="button"
+                      variant="ghost"
                       onClick={() => setSelectedId(m.id)}
                       className={cn(
-                        "w-full rounded-lg border p-3 text-left transition-colors hover:border-primary/40",
+                        "h-auto w-[min(78vw,260px)] shrink-0 snap-start items-start justify-start whitespace-normal rounded-lg border p-3 text-left transition-colors hover:border-primary/40 lg:w-full",
                         active && "border-primary bg-primary/5",
                       )}
                     >
-                      <p className="text-xs text-muted-foreground">{fmt(m.meeting_date)}</p>
-                      <p className="line-clamp-2 text-sm font-medium">{m.title}</p>
-                      <div className="mt-1.5 flex flex-wrap gap-1">
-                        <Badge variant="secondary" className="text-[10px]">
-                          {actionItems.filter((a) => a.minute_id === m.id).length} ações
-                        </Badge>
-                        {late > 0 && (
-                          <Badge variant="outline" className="border-destructive/30 bg-destructive/10 text-[10px] text-destructive">
-                            {late} atrasada{late > 1 ? "s" : ""}
+                      <div className="min-w-0">
+                        <p className="text-xs text-muted-foreground">{fmt(m.meeting_date)}</p>
+                        <p className="line-clamp-2 break-words text-sm font-medium">{m.title}</p>
+                        <div className="mt-1.5 flex flex-wrap gap-1">
+                          <Badge variant="secondary" className="text-[10px]">
+                            {actionItems.filter((a) => a.minute_id === m.id).length} ações
                           </Badge>
-                        )}
+                          {late > 0 && (
+                            <Badge variant="outline" className="border-destructive/30 bg-destructive/10 text-[10px] text-destructive">
+                              {late} atrasada{late > 1 ? "s" : ""}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
-                    </button>
+                    </Button>
                   );
                 })}
               </CardContent>
@@ -241,16 +245,16 @@ const AtasReuniao = () => {
 
             {/* Detalhes da ata */}
             {selected && (
-              <div className="space-y-6">
+              <div className="min-w-0 space-y-6">
                 <Card className="border-border/60">
                   <CardContent className="space-y-4 p-5">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="space-y-1">
+                       <div className="min-w-0 space-y-1">
                         <Badge variant="outline" className="gap-1.5">
                           <CalendarDays className="h-3.5 w-3.5" />
                           {fmt(selected.meeting_date)}
                         </Badge>
-                        <h2 className="text-xl font-bold md:text-2xl">{selected.title}</h2>
+                         <h2 className="break-words text-xl font-bold md:text-2xl">{selected.title}</h2>
                       </div>
                       <div className="flex gap-1">
                         {canEdit && (
@@ -297,7 +301,7 @@ const AtasReuniao = () => {
                                 {getInitials(profileLabel(id)) || "?"}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="text-xs">{profileLabel(id)}</span>
+                             <span className="max-w-[15rem] truncate text-xs">{profileLabel(id)}</span>
                           </div>
                         ))}
                       </div>
