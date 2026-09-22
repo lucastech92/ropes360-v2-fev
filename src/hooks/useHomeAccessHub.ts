@@ -59,7 +59,7 @@ export const useHomeAccessHub = (includeManagement: boolean) => {
       const baseRequests = await Promise.all([
         supabase.from("inventory").select("quantity, min_quantity"),
         supabase.from("inventory_consumption_history").select("created_at, quantity_change").gte("created_at", since),
-        supabase.from("inspection_packages").select("created_at").gte("created_at", since),
+        supabase.from("inspection_packages").select("created_at"),
         supabase.from("inspection_package_files").select("id", { count: "exact", head: true }),
       ]);
 
@@ -138,8 +138,8 @@ export const useHomeAccessHub = (includeManagement: boolean) => {
 
   useEffect(() => {
     const tables = includeManagement
-      ? ["inventory", "inspection_packages", "inspection_package_files", "meeting_minutes", "meeting_action_items", "user_roles"]
-      : ["inventory", "inspection_packages", "inspection_package_files"];
+      ? ["inventory", "inventory_consumption_history", "inspection_packages", "inspection_package_files", "meeting_minutes", "meeting_action_items", "user_roles"]
+      : ["inventory", "inventory_consumption_history", "inspection_packages", "inspection_package_files"];
     const channel = supabase.channel(`home-access-hub-${includeManagement ? "management" : "operation"}`);
 
     tables.forEach((table) => {
